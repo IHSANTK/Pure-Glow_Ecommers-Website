@@ -1,0 +1,58 @@
+<!-- profile.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    /* Custom styles */
+    body {
+      background-color:  rgb(71, 185, 48);
+    }
+    .profile-container {
+      background-color: rgb(211, 248, 246);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0px 0px 30px;
+    }
+    .profile-heading {
+      margin-bottom: 20px;
+    }
+    .profile-info {
+      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-light bg-light">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <h1 class="mb-0" style="color: rgb(137, 212, 93);">Pure Glow</h1>
+      </a>
+    </div>
+  </nav>
+
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="profile-container">
+          <h1 class="profile-heading"><%= userName %></h1>
+          <p class="profile-info"><%= email %></p>
+          <p class="profile-info"><%= phoneNumber %></p>
+
+          <!-- <a href="/edit-profile" class="btn btn-primary btn-block">Edit Profile</a> -->
+          <!-- <a href="/delete-profile" class="btn btn-danger btn-block">Delete Profile</a> -->
+          <a href="/logout" class="btn btn-secondary btn-block">Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

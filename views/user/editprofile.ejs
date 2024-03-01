@@ -1,0 +1,58 @@
+<!-- edit-profile.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+</head>
+<body>
+    <div class="div">
+    <h1>Edit Profile</h1>
+    <form action="/edit-profile" method="post">
+        <label for="name">New Name</label><br>
+        <input type="text" id="name" name="name" value="<%= userName %>"><br><br>
+        <label for="email">New Email</label><br>
+        <input type="email" id="email" name="email" value="<%= email %>"><br><br>
+        <label for="number">New phoneNumber</label><br>
+        <input type="number" id="number" name="email" value="<%=phoneNumber %>"><br><br>
+        <button type="submit">Update Profile</button>
+    </form>
+</div>
+
+<style>
+    body{
+        background-color: rgb(114, 224, 187);
+    }
+    .div {
+        background-color: rgb(114, 119, 118);
+        margin: auto;
+        height: 350px;
+        width: 300px;
+        display: flex;
+        flex-direction: column;
+        padding-left: 100px;
+        margin-top: 100px;
+        border: 1px solid gray;
+        border-radius: 15px; 
+    }
+    input{
+        width: 200px;
+        height: 25px;
+        border: none;
+        outline:none;
+        border-radius: 5px;
+    }
+    button{
+       border: none;
+       height: 25px;
+       margin-left: 50px;
+       background-color: rgb(67, 226, 94);
+       border-radius: 3px;
+
+     
+
+    }
+</style>
+</body>
+</html>

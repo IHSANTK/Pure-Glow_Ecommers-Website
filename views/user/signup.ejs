@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signup</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body style="background-color: rgb(113, 184, 99);">
+  <div class="container mt-2 mb-2">
+    <div class="row justify-content-center ">
+      <div class="col-md-6 " >
+        <div class="card custom-card-shadow" style="border-radius: 15px;">
+          <div class="card-body">
+            <h1 class="text-center">Signup</h1>
+            <form action="/signup" method="post" onsubmit="return validateForm()">
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name" >
+                <span id="name-error" style="color: red;"></span>
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" >
+                <span id="email-error" style="color: red;"></span>
+              </div>
+              <div class="form-group">
+                <label for="phoneNumber">Phone Number</label>
+                <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" >
+                <span id="phoneNumber-error" style="color: red;"></span>
+              </div>
+              <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password" >
+                <span id="password-error" style="color: red;"></span>
+              </div>
+              <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" >
+                <span id="confirmPassword-error" style="color: red;"></span>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Signup</button>
+            </form>
+            <p class="text-center mt-3">Already have an account? <a href="/login">Login</a></p>
+            <p class="text-center mt-3"><%= signupSuccessful %></p>
+          </div>
+        </div>
+        
+         
+     
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    function validateForm() {
+      var name = document.getElementById("name").value;
+      var email = document.getElementById("email").value;
+      var phoneNumber = document.getElementById("phoneNumber").value;
+      var password = document.getElementById("password").value;
+      var confirmPassword = document.getElementById("confirmPassword").value;
+  
+      var nameError = document.getElementById("name-error");
+      var emailError = document.getElementById("email-error");
+      var phoneNumberError = document.getElementById("phoneNumber-error");
+      var passwordError = document.getElementById("password-error");
+      var confirmPasswordError = document.getElementById("confirmPassword-error");
+  
+      nameError.innerHTML = "";
+      emailError.innerHTML = "";
+      phoneNumberError.innerHTML = "";
+      passwordError.innerHTML = "";
+      confirmPasswordError.innerHTML = "";
+  
+      var isValid = true;
+  
+      if (name.trim() === "") {
+        nameError.innerHTML = "Name is required.";
+        isValid = false;
+      } else {
+        var nameRegex = /^[a-zA-Z ]+$/;
+        if (!nameRegex.test(name)) {
+          nameError.innerHTML = "Name should only contain letters";
+          isValid = false;
+        }
+      }
+  
+      if (email.trim() === "") {
+        emailError.innerHTML = "Email is required.";
+        isValid = false;
+      } else {
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          emailError.innerHTML = "Invalid email format.";
+          isValid = false;
+        }
+      }
+  
+      if (phoneNumber.trim() === "") {
+        phoneNumberError.innerHTML = "Phone number is required.";
+        isValid = false;
+      } else {
+        var phoneNumberRegex = /^\d{10}$/;
+        if (!phoneNumberRegex.test(phoneNumber)) {
+          phoneNumberError.innerHTML = "Invalid phone number format. Please enter in the format: 123-456-7890";
+          isValid = false;
+        }
+      }
+  
+      if (password.trim() === "") {
+        passwordError.innerHTML = "Password is required.";
+        isValid = false;
+      } else {
+        var passwordRegex = /^\d{6,}$/;
+        if (!passwordRegex.test(password)) {
+          passwordError.innerHTML = "Password must be at least six digits.";
+          isValid = false;
+        }
+      }
+  
+      if (confirmPassword.trim() === "") {
+        confirmPasswordError.innerHTML = "Confirm password is required.";
+        isValid = false;
+      } else {
+        if (confirmPassword !== password) {
+          confirmPasswordError.innerHTML = "Passwords do not match.";
+          isValid = false;
+        }
+      }
+  
+      return isValid;
+    }
+  </script>
+</body>
+</html>
