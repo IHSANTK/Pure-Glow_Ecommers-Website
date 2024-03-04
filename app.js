@@ -2,12 +2,15 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const session = require('express-session');
-const bcrypt = require('bcrypt');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const path = require('path');
 const ejs = require('ejs');
+const User = require('./models/user');
+const adminRoutes = require('./routes/adminroutes');
+const userRoutes = require('./routes/userroutes');
 
 const app = express();
-
 
 mongoose.connect('mongodb://localhost:27017/users', { useNewUrlParser: true, useUnifiedTopology: true });
 const db = mongoose.connection;
@@ -15,21 +18,203 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({ secret: 'mysecretkey', resave: true, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, done) => {
+    done(null, user._id);
+});
+
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await User.findById(id);
+        done(null, user);
+    } catch (err) {
+        done(err);
+    }
+});
+
+passport.use(new GoogleStrategy({
+        clientID: '244913245911-80ghie1pg35f8gg30if8dt939kgahetn.apps.googleusercontent.com',
+        clientSecret: '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t',
+        callbackURL: 'https://localhost:3000/auth/google/callback' // Ensure this URL matches your SSL configuration
+    },
+    async (accessToken, refreshToken, profile, done) => {
+        try {
+            let user = await User.findOne({ googleId: profile.id });
+
+            if (!user) {
+                user = new User({
+                    googleId: profile.id,
+                    name: profile.displayName,
+                    email: profile.emails[0].value
+                });
+                await user.save();
+            }
+
+            done(null, user);
+        } catch (err) {
+            done(err);
+        }
+    }
+));
+
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
+app.use(express.static('uploads'));
+app.use('/', adminRoutes);
+app.use('/', userRoutes);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
 
 
 
-const adminRoutes = require('./routes/adminroutes');
-const userRoutes = require('./routes/userroutes');
 
-app.use('/',adminRoutes);
-app.use('/',userRoutes);
 
-app.listen(3000, () => {
-        console.log('Server is running on port 3000');
- });
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// const express = require('express');
+// const mongoose = require('mongoose');
+// const bodyParser = require('body-parser');
+// const session = require('express-session');
+// const User = require('../models/user');
+// const bcrypt = require('bcrypt');
+// const path = require('path');
+// const ejs = require('ejs');
+// require("dotenv").config();
+// const cors = require("cors");
+// const passport = require("passport");
+// const GoogleStrategy = require("passport-google-oauth20").Strategy; // Corrected import statement
+// const app = express();
+
+// const clientID = "244913245911-80ghie1pg35f8gg30if8dt939kgahetn.apps.googleusercontent.com";
+// const clientSecret = "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";
+// app.use(cors({
+//     origin: "http://localhost:3000",
+//     methods: "GET,POST,PUT,DELETE",
+//     credentials: true
+// }));
+
+// app.use(express.json());
+
+// mongoose.connect('mongodb://localhost:27017/users', { useNewUrlParser: true, useUnifiedTopology: true });
+// const db = mongoose.connection;
+// db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+// app.set('view engine', 'ejs');
+// app.use(express.static('public'));
+// app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(session({ secret: 'mysecretkey', resave: false, saveUninitialized: true }));
+// app.use(passport.initialize());
+// app.use(passport.session());
+
+// passport.use(
+//     new GoogleStrategy({
+//         clientID: clientID,
+//         clientSecret: clientSecret,
+//         callbackURL: "/auth/google/callback",
+//         passReqToCallback: true
+//     },
+//     async (request, accessToken, refreshToken, profile, done) => {
+//         try {
+//             let user = await User.findOne({ googleId: profile.id });
+
+//             if (!user) {
+//                 user = new User({
+//                     googleId: profile.id,
+//                     displayName: profile.displayName,
+//                     email: profile.emails[0].value,
+//                     image: profile.photos[0].value,
+//                 });
+//                 await user.save();
+//             }
+
+//             return done(null, user);
+//         } catch (error) {
+//             return done(error, null);
+//         }
+//     })
+// );
+
+// passport.serializeUser((user, done) => {
+//     done(null, user);
+// });
+
+// passport.deserializeUser((user, done) => {
+//     done(null, user);
+// });
+
+// const adminRoutes = require('./routes/adminroutes');
+// const userRoutes = require('./routes/userroutes');
+
+// app.use('/', adminRoutes);
+// app.use('/', userRoutes);
+
+// app.listen(3000, () => {
+//     console.log('Server is running on port 3000');
+// });
 
 
 

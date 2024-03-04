@@ -6,29 +6,33 @@
   <title>Login</title>
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .card {
+      box-shadow: 0px 0px 25px;
+      border-radius: 15px; 
+    }
+  </style>
 </head>
-<body class="bg-light">
+<body style="background-color: rgb(108, 230, 84);">
   <div class="container mt-5">
     <div class="row justify-content-center">
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-body">
-            <h1 class="text-center">Login Page</h1>
-            
-              <div class="alert alert-white" role="alert" style="color: red;">
-                <%= errorMessage %>
-              </div>
-         
+      <div class="col-md-5">
+        <div class="card" style="background-color: rgb(204, 204, 204)">
+          <div class="card-body p-5" >
+            <h3 class="text-center">Login</h3>
+            <div class="alert alert-white" role="alert" style="color: red;">
+              <%= errorMessage %>
+            </div>
             <form action="/login" method="post">
-              <div class="form-group">
+              <div class="form-group mt-2"> <!-- Adjusted margin-top -->
                 <label for="email">Enter Your Email</label>
                 <input type="email" class="form-control" id="email" name="email" required>
               </div>
-              <div class="form-group">
+              <div class="form-group mt-2"> <!-- Adjusted margin-top -->
                 <label for="password">Enter Password</label>
                 <input type="password" class="form-control" id="password" name="password" required>
               </div>
-              <button type="submit" class="btn btn-primary btn-block">Login</button>
+              <button type="submit" class="btn btn-primary btn-block mt-3">Login</button> <!-- Adjusted margin-top -->
             </form>
             <p class="text-center mt-3">Don't have an account? <a href="/signup">Sign up</a></p>
           </div>
@@ -36,6 +40,7 @@
       </div>
     </div>
   </div>
+  
 
   <!-- Bootstrap JS -->
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

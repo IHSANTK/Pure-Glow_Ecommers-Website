@@ -1,12 +1,15 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
+const passport = require('passport');
 
 
 let Homepage = (req, res) => {
     res.render('user/index');
 }
 
-let userprofilepage =(req, res) => {
+let userprofilepage = async (req, res) => {
+
+
     if (req.session.userId) {
         res.render('user/profile', { userName: req.session.userName, email: req.session.email, phoneNumber: req.session.phoneNumber });
     } else {
@@ -45,7 +48,11 @@ let dataslogin =  async (req, res) => {
 
 
 let signuppage = (req, res) => {
+    if (req.session.userId) {
+        res.redirect('/profile');
+    }else{
     res.render('user/signup', { signupSuccessful: req.signupSuccessful });
+    }
 }
 
 let getsignupdata = async (req, res) => {
@@ -78,6 +85,13 @@ let logout =(req, res) => {
     res.redirect('/');
   };
 
+
+
+  let googleAuth = passport.authenticate('google', { scope: ['profile', 'email'] });
+
+
+  
+
 module.exports={
   
     Homepage,
@@ -86,7 +100,8 @@ module.exports={
     dataslogin,
     signuppage,
     getsignupdata,
-    logout
+    logout,
+    googleAuth,
 
 }
 

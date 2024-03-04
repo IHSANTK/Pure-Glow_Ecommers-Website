@@ -1,15 +1,15 @@
 const mongoose = require('mongoose');
-const { categorilist } = require('../controllers/admincontroller');
+// const { categorilist } = require('../controllers/admincontroller');
 
 
 
 const userSchema = new mongoose.Schema({
+   
     name: String,
     email: String,
     phoneNumber: String,
     password: String,
     blocked: { type: Boolean, default: false },
-   
    
 });
 

@@ -326,11 +326,11 @@
                         </div>
                     </div> <!-- Row end  -->  
                     
-                    <div class="row g-3 mb-3">
+                    <!-- <div class="row g-3 mb-3">
                         <div class="col-lg-4">
                             <div class="sticky-lg-top">
-                                <div class="card mb-3">
-                                    <div class="card-header py-3 d-flex justify-content-between align-items-center bg-transparent border-bottom-0">
+                                <div class="card mb-3"> -->
+                                    <!-- <div class="card-header py-3 d-flex justify-content-between align-items-center bg-transparent border-bottom-0">
                                         <h6 class="m-0 fw-bold">Visibility Status</h6>
                                     </div>
                                     <div class="card-body">
@@ -353,7 +353,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                </div>
+                                </div> -->
                                 <!-- <div class="card mb-3">
                                     <div class="card-header py-3 d-flex justify-content-between align-items-center bg-transparent border-bottom-0">
                                         <h6 class="m-0 fw-bold">Publish Schedule</h6>
@@ -387,33 +387,37 @@
                                         </select>
                                     </div>
                                 </div> -->
-                                <div class="card">
-                                    <div class="card-header py-3 bg-transparent border-bottom-0">
-                                        <h6 class="m-0 fw-bold">Categories Image Upload</h6>
-                                        <small>With event and default file try to remove the image</small>
-                                    </div>
-                                    <div class="card-body">
-                                        <input type="file" id="dropify-event" data-default-file="assets/images/product/Cropimg.jpg">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-8">
-                            <div class="card mb-3">
-                                <div class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom-0">
+                              
+                            <!-- </div>
+                        </div> -->
+                        <!-- <div class="col-12">
+                            <div class="card mb-3"> -->
+                                <!-- <div class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom-0">
                                     <h6 class="mb-0 fw-bold ">Basic information</h6>
-                                </div>
-                                <div class="card-body">
+                                </div> -->
+                                <div class="p-3 col-8"style="background-color: rgb(165, 168, 168);">
+                                <div class="card-body col-6">
                                     <form action="/categories-edit/<%= category.id %>" method="post">
                                         <div class="row g-3 align-items-center">
-                                            <div class="col-md-6">
+                                            <div class="col-md-12">
                                                 <label class="form-label">Name</label>
                                                 <!-- Add a name attribute to the input field -->
                                                 <input type="text" class="form-control" name="newName" value="<%= category.categoryName %>">
                                             </div>
                                         </div>
+                                        <br>
+                                        <!-- <div class="card">
+                                            <div class="card-header py-3 bg-transparent border-bottom-0">
+                                                <h6 class="m-0 fw-bold">Categories Image Upload</h6>
+                                                <small>With event and default file try to remove the image</small>
+                                            </div>
+                                            <div class="card-body">
+                                                <input type="file" id="dropify-event" data-default-file="assets/images/product/Cropimg.jpg">
+                                            </div>
+                                        </div> -->
                                         <button type="submit" class="btn btn-primary py-2 px-5 text-uppercase btn-set-task w-sm-100 mt-3">Save</button>
                                     </form>
+                                </div>
                                     
                                             <!-- <div class="col-md-6">
                                                 <label class="form-label">Page Title</label>

@@ -321,18 +321,16 @@
                         <div class="border-0 mb-4">
                             <div class="card-header py-3 no-bg bg-transparent d-flex align-items-center px-0 justify-content-between border-bottom flex-wrap">
                                 <h3 class="fw-bold mb-0">Categories Add</h3>
-                                <form >
-                               
-                                </form>
+                                <!-- <button type="submit" class="btn btn-primary py-2 px-5 text-uppercase btn-set-task w-sm-100">Save</button> -->
                             </div>
                         </div>
                     </div> <!-- Row end  -->  
                     
                     <div class="row g-3 mb-3">
                         <div class="col-lg-4">
-                            <div class="sticky-lg-top">
-                                <div class="card mb-3">
-                                    <div class="card-header py-3 d-flex justify-content-between align-items-center bg-transparent border-bottom-0">
+                            <!-- <div class="sticky-lg-top">
+                                <div class="card mb-3"> -->
+                                    <!-- <div class="card-header py-3 d-flex justify-content-between align-items-center bg-transparent border-bottom-0">
                                         <h6 class="m-0 fw-bold">Visibility Status</h6>
                                     </div>
                                     <div class="card-body">
@@ -353,14 +351,14 @@
                                             <label class="form-check-label">
                                                 Hidden
                                             </label>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </div>
                                 <div class="card mb-3">
                                     <!-- <div class="card-header py-3 d-flex justify-content-between align-items-center bg-transparent border-bottom-0">
                                         <h6 class="m-0 fw-bold">Publish Schedule</h6>
-                                    </div> -->
-                                    <!-- <div class="card-body">
+                                    </div>
+                                    <div class="card-body">
                                         <div class="row g-3 align-items-center">
                                             <div class="col-md-12">
                                                 <label  class="form-label">Publish Date</label>
@@ -369,9 +367,9 @@
                                             <div class="col-md-12">
                                                 <label  class="form-label">Publish Time</label>
                                                 <input type="time" class="form-control w-100">
-                                            </div>
+                                            </div> -->
                                         </div>
-                                    </div> -->
+                                    </div>
                                 </div>
                                 <!-- <div class="card mb-3">
                                     <div class="card-header py-3 d-flex justify-content-between align-items-center bg-transparent border-bottom-0">
@@ -389,7 +387,7 @@
                                         </select>
                                     </div>
                                 </div> -->
-                                <div class="card">
+                                <!-- <div class="card">
                                     <div class="card-header py-3 bg-transparent border-bottom-0">
                                         <h6 class="m-0 fw-bold">Categories Image Upload</h6>
                                         <small>With event and default file try to remove the image</small>
@@ -397,67 +395,57 @@
                                     <div class="card-body">
                                         <input type="file" id="dropify-event" data-default-file="assets/images/product/cropimg-upload.jpg">
                                     </div>
-                                </div>
-                            </div>
-                        </div>
+                                </div> -->
+                            <!-- </div>
+                        </div> -->
                         <div class="col-lg-8">
                             <div class="card mb-3">
-                                <div class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom-0">
+                                <!-- <div class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom-0">
                                     <h6 class="mb-0 fw-bold ">Basic information</h6>
-                                </div>
-                                <div class="card-body">
+                                </div> -->
+                                <div class="card-body" style="background-color: rgb(170, 177, 177);">
                                     <form action="/categories-add" method="post">
                                         <div class="row g-3 align-items-center">
                                             <div class="col-md-6">
                                                 <label class="form-label">Name</label>
                                                 <!-- Add the name attribute to the input field -->
-                                                <input type="text" class="form-control" name="name">
+                                                <input type="text" class="form-control border border-3" name="name">
                                                 <button type="submit" class="btn btn-primary py-2 px-5 text-uppercase btn-set-task w-sm-100 mt-3">Save</button>
                                             </div>
                                         </div>
-                                    </form>
-                                    
-                                            <!-- <div class="col-md-6">
-                                                <label class="form-label">Page Title</label>
-                                                <input type="text" class="form-control">
-                                            </div> -->
-                                            <!-- <div class="col-md-12">
-                                                <label class="form-label">Product Identifier URL</label>
-                                                <div class="input-group mb-3">
-                                                    <span class="input-group-text">https://eBazar.com</span>
-                                                    <input type="text" class="form-control">
-                                                </div> -->
+                                        <br><br>
+                                        <!-- <div class="card col-8 ">
+                                            <div class="card-header py-3 bg-transparent border-bottom-0">
+                                                <h6 class="m-0 fw-bold">Categories Image Upload</h6>
+                                                <small>With event and default file try to remove the image</small>
                                             </div>
-                                            <!-- <div class="col-md-12">
-                                                <label class="form-label">Product Description</label>
-                                                <div id="editor">
-                                                    <h4>Please add Product Description here</h4>
-                                                </div>
-                                            </div> -->
-                                        </div>
-                                    
+                                            <div class="card-body">
+                                                <input type="file" id="dropify-event" data-default-file="assets/images/product/cropimg-upload.jpg">
+                                            </div>
+                                        </div> -->
+                                    </form>
                                 </div>
                             </div>
                             <!-- <div class="card">
                                 <div class="card-header py-3 bg-transparent border-bottom-0">
                                     <h6 class="m-0 fw-bold">Cropped Images</h6>
                                     <small>If You Cropped Images Please Upload and croppd easily.</small>
-                                </div> -->
-                                <!-- <div class="card-body">
+                                </div>
+                                <div class="card-body">
                                     <div class="row g-3 mb-3">
                                         <div class="col-xxl-12 col-xl-12 col-lg-12">
                                             <div class="img-container">
                                                 <img id="image" src="assets/images/product/upload.png" class="img-responsive" alt="Picture">
                                             </div>
-                                        </div> -->
-                                        <!-- <div class="col-xxl-12 col-xl-12 col-lg-12">
+                                        </div>
+                                        <div class="col-xxl-12 col-xl-12 col-lg-12">
                                             <div class="docs-preview clearfix">
                                                 <div class="img-preview preview-lg"></div>
                                                 <div class="img-preview preview-md"></div>
                                                 <div class="img-preview preview-sm"></div>
                                                 <div class="img-preview preview-xs"></div>
-                                            </div>                                 -->
-                                            <!-- <div class="docs-data">
+                                            </div>                                
+                                            <div class="docs-data">
                                                 <div class="input-group">
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text">X</span>
@@ -475,8 +463,8 @@
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">PX</span>
                                                     </div>
-                                                </div> -->
-                                                <!-- <div class="input-group">
+                                                </div>
+                                                <div class="input-group">
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text">Width</span>
                                                     </div>
@@ -516,12 +504,12 @@
                                                     <input type="text" class="form-control" id="dataScaleY" placeholder="scaleY">
                                                 </div> -->
                                                 <!-- /.pixels of image -->
-                                            <!-- </div>
+                                            </div>
                                         </div>
-                                    </div>Row end  
-                                    <div class="row g-3">
-                                        <div class="col-lg-8 col-md-12 docs-buttons"> -->
-                                            <!-- .btn groups -->
+                                    </div><!-- Row end  --> 
+                                    <!-- <div class="row g-3">
+                                        <div class="col-lg-8 col-md-12 docs-buttons">
+                                            .btn groups -->
                                             <!-- <button type="button" class="btn btn-sm btn-info" data-method="setDragMode" data-option="move" title="Move"> <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;setDragMode&quot;, &quot;move&quot;)"> <i class="icofont-drag1"></i> </span></button>
                                             <button type="button" class="btn btn-sm btn-info" data-method="setDragMode" data-option="crop" title="Crop"> <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;setDragMode&quot;, &quot;crop&quot;)"> <i class="icofont-crop"></i> </span></button>
                     
@@ -674,8 +662,8 @@
                                                         <label class="checkbox-inline">
                                                             <input type="checkbox" name="cropBoxMovable" checked> cropBoxMovable </label>
                                                     </li>
-                                                    <li role="presentation">
-                                                        <label class="checkbox-inline">
+                                                    <li role="presentation"> -->
+                                                        <!-- <label class="checkbox-inline">
                                                             <input type="checkbox" name="cropBoxResizable" checked> cropBoxResizable </label>
                                                     </li>
                                                     <li role="presentation">
@@ -684,8 +672,8 @@
                                                     </li>
                                                 </ul>
                                             </div>
-                                        </div>
-                                    </div>Row end   -->
+                                        </div> -->
+                                    </div><!-- Row end  --> 
                                 </div>
                             </div>
                         </div>

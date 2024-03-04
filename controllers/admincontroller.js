@@ -3,6 +3,8 @@ const User = require('../models/user');
 const Admin = require('../models/admin');
 
 
+
+
 let adminlogin = (req, res) => {
     if (req.session.adminId) {
         res.render('admin/index');
@@ -62,9 +64,7 @@ let categorilist = async(req,res)=>{
     }
     let data= admin[0].categories.map(category => category);
     res.render('admin/categorie-list',{data});
-
 }
-
 
 let categoriesadd= async(req,res)=>{
 
@@ -72,19 +72,15 @@ let categoriesadd= async(req,res)=>{
 
 }
 
-
 const updatecategory = async (req, res) => {
     try {
         const { name } = req.body;
 
-     
         let admin = await Admin.findOne();
 
-        
         if (!admin) {
             return res.status(400).send('Admin not found');
         }
-
 
        let data =  admin.categories.push({ categoryName: name });
        
@@ -97,15 +93,13 @@ const updatecategory = async (req, res) => {
         console.error("Error updating category:", error);
         res.status(500).json({ error: "Internal server error" });
     }
-};
+}; 
 
 let categorieedit = async (req, res) => {
     try {
         // Access the ID parameter from the URL
         const id = req.params.id;
    
-        let data = await Admin.findOne();
-          
         const admin = await Admin.findOne({ 'categories._id': id });
 
         if (!admin) {
@@ -113,8 +107,6 @@ let categorieedit = async (req, res) => {
         }
 
      const category = admin.categories.find(catgorie => catgorie._id == id);
-
-
 
      res.render('admin/categories-edit', { category })
          
@@ -137,10 +129,8 @@ let categorieeditdatas = async (req, res) => {
 
         const category = admin.categories.find(cat => cat._id == categoryId);
 
-        // Update the category name
         category.categoryName = newName;
-
-        // Save the changes to the admin document
+  
         await admin.save();
 
        res.redirect('/categorie-list')
@@ -152,14 +142,13 @@ let categorieeditdatas = async (req, res) => {
 
 let deletecategorie = async (req, res) => {
     try {
-        // Extract the admin ID from the request parameters
+      
         const categoryId= req.params.id;
-        
-        // Update the admin document to remove the category from the categories array
+       
         const admin = await Admin.findOneAndUpdate(
-            { 'categories._id': categoryId }, // Find the admin document containing the desired category
-            { $pull: { categories: { _id: categoryId } } }, // Remove the category from the categories array
-            { new: true } // Return the updated document
+            { 'categories._id': categoryId }, 
+            { $pull: { categories: { _id: categoryId } } }, 
+            { new: true }
         );
 
         if (!admin) {
@@ -173,11 +162,148 @@ let deletecategorie = async (req, res) => {
     }
 };
 
+ let productlist = async(req,res)=>{
 
+    try {
+        let admin = await Admin.findOne();
+        let products = admin.products;
 
+        
+        res.render('admin/product-grid', { products });
 
+        if (!admin) {
+            return res.status(404).json({ error: "Admin not found" });
+        }
+     
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Internal Server Error');
+    }
 
+ }
+ let productadd = async(req,res)=>{
 
+    let data = await Admin.findOne();
+  
+      res.render('admin/product-add',{data});
+
+ }
+ const AddProductlist = async (req, res) => {
+    try {
+        
+        let {
+            ProductName,
+            Price,
+            description,
+            Category
+        } = req.body;
+
+        let newProduct = {
+            productName: ProductName,
+            productPrice: Price,
+            description: description,
+            category: Category
+        };
+
+        let admin = await Admin.findOne();
+        if (!admin) {
+            return res.status(400).send('Admin not found');
+        }
+
+        
+        if (req.file) {
+            newProduct.image = req.file.filename; 
+        }
+
+        admin.products.push(newProduct);
+        await admin.save();
+
+        
+        res.redirect('/product-list');
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Internal Server Error');
+    }
+  };
+  let productedit = async (req,res)=>{
+            
+   
+    try {
+        
+        const id = req.params.id;
+     
+        const admin = await Admin.findOne({ 'products._id': id });
+
+        if (!admin) {
+            return res.status(404).json({ error: "Admin not found" });
+        }
+
+     const data= admin.products.find(product => product._id == id);
+
+     res.render('admin/product-edit', { data })
+         
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+  }
+   
+  const updateProduct = async (req, res) => {
+    try {
+        const productId = req.params.id;
+        const newName = req.body.ProductName;
+        const newPrice = req.body.Price;
+        const description = req.body.description;
+        const newImage = req.file ? req.file.filename : null; 
+
+        const admin = await Admin.findOne({ 'products._id': productId });
+
+        if (!admin) {
+            return res.status(404).json({ error: "Admin not found" });
+        }
+
+        const product = admin.products.find(product => product._id == productId);
+
+        product.productName = newName;
+        product.productPrice = newPrice;
+        product.description = description;
+        if (newImage) { 
+            product.image = newImage;
+        }
+
+        await admin.save();
+
+        res.redirect('/product-list')
+        
+    } catch (error) {
+        console.error("Error updating product:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+const deleteproduct = async (req,res)=>{
+        
+    try {
+      
+        const productId= req.params.id;
+       
+        const admin = await Admin.findOneAndUpdate(
+            { 'products._id': productId }, 
+            { $pull: { products: { _id: productId } } }, 
+            { new: true }
+        );
+
+        if (!admin) {
+            return res.status(404).json({ error: "Admin not found" });
+        }
+        res.redirect('/product-list')
+       
+    } catch (error) {
+        console.error("Error deleting category:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
 
 
 
@@ -194,5 +320,11 @@ module.exports={
     categorieedit,
     categorieeditdatas,
     deletecategorie,
+    productlist,
+    productadd,
+    AddProductlist,
+    productedit,
+    updateProduct,
+    deleteproduct,
     
 }
