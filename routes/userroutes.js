@@ -14,6 +14,10 @@ router.post('/login', userController.dataslogin);
 router.get('/signup', userController.signuppage);
 router.post('/signup', userController.getsignupdata);
 router.get('/logout', userController.logout);
+router.get('/change-password/:id',userController.changepassword)
+router.post('/edit-password/:id',userController.editpassword)
+router.get('/shop',userController.shoppage)
+router.get('/getshopproduct/:category',userController.getproductdeteils)
 
 
 router.get('/auth/google', userController.googleAuth);

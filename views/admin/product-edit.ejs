@@ -482,46 +482,51 @@
                             </div>
                         </div> -->
                         <div class="col-xl-8 col-lg-8">
-                            <div class="card mb-3">
+                            <div class="card mb-3 p-5" style="background-color: rgb(231, 231, 231);">
                                 <div class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom-0">
                                     <h6 class="mb-0 fw-bold ">Basic information</h6>
                                 </div>
-                                <div class="card-body" style="background-color: rgb(170, 177, 177);">
-
-                                    <form action="/product-edit/<%= data._id %>" method="post" enctype="multipart/form-data">
-                                        <div class="row g-3 align-items-center">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Name</label>
-                                                <input type="text" class="form-control" name="ProductName" value="<%= data.productName %>">
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">Price</label>
-                                                <input type="text" class="form-control" name="Price" value="<%= data.productPrice %>">
-                                            </div>
-                                            <div class="col-md-12">
-                                                <label class="form-label">Description</label>
-                                                <input type="text" class="form-control" name="description" value="<%= data.description %>">
-                                            </div>
+                                <form action="/product-edit/<%= data._id %>" method="post" enctype="multipart/form-data">
+                                    <div class="row g-3 align-items-center">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Name</label>
+                                            <input type="text" class="form-control" name="ProductName" value="<%= data.productName %>">
                                         </div>
-                                    
-                                        <div class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom-0">
-                                            <h6 class="mb-0 fw-bold ">Images</h6>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Price</label>
+                                            <input type="text" class="form-control" name="Price" value="<%= data.productPrice %>">
                                         </div>
-                                        <div class="card-body">
-                                            <div class="row g-3 align-items-center">
+                                        <div class="col-md-12">
+                                            <label class="form-label">Description</label>
+                                            <input type="text" class="form-control" name="description" value="<%= data.description %>">
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label">Category</label>
+                                            <input type="text" class="form-control" name="category" value="<%= data.category %>">
                                             
-                                                <div class="col-md-12">
-                                                    <label class="form-label">Update Product Image</label><br>
-                                                    <!-- <img src="<%= data.image %>" alt="Current Image" style="max-width: 200px;"> -->
-                                                    <input type="file" name="image" id="input-file-to-destroy" class="dropify" data-allowed-formats="portrait square" data-max-file-size="2M" data-max-height="2000">
-                                                </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom-0">
+                                        <h6 class="mb-0 fw-bold ">Images</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3 align-items-center">
+                                            <div class="col-md-12">
+                                                <label class="form-label">Update Product Images</label><br>
+                                                <% data.image.forEach(image => { %>
+                                                    <div>
+                                                        <img src="<%= image %>" alt="Current Image" style="max-width: 200px;">
+                                                        <input type="hidden" name="existingImages[]" value="<%= image %>">
+                                                    </div>
+                                                <% }); %>
+                                                <input type="file" name="image" id="input-file-to-destroy" class="dropify" multiple data-allowed-formats="portrait square" data-max-file-size="2M" data-max-height="2000">
                                             </div>
                                         </div>
-                                    
-                                        <button type="submit" class="btn btn-primary btn-set-task w-sm-100 py-2 px-5 text-uppercase mt-3">Save</button>
-                                    </form>
-                                    
-
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-set-task w-sm-100 py-2 px-5 text-uppercase mt-3">Save</button>
+                                </div>
+                                </form>
+                        
 
 
                                             <!-- <div class="col-md-12">

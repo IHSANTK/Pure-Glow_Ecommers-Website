@@ -1,31 +1,46 @@
 
 const User = require('../models/user');
+const Products = require('../models/Products');
 const Admin = require('../models/admin');
+const multer =  require('multer')
+const cloudinary = require('../config/cloudinary')
+const upload = require('../config/multer.js');
+require('dotenv').config()
 
 
 
 
-let adminlogin = (req, res) => {
+const loginpage =(req,res)=>{
+
     if (req.session.adminId) {
-        res.render('admin/index');
+        res.redirect('/admin');
     } else {
         res.render('admin/login');
     }
+ 
 }
+const admindashbord = async (req, res) => {
+    if (req.session.adminId) {
+        res.render('admin/index');
+    } else {
+        res.redirect('/adminlogin');
+    }
+    
 
+};
 
-let logindatas =  async (req, res) => {
+const logindatas = async (req, res) => {
     const { email, password } = req.body;
     const admin = await Admin.findOne({ email });
 
-    if (admin.email === email && admin.password === password) {
+    if (admin && admin.password === password) {
         req.session.adminId = admin._id;
-        req.session.email = admin.email;
-        res.render('admin/index');
-    } else {
+        req.session.adminEmail = admin.email; // Store admin email in session
         res.redirect('/admin');
+    } else {
+        res.redirect('/adminlogin');
     }
-}
+};
 
 let blockuser = async (req, res) => {
     const userId = req.body.userId;
@@ -58,11 +73,11 @@ let renderindexblock =(req, res) => {
 
 let categorilist = async(req,res)=>{
 
-    let admin = await Admin.find();
-    if(!admin){
+    let products = await Products.find();
+    if(!products ){
         res.status(400).send('Admin not found');
     }
-    let data= admin[0].categories.map(category => category);
+    let data= products[0].categories.map(category => category);
     res.render('admin/categorie-list',{data});
 }
 
@@ -76,15 +91,15 @@ const updatecategory = async (req, res) => {
     try {
         const { name } = req.body;
 
-        let admin = await Admin.findOne();
+        let product = await Products.findOne();
 
-        if (!admin) {
+        if (!product) {
             return res.status(400).send('Admin not found');
         }
 
-       let data =  admin.categories.push({ categoryName: name });
+       let data =  product.categories.push({ categoryName: name });
        
-        await admin.save();
+        await product.save();
 
         res.redirect('/categorie-list')
            
@@ -100,13 +115,13 @@ let categorieedit = async (req, res) => {
         // Access the ID parameter from the URL
         const id = req.params.id;
    
-        const admin = await Admin.findOne({ 'categories._id': id });
+        const product = await Products.findOne({ 'categories._id': id });
 
-        if (!admin) {
+        if (!product) {
             return res.status(404).json({ error: "Admin not found" });
         }
 
-     const category = admin.categories.find(catgorie => catgorie._id == id);
+     const category =  product.categories.find(catgorie => catgorie._id == id);
 
      res.render('admin/categories-edit', { category })
          
@@ -121,17 +136,17 @@ let categorieeditdatas = async (req, res) => {
         const categoryId = req.params.id;
         const newName = req.body.newName;
 
-        const admin = await Admin.findOne({ 'categories._id': categoryId });
+        const product = await Products.findOne({ 'categories._id': categoryId });
 
-        if (!admin) {
+        if (!product) {
             return res.status(404).json({ error: "Admin not found" });
         }
 
-        const category = admin.categories.find(cat => cat._id == categoryId);
+        const category = product.categories.find(cat => cat._id == categoryId);
 
         category.categoryName = newName;
   
-        await admin.save();
+        await product.save();
 
        res.redirect('/categorie-list')
     } catch (error) {
@@ -145,14 +160,14 @@ let deletecategorie = async (req, res) => {
       
         const categoryId= req.params.id;
        
-        const admin = await Admin.findOneAndUpdate(
+        const product = await Products.findOneAndUpdate(
             { 'categories._id': categoryId }, 
             { $pull: { categories: { _id: categoryId } } }, 
             { new: true }
         );
 
-        if (!admin) {
-            return res.status(404).json({ error: "Admin not found" });
+        if (!product) {
+            return res.status(404).json({ error: "Product not found" });
         }
         res.redirect('/categorie-list')
        
@@ -165,14 +180,14 @@ let deletecategorie = async (req, res) => {
  let productlist = async(req,res)=>{
 
     try {
-        let admin = await Admin.findOne();
-        let products = admin.products;
+        let product = await Products.findOne();
+        let products = product.products;
 
         
         res.render('admin/product-grid', { products });
 
-        if (!admin) {
-            return res.status(404).json({ error: "Admin not found" });
+        if (!product) {
+            return res.status(404).json({ error: "product not found" });
         }
      
     } catch (error) {
@@ -183,49 +198,53 @@ let deletecategorie = async (req, res) => {
  }
  let productadd = async(req,res)=>{
 
-    let data = await Admin.findOne();
+    let data = await Products.findOne();
   
       res.render('admin/product-add',{data});
 
  }
  const AddProductlist = async (req, res) => {
-    try {
-        
-        let {
-            ProductName,
-            Price,
-            description,
-            Category
-        } = req.body;
+    console.log("req.body :", req.body);
+    console.log("req.files :", req.files);
+    const imageData = req.files || [];
+    const productData = req.body;
 
-        let newProduct = {
+    try {
+        const { ProductName, Price, description, Category } = productData;
+        const imageUrls = [];
+
+        for (const file of imageData) {
+            const result = await cloudinary.uploader.upload(file.path);
+            imageUrls.push(result.secure_url);
+        }
+
+        console.log("imageUrls:", imageUrls);
+
+        const newProduct = {
             productName: ProductName,
             productPrice: Price,
             description: description,
-            category: Category
+            category: Category,
+            image: imageUrls
         };
 
-        let admin = await Admin.findOne();
-        if (!admin) {
-            return res.status(400).send('Admin not found');
+        let product = await Products.findOne();
+        
+        if (!product) {
+            return res.status(400).send('Product not found');
         }
 
-        
-        if (req.file) {
-            newProduct.image = req.file.filename; 
-        }
+        product.products.push(newProduct);
+        await product.save();
 
-        admin.products.push(newProduct);
-        await admin.save();
-
-        
         res.redirect('/product-list');
         
     } catch (error) {
         console.log(error);
         res.status(500).send('Internal Server Error');
     }
-  };
+};
+
   let productedit = async (req,res)=>{
             
    
@@ -233,13 +252,13 @@ let deletecategorie = async (req, res) => {
         
         const id = req.params.id;
      
-        const admin = await Admin.findOne({ 'products._id': id });
+        const product = await Products.findOne({ 'products._id': id });
 
-        if (!admin) {
+        if (!product) {
             return res.status(404).json({ error: "Admin not found" });
         }
 
-     const data= admin.products.find(product => product._id == id);
+     const data= product.products.find(product => product._id == id);
 
      res.render('admin/product-edit', { data })
          
@@ -252,29 +271,58 @@ let deletecategorie = async (req, res) => {
   const updateProduct = async (req, res) => {
     try {
         const productId = req.params.id;
-        const newName = req.body.ProductName;
-        const newPrice = req.body.Price;
-        const description = req.body.description;
-        const newImage = req.file ? req.file.filename : null; 
+        const { ProductName, Price, description, category } = req.body;
+        let updatedImages = [];
 
-        const admin = await Admin.findOne({ 'products._id': productId });
-
-        if (!admin) {
-            return res.status(404).json({ error: "Admin not found" });
+        // Check if new images are uploaded
+        if (req.files && req.files.length > 0) {
+            // Upload new images to Cloudinary
+            for (const file of req.files) {
+                const result = await cloudinary.uploader.upload(file.path);
+                updatedImages.push(result.secure_url);
+            }
         }
 
-        const product = admin.products.find(product => product._id == productId);
+        // If new images are uploaded, update the product's images
+        if (updatedImages.length > 0) {
+            const product = await Products.findOneAndUpdate(
+                { 'products._id': productId },
+                {
+                    $set: {
+                        'products.$.productName': ProductName,
+                        'products.$.productPrice': Price,
+                        'products.$.description': description,
+                        'products.$.category': category,
+                        'products.$.image': updatedImages  // Replace existing images with updated ones
+                    }
+                },
+                { new: true }
+            );
 
-        product.productName = newName;
-        product.productPrice = newPrice;
-        product.description = description;
-        if (newImage) { 
-            product.image = newImage;
+            if (!product) {
+                return res.status(404).json({ error: "Product not found" });
+            }
+        } else {
+            // If no new images are uploaded, only update other product details
+            const product = await Products.findOneAndUpdate(
+                { 'products._id': productId },
+                {
+                    $set: {
+                        'products.$.productName': ProductName,
+                        'products.$.productPrice': Price,
+                        'products.$.description': description,
+                        'products.$.category': category
+                    }
+                },
+                { new: true }
+            );
+
+            if (!product) {
+                return res.status(404).json({ error: "Product not found" });
+            }
         }
 
-        await admin.save();
-
-        res.redirect('/product-list')
+        res.redirect('/product-list');
         
     } catch (error) {
         console.error("Error updating product:", error);
@@ -285,16 +333,15 @@ let deletecategorie = async (req, res) => {
 const deleteproduct = async (req,res)=>{
         
     try {
-      
         const productId= req.params.id;
        
-        const admin = await Admin.findOneAndUpdate(
+        const product = await Products.findOneAndUpdate(
             { 'products._id': productId }, 
             { $pull: { products: { _id: productId } } }, 
             { new: true }
         );
 
-        if (!admin) {
+        if (!product) {
             return res.status(404).json({ error: "Admin not found" });
         }
         res.redirect('/product-list')
@@ -305,11 +352,15 @@ const deleteproduct = async (req,res)=>{
     }
 }
 
-
-
+const adminlogout = (req, res) => {
+    delete req.session.adminId;
+    delete req.session.adminEmail;
+    res.redirect('/adminlogin');
+}
 
 module.exports={
-    adminlogin,
+    loginpage,
+    admindashbord,
     logindatas,
     blockuser,
     userslist,
@@ -326,5 +377,6 @@ module.exports={
     productedit,
     updateProduct,
     deleteproduct,
+    adminlogout,
     
 }

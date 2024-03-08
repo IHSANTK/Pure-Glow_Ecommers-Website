@@ -726,9 +726,12 @@
                                             <div class="card">
                                                 <div class="product">
                                                     <div class="product-image">
-                                                        <div class="product-item active">
-                                                            <img src="<%= product.image %>" alt="<%= product.productName %>" class="img-fluid w-100">
-                                                        </div>
+                                                        <!-- Iterate over the array of image URLs for the current product -->
+                                                        <% product.image.forEach(imageUrl => { %>
+                                                            <div class="product-item">
+                                                                <img src="<%= imageUrl %>" alt="<%= product.productName %>" class="img-fluid w-100">
+                                                            </div>
+                                                        <% }); %>
                                                         <a class="add-wishlist" href="#">
                                                             <i class="bi bi-heart text-danger"></i>
                                                         </a>
@@ -747,6 +750,7 @@
                                             </div>
                                         </div>
                                     <% }); %>
+                                    
                                 </div>
                             <div class="row g-3 mb-3">
                                 <div class="col-md-12">

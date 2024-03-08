@@ -9,6 +9,7 @@ const ejs = require('ejs');
 const User = require('./models/user');
 const adminRoutes = require('./routes/adminroutes');
 const userRoutes = require('./routes/userroutes');
+require('dotenv').config()
 
 const app = express();
 
@@ -35,10 +36,10 @@ passport.deserializeUser(async (id, done) => {
 });
 
 passport.use(new GoogleStrategy({
-        clientID: '244913245911-80ghie1pg35f8gg30if8dt939kgahetn.apps.googleusercontent.com',
-        clientSecret: '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t',
-        callbackURL: 'https://localhost:3000/auth/google/callback' // Ensure this URL matches your SSL configuration
-    },
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: process.env.GOOGLE_CALLBACK_URL 
+},
     async (accessToken, refreshToken, profile, done) => {
         try {
             let user = await User.findOne({ googleId: profile.id });
@@ -65,7 +66,7 @@ app.use(express.static('uploads'));
 app.use('/', adminRoutes);
 app.use('/', userRoutes);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT ; 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
