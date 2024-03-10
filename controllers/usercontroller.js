@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+
 const User = require('../models/user');
 const Products = require('../models/Products');
 const passport = require('passport');
@@ -14,7 +15,7 @@ let userprofilepage = async (req, res) => {
     if (req.session.userId) {
         res.render('user/profile', { userName: req.session.userName, email: req.session.userEmail, phoneNumber: req.session.phoneNumber, userId:req.session.userId });
     } else {
-        res.render('user/login', { errorMessage: req.errorMessage });
+        res.redirect('/login');
     }
 }
 
@@ -32,7 +33,7 @@ let dataslogin =  async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && user.blocked) {
-        res.redirect('/blocked'); // Redirect to blocked page if user is blocked
+        res.render('user/error404',{errormessage:"You Are Blocked !!"}); // Redirect to blocked page if user is blocked
         return;
     }
 
@@ -79,7 +80,7 @@ let getsignupdata = async (req, res) => {
     req.session.userName = newUser.name;
     req.session.userEmail = newUser.email;
     req.session.phoneNumber = newUser.phoneNumber;
-    res.redirect('/profile');
+    res.redirect('/');
 }
 let logout =(req, res) => {
     delete req.session.userId;
@@ -128,70 +129,226 @@ let logout =(req, res) => {
     }
   };
 
-  const shoppage = async (req,res)=>{
+  const shoppage = async (req, res) => {
+    try {
+        const data = await Products.findOne();
 
-       
+        if (!data || !data.products || data.products.length === 0) {
+            return res.status(404).json({ error: "Data not found or empty" });
+        }
 
+        const uniqueCategories = [...new Set(data.products.map(product => product.category))];
+        // console.log(uniqueCategories);
 
-    const data = await Products.findOne();
+        res.render('user/shop', { categor: data.products, uniqueCategories });
 
-    if (!data) {
-        return res.status(404).json({ error: "data not found" });
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
-
-    const categor = data.products.filter(produ => produ.category);
-    
-
-    res.render('user/shop',{categor})
-
-
-  }
-
-  const getproductdeteils =  async (req,res)=>{
-try{
-    const category = req.params.category;
-
-    // console.log(category);
-
-    const data = await Products.findOne({ 'products.category': category });
-
-    if (!data) {
-        res.render('user/error404',{ error: "Product Not Availble Now !!" });
-    }
-   
- 
-    const categor = data.products.filter(produ => produ.category === category);
-    
-
-    res.render('user/shop',{categor})
-}catch{
-    res.render('user/error404',{ errormessage: "Product Not Availble Now !!" });
 }
-    
-
-    
 
 
-  }
+const getproductdetails = async (req, res) => {
+    try {
+        const category = req.params.category;
 
-  const productdatalist = (req,res)=>{
+        const data = await Products.findOne({ 'products.category': category });
+
+        if (!data) {
+            return res.render('user/error404', { error: "Product Not Available Now !!" });
+        }
+
+        const categor = data.products.filter(produ => produ.category === category);
+
+        const allCategories = await Products.distinct("products.category");
+        
+        res.render('user/shop', { categor, uniqueCategories: allCategories });
+
+    } catch (error) {
+        console.error("Error:", error);
+        res.render('user/error404', { errormessage: "Product Not Available" });
+    }
+}
+const addToCart = async (req, res) => {
+    const productId = req.params.id;
+
+    // Check if the user is authenticated
+    if (!req.session.userId) {
+        return res.status(401).send('Unauthorized');
+    }
+
+    const userId = req.session.userId;
+
+    try {
+        // Find the product by ID
+        const product = await Products.findOne({ 'products._id': productId });
+       
+        if (!product) {
+            return res.status(404).send('Product not found');
+        }
+
+        // Find the user by ID
+        const user = await User.findById(userId);
+       
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+
+        // Check if the product already exists in the cart
+        const existingProduct = user.cart.products.find(item => item.productId == productId);
+        if (existingProduct) {
+            // If the product already exists, update its quantity
+            existingProduct.quantity += 1;
+        } else {
+            // If the product doesn't exist, add it to the cart
+            const productData = product.products.find(prod => prod._id == productId);
+            user.cart.products.push({
+                productId: productData._id,
+                productName: productData.productName,
+                productPrice: productData.productPrice,
+                image: productData.image,
+                quantity: 1
+            });
+        }
+
+        // Calculate the sum of product prices in the cart
+        const totalPrice = user.cart.products.reduce((total, product) => {
+            return total + (product.productPrice * product.quantity);
+        }, 0);
+
+        // Update the total price in the cart object
+        user.cart.total = totalPrice;
+
+        // Save the updated user cart
+        await user.save();
+
+        // Redirect to the cart page
+        res.redirect('/shop'); // Assuming the cart page URL is '/cart'
+
+    } catch (error) {
+        // Handle error
+        console.error(error);
+        res.status(500).send('Internal Server Error'); 
+    }
+}
+
+const cartpage = async (req, res) => {
+    try {
+        // Check if the user is authenticated
+        if (!req.session.userId) {
+            return res.status(401).send('Unauthorized');
+        }
+
+        // Find the logged-in user by ID
+        const user = await User.findById(req.session.userId);
+       
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+
+        // Extract the cart data from the user document
+        const usercartdata = user.cart.products.map(item => ({
+            productId: item.productId,
+            productName: item.productName,
+            productPrice: item.productPrice,
+            image: item.image,
+            quantity: item.quantity
+        }));
+        totalPrice = user.cart.total 
+        console.log(totalPrice); 
+        // Render the cart page with the cart data
+        res.render('user/cart', { usercartdata, totalPrice});
+      
+        
+    } catch (error) {
+        // Handle error
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+}
+
+const deletecartproduct = async (req, res) => {
+    try {
+        const productId = req.params.productId; // Access productId from req.params
+        
+        // Find the logged-in user by ID and update the cart by removing the product with the given ID
+        const user = await User.findByIdAndUpdate(
+            req.session.userId,
+            { $pull: { 'cart.products': { productId: productId } } },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+
+        // Recalculate the total price of all products in the cart after deletion
+        const totalPrice = user.cart.products.reduce((total, product) => {
+            return total + (product.productPrice * product.quantity);
+        }, 0);
+
+        // Update the total field in the cart object
+        user.cart.total = totalPrice;
+           
+        console.log(totalPrice);
+        // Save the updated user cart
+        await user.save();
+
+        // Redirect back to the cart page after successful deletion
+        res.render('user/cart', { usercartdata: user.cart.products, totalPrice: totalPrice });
+    } catch (error) {
+        // Handle error
+        console.error(error);
+        res.status(500).send('Internal Server Error'); 
+    }
+}
 
 
-  }
+const succesGoogleLogin = async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.redirect('/failure');
+      }
   
-
-
-
-
-
-
+      console.log('Google Login Email:', req.user.email);
+      let user = await User.findOne({ email: req.user.email });
+  
+      if (!user) {
+        user = new User({
+          name: req.user.displayName,
+          email: req.user.email
+        });
+        await user.save();
+        console.log('User Data Saved.');
+        req.session.user = user; // Store user data in session
+        return res.redirect('/profile');
+      } else {
+        if (user.blocked) {
+          console.log('User is blocked');
+          return res.render('users/error404', { errormessage : 'Your Account has been restricted by the Admin' });
+        }
+  
+        console.log('Login with Google');
+        req.session.user = user; // Store user data in session
+        return res.redirect('/');
+      }
+    } catch (error) {
+      console.error('Error in Google authentication:', error);
+      return res.redirect('/failure');
+    }
+  };
+  
+  // Failure route handler for Google authentication
+  const failureGooglelogin = (req, res) => {
+    res.send('Error');
+  };
   let googleAuth = passport.authenticate('google', { scope: ['profile', 'email'] });
 
 
   
 
 module.exports={
-  
     Homepage,
     userprofilepage,
     loginpage,
@@ -202,8 +359,12 @@ module.exports={
     changepassword,
     editpassword,
     shoppage,
-    getproductdeteils,
-    productdatalist,
+    getproductdetails ,
+    addToCart,
+    cartpage,
+    deletecartproduct,
+    succesGoogleLogin,
+    failureGooglelogin,
     googleAuth,
 
 }
@@ -213,18 +374,3 @@ module.exports={
 
 
 
-
-
-
-
-
-
-
-
-// const userlogout = (req, res) => {
-//     delete req.session.userId;
-//     delete req.session.userName;
-//     delete req.session.userEmail;
-//     delete req.session.phoneNumber;
-//     res.redirect('/');
-// };

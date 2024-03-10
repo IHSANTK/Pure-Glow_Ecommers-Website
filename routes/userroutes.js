@@ -17,15 +17,18 @@ router.get('/logout', userController.logout);
 router.get('/change-password/:id',userController.changepassword)
 router.post('/edit-password/:id',userController.editpassword)
 router.get('/shop',userController.shoppage)
-router.get('/getshopproduct/:category',userController.getproductdeteils)
-
+router.get('/getshopproduct/:category',userController.getproductdetails)
+router.post('/cart/:id', userController.addToCart);
+router.get('/cart', userController.cartpage);
+router.post('/deletecartproduct/:productId', userController.deletecartproduct);
 
 router.get('/auth/google', userController.googleAuth);
 
 router.get('/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/signup' }),
-    userController.userprofilepage // Redirect to user profile page after successful authentication
+ passport.authenticate('google',{successRedirect: '/success', failureRedirect:'/failure'})
 );
 
-module.exports = router;
+router.get('/success', userController.succesGoogleLogin);
+router.get('/failure', userController.failureGooglelogin);
 
+module.exports = router;

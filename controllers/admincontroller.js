@@ -12,7 +12,7 @@ require('dotenv').config()
 
 const loginpage =(req,res)=>{
 
-    if (req.session.adminId) {
+    if (req.session.adminId ) {
         res.redirect('/admin');
     } else {
         res.render('admin/login');
@@ -58,6 +58,8 @@ let blockuser = async (req, res) => {
 }
 
 let userslist = async (req, res) => {
+
+    if (req.session.adminId) {
     try {
         const data = await User.find();
         res.render('admin/customers', { data });
@@ -65,6 +67,9 @@ let userslist = async (req, res) => {
         console.error('Error retrieving users:', error);
         res.status(500).send('Error retrieving users');
     }
+
+    } 
+ 
 }
 
 let renderindexblock =(req, res) => {
@@ -72,13 +77,15 @@ let renderindexblock =(req, res) => {
 }
 
 let categorilist = async(req,res)=>{
-
+    
+ if (req.session.adminId) {
     let products = await Products.find();
     if(!products ){
         res.status(400).send('Admin not found');
     }
     let data= products[0].categories.map(category => category);
     res.render('admin/categorie-list',{data});
+   }
 }
 
 let categoriesadd= async(req,res)=>{
@@ -176,26 +183,36 @@ let deletecategorie = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 };
+let productlist = async (req, res) => {
+    if (req.session.adminId) {
+        try {
+            let product = await Products.findOne();
+            let products = product.products;
 
- let productlist = async(req,res)=>{
+            // Pagination logic
+            const page = parseInt(req.query.page) || 1; // Get page number from query parameter or default to 1
+            const ITEMS_PER_PAGE = 9; // Number of products to display per page
+            const startIndex = (page - 1) * ITEMS_PER_PAGE;
+            const endIndex = page * ITEMS_PER_PAGE;
+            const totalProducts = products.length;
+            const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE);
 
-    try {
-        let product = await Products.findOne();
-        let products = product.products;
+            // Slice products array to get products for the current page
+            const productsForPage = products.slice(startIndex, endIndex);
 
-        
-        res.render('admin/product-grid', { products });
+            res.render('admin/product-grid', { products: productsForPage, totalPages, currentPage: page });
 
-        if (!product) {
-            return res.status(404).json({ error: "product not found" });
+            if (!product) {
+                return res.status(404).json({ error: "Product not found" });
+            }
+        } catch (error) {
+            console.log(error);
+            res.status(500).send('Internal Server Error');
         }
-     
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal Server Error');
     }
+};
 
- }
+ 
  let productadd = async(req,res)=>{
 
     let data = await Products.findOne();

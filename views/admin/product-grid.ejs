@@ -750,27 +750,32 @@
                                             </div>
                                         </div>
                                     <% }); %>
+                                </div>
                                     
                                 </div>
-                            <div class="row g-3 mb-3">
-                                <div class="col-md-12">
-                                    <nav class="justify-content-end d-flex">
-                                        <ul class="pagination">
-                                        <li class="page-item disabled">
-                                            <a class="page-link" href="#" tabindex="-1">Previous</a>
-                                        </li>
-                                        <li class="page-item"><a class="page-link" href="#">1</a></li>
-                                        <li class="page-item active" aria-current="page">
-                                            <a class="page-link" href="#">2</a>
-                                        </li>
-                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                        <li class="page-item">
-                                            <a class="page-link" href="#">Next</a>
-                                        </li>
-                                        </ul>
-                                    </nav>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-12">
+                                        <nav class="justify-content-end d-flex">
+                                            <ul class="pagination">
+                                                <% if (currentPage > 1) { %>
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?page=<%= currentPage - 1 %>" tabindex="-1">Previous</a>
+                                                    </li>
+                                                <% } %>
+                                                <% for (let i = 1; i <= totalPages; i++) { %>
+                                                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                                                    </li>
+                                                <% } %>
+                                                <% if (currentPage < totalPages) { %>
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+                                                    </li>
+                                                <% } %>
+                                            </ul>
+                                        </nav>
+                                    </div>
                                 </div>
-                            </div>
                         </div>
                     </div> <!-- Row end  -->
                 </div>

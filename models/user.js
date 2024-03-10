@@ -1,7 +1,4 @@
 const mongoose = require('mongoose');
-// const { categorilist } = require('../controllers/admincontroller');
-
-
 
 const userSchema = new mongoose.Schema({
     googleId: String,
@@ -10,12 +7,18 @@ const userSchema = new mongoose.Schema({
     phoneNumber: String,
     password: String,
     blocked: { type: Boolean, default: false },
-   
+    cart: {
+        products: [{
+            productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' }, // Reference to the Product model
+            image: [String],
+            productName: String,
+            productPrice: String,
+            quantity: { type: Number, default: 1 }
+        }],
+        total: String
+    }
 });
-
-
-
 
 const User = mongoose.model('User', userSchema);
 
-module.exports = User;
+module.exports = User

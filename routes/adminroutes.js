@@ -9,7 +9,7 @@ router.get('/adminlogin',admincontroller.loginpage);
 router.post('/admin',admincontroller.logindatas);
 router.post('/toggleBlock',admincontroller.blockuser);
 router.get('/userlist',admincontroller.userslist);
-router.get('/blocked',admincontroller.renderindexblock)
+// router.get('/blocked',admincontroller.renderindexblock)
 router.get('/categorie-list',admincontroller.categorilist);
 router.get('/categories-add',admincontroller.categoriesadd);
 router.post('/categories-add',admincontroller.updatecategory);
