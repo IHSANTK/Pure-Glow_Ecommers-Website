@@ -40,7 +40,7 @@
 
         <!-- Navbar start -->
         <div class="container-fluid fixed-top ">
-            <div class="container topbar bg-primary d-none d-lg-block">
+            <!-- <div class="container topbar bg-primary d-none d-lg-block">
                  <div class="d-flex justify-content-between">
                      <div class="top-info ps-2">
                         <small class="me-3"><i class="fas fa-map-marker-alt me-2 text-secondary"></i> <a href="#" class="text-white">123 Street, New York</a></small>
@@ -52,7 +52,7 @@
                         <a href="#" class="text-white"><small class="text-white ms-2">Sales and Refunds</small></a>
                     </div>
                 </div>
-             </div>
+             </div> -->
             <div class="container px-0 ">
                 <nav class="navbar navbar-ligh bg-white navbar-expand-xl  ps-4 pe-4">
                     <a href="index.html" class="navbar-brand"><h1 class="text-primary display-6">Pure Glow</h1></a>
@@ -81,7 +81,7 @@
                                 <i class="fa fa-shopping-bag fa-2x"></i>
                                 <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">3</span>
                             </a>
-                            <a href="#" class="my-auto">
+                            <a href="/profile" class="my-auto">
                                 <i class="fas fa-user fa-2x"></i>
                             </a>
                         </div>
@@ -150,7 +150,7 @@
                                 </div>
                             </div> -->
                         </div>
-                        <div class="row g-4 mt-5">
+                        <div class="row g-4 mt-2">
                             <div class="col-lg-3" style="">
                                 <div class="row g-4">
                                     <div class="col-lg-12">
@@ -275,40 +275,78 @@
                             <div class="col-lg-9">
                                
                                 <div class="row g-4 justify-content-center">
-                                    <% if (categor && categor.length > 0) { %>
-                                        <!-- Product details -->
-                                        <% categor.forEach(product => { %>
-                                            <div class="col-md-6 col-lg-6 col-xl-4">
-                                                <div class="rounded position-relative fruite-item">
-                                                    <div class="fruite-img">
-                                                        <img src="<%= product.image %>" class="img-fluid w-100 rounded-top" alt="<%= product.image %>">
-                                                    </div>
-                                                    <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;"><%= product.category %></div>
-                                                    <div class="p-4 border border-secondary border-top-0 rounded-bottom">
-                                                        <h4><%= product.productName %></h4>
-                                                        <p><%= product.description %></p>
-                                                        <div class="d-flex justify-content-between flex-lg-wrap">
-                                                            <p class="text-dark fs-5 fw-bold mb-0">₹<%= product.productPrice %></p>
-                                                            <form action="/cart/<%= product._id %>" method="POST">
-                                                                <!-- Add any necessary hidden input fields for additional data -->
-                                                                <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary">
-                                                                    <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
-                                                                </button>
-                                                            </form>    </div>
+                                    <div class="row g-4 justify-content-center">
+                                        <% if (categor && categor.length > 0) { %>
+                                            <!-- Product details -->
+                                            <% categor.forEach(product => { %>
+                                                <div class="col-md-6 col-lg-6 col-xl-4">
+                                                    <div class="rounded position-relative fruite-item">
+                                                        <div class="fruite-img">
+                                                            <img src="<%= product.image %>" class="img-fluid w-100 rounded-top" alt="<%= product.image %>">
+                                                        </div>
+                                                        <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;"><%= product.category %></div>
+                                                        <div class="p-4 border border-secondary border-top-0 rounded-bottom">
+                                                            <h4><%= product.productName %></h4>
+                                                            <p><%= product.description %></p>
+                                                            <div class="d-flex justify-content-between flex-lg-wrap">
+                                                                <p class="text-dark fs-5 fw-bold mb-0">₹<%= product.productPrice %></p>
+                                                                <form id="addToCartForm<%= product._id %>"  action="/cart/<%= product._id %>" method="POST" >
+                                                                    <!-- Add any necessary hidden input fields for additional data -->
+                                                                    <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn">
+                                                                        <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        <% }); %>
-                                    <% } %>
-                                    <script>
-                                        // JavaScript to handle onchange event of select dropdown
-                                        document.getElementById('categorySelect').addEventListener('change', function() {
-                                            const selectedCategory = this.value;
-                                            if (selectedCategory) {
-                                                window.location.href = `/getshopproduct/${selectedCategory}`;
-                                            }
+                                            <% }); %>
+                                        <% } %>
+                                    </div>
+                                </div>
+                    
+                                <script>
+                                    // JavaScript to handle onchange event of select dropdown
+                                    document.getElementById('categorySelect').addEventListener('change', function() {
+                                        const selectedCategory = this.value;
+                                        if (selectedCategory) {
+                                            window.location.href = `/getshopproduct/${selectedCategory}`;
+                                        }
+                                    });
+                                    function addToCartAlert(productName) {
+                                         alert(productName + ' added to cart!');
+                                            return true; // Allow form submission to proceed
+                                   }
+                                </script>
+                                
+<!--                                  
+                                <script>
+                                    // JavaScript to handle form submission and display alert after adding to cart
+                                    document.querySelectorAll('.addToCartBtn').forEach(button => {
+                                        button.addEventListener('click', function(event) {
+                                            event.preventDefault();
+                                            const form = this.closest('form');
+                                            fetch(form.action, {
+                                                method: form.method,
+                                                body: new FormData(form)
+                                            })
+                                            .then(response => {
+                                                if (response.ok) {
+                                                    // If the response is successful, show an alert
+                                                    alert('Product added to cart ');
+                                                } else {
+                                                    // If there's an error, log it to console
+                                                    console.error('Error adding product to cart');
+                                                }
+                                            })
+                                            .catch(error => {
+                                                // If there's a network error, log it to console
+                                                console.error('Network error:', error);
+                                            });
                                         });
-                                    </script>
+                                    });
+                                </script> -->
+                        
                                     <!-- <script>
                                         // Function to display a popup message
                                         function displayPopup(message) {
@@ -508,7 +546,7 @@
                     <div class="row g-4">
                         <div class="col-lg-3">
                             <a href="#">
-                                <h1 class="text-primary mb-0">Fruitables</h1>
+                                <h1 class="text-primary mb-0">Pure Glow</h1>
                                 <p class="text-secondary mb-0">Fresh products</p>
                             </a>
                         </div>

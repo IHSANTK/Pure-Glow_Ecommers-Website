@@ -3,7 +3,7 @@
 
     <head>
         <meta charset="utf-8">
-        <title>Fruitables - Vegetable Website Template</title>
+        <title>Pure Glow</title>
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
         <meta content="" name="keywords">
         <meta content="" name="description">
@@ -55,14 +55,14 @@
             </div>
             <div class="container px-0">
                 <nav class="navbar navbar-light bg-white navbar-expand-xl">
-                    <a href="index.html" class="navbar-brand"><h1 class="text-primary display-6">Fruitables</h1></a>
+                    <a href="index.html" class="navbar-brand"><h1 class="text-primary display-6">Pure Glow</h1></a>
                     <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                         <span class="fa fa-bars text-primary"></span>
                     </button>
                     <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
                         <div class="navbar-nav mx-auto">
-                            <a href="index.html" class="nav-item nav-link">Home</a>
-                            <a href="shop.html" class="nav-item nav-link">Shop</a>
+                            <a href="/" class="nav-item nav-link">Home</a>
+                            <a href="/shop" class="nav-item nav-link">Shop</a>
                             <a href="shop-detail.html" class="nav-item nav-link">Shop Detail</a>
                             <div class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Pages</a>
@@ -81,7 +81,7 @@
                                 <i class="fa fa-shopping-bag fa-2x"></i>
                                 <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">3</span>
                             </a>
-                            <a href="#" class="my-auto">
+                            <a href="/profile" class="my-auto">
                                 <i class="fas fa-user fa-2x"></i>
                             </a>
                         </div>
@@ -126,48 +126,57 @@
 
         <!-- Cart Page Start -->
         <div class="container-fluid py-5 " style="margin-top: 100px;">
+            <!-- <div style ="margin:auto">Your Cart</div> -->
             <div class="container py-5">
+              
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
                           <tr>
+                            <% if (usercartdata.length !== 0) { %>
                             <th scope="col">Products</th>
                             <th scope="col">Name</th>
                             <th scope="col">Price</th>
                             <th scope="col">Quantity</th>
                             <!-- <th scope="col">Total</th> -->
                             <th scope="col">Handle</th>
+                            <% } %>
                           </tr>
                         </thead>
-
-                        <% usercartdata.forEach(product => { %>
-                            <tbody>
-                                <tr>
-                                    <th scope="row">
-                                        <div class="d-flex align-items-center">
-                                            <img src="<%= product.image %>" class="img-fluid me-5 rounded-circle" style="width: 80px; height: 80px;" alt="">
-                                        </div>
-                                    </th>
-                                    <td>
-                                        <p class="mb-0 mt-4"><%= product.productName %></p>
-                                    </td>
-                                    <td>
-                                        <p class="mb-0 mt-4"><%= product.productPrice %></p>
-                                    </td>
-                                    <td>
-                                        <p class="mb-0 mt-4 ms-4"><%= product.quantity %></p>
-                                    </td>
-                                    <td>
-                                        <!-- Delete button form -->
-                                        <form action="/deletecartproduct/<%= product.productId %>" method="POST">
-                                            <button type="submit" class="btn btn-md rounded-circle bg-light border mt-4">
-                                                <i class="fa fa-times text-danger"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        <% }); %>
+                        <% if (usercartdata.length === 0) { %>
+                            <div class="alert alert-info mt-3" role="alert" style="color: black;display: flex;justify-content: center;font-weight: 700;">
+                                Your cart is empty !
+                            </div>
+                        <% } else { %>
+                            <% usercartdata.forEach(product => { %>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">
+                                            <div class="d-flex align-items-center">
+                                                <img src="<%= product.image %>" class="img-fluid me-5 rounded-circle" style="width: 80px; height: 80px;" alt="">
+                                            </div>
+                                        </th>
+                                        <td>
+                                            <p class="mb-0 mt-4"><%= product.productName %></p>
+                                        </td>
+                                        <td>
+                                            <p class="mb-0 mt-4"><%= product.productPrice %></p>
+                                        </td>
+                                        <td>
+                                            <p class="mb-0 mt-4 ms-4"><%= product.quantity %></p>
+                                        </td>
+                                        <td>
+                                            <!-- Delete button form -->
+                                            <form action="/deletecartproduct/<%= product.productId %>" method="POST">
+                                                <button type="submit" class="btn btn-md rounded-circle bg-light border mt-4">
+                                                    <i class="fa fa-times text-danger"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            <% }); %>
+                        <% } %>
                             <!-- <tr>
                                 <th scope="row">
                                     <div class="d-flex align-items-center">
@@ -243,10 +252,10 @@
                    
                     </table>
                 </div>
-                <div class="mt-5">
+                <!-- <div class="mt-5">
                     <input type="text" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
                     <button class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="button">Apply Coupon</button>
-                </div>
+                </div> -->
                 <div class="row g-4 justify-content-end">
                     <div class="col-8"></div>
                     <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
@@ -257,19 +266,19 @@
                                     <h5 class="mb-0 me-4">Subtotal:</h5>
                                     <p class="mb-0">₹<%=totalPrice %></p>
                                 </div>
-                                <div class="d-flex justify-content-between">
+                                <!-- <div class="d-flex justify-content-between">
                                     <h5 class="mb-0 me-4">Shipping</h5>
                                     <div class="">
                                         <p class="mb-0">Flat rate: ₹50.00</p>
                                     </div>
-                                </div>
-                                <p class="mb-0 text-end">Shipping to Ukraine.</p>
+                                </div> -->
+                                <p class="mb-0 text-end"> Free Shipping.</p>
                             </div>
                             <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
                                 <h5 class="mb-0 ps-4 me-4">Total</h5>
                                 <p class="mb-0 pe-4">₹<%=totalPrice %></p>
                             </div>
-                            <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">Proceed Checkout</button>
+                            <a href="/checkout"><button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">Proceed Checkout</button></a>
                         </div>
                     </div>
                 </div>

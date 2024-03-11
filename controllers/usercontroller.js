@@ -33,7 +33,7 @@ let dataslogin =  async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && user.blocked) {
-        res.render('user/error404',{errormessage:"You Are Blocked !!"}); // Redirect to blocked page if user is blocked
+        res.redirect('/block'); // Redirect to blocked page if user is blocked
         return;
     }
 
@@ -47,7 +47,10 @@ let dataslogin =  async (req, res) => {
         res.render('user/login',{errorMessage:'Invalid email or password. Please sign up.'});
     }
 }
+const blockpage =(req,res)=>{
 
+    res.render('user/error404',{errormessage:"You Are Blocked !!"});
+}
 
 let signuppage = (req, res) => {
     if (req.session.userId) {
@@ -91,43 +94,46 @@ let logout =(req, res) => {
   };
 
   const changepassword = (req, res) => {
+    const userId = req.params.id;
+    res.render('user/editpassword', { userId, errorMessage: req.errorMessage });
+};
 
-       const userId = req.params.id;
-
-    res.render('user/editpassword',{userId});
-  };
-  
-  const editpassword = async (req, res) => {
+const editpassword = async (req, res) => {
     const userId = req.params.id;
     const { currentPassword, newPassword, confirmPassword } = req.body;
-  
-    try {
-      const user = await User.findById(userId);
-  
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      const isPasswordMatch = await bcrypt.compare(currentPassword, user.password);
-  
-      if (!isPasswordMatch) {
-        return res.status(400).json({ message: "Current password is incorrect" });
-      }
-  
-      if (newPassword !== confirmPassword) {
-        return res.status(400).json({ message: "New password and confirm password do not match" });
-      }
 
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-  
-      user.password = hashedPassword;
-      await user.save();
-  
-      res.status(200).json({ message: "Password updated successfully" });
+    try {
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        const isPasswordMatch = await bcrypt.compare(currentPassword, user.password);
+
+        if (!isPasswordMatch) {
+            // Setting error message to req.errorMessage
+            req.errorMessage = "Current password is not correct";
+            return changepassword(req, res);
+        }
+
+        if (newPassword !== confirmPassword) {
+            // Clearing previous error message if any
+            req.errorMessage = "";
+            return res.status(400).json({ message: "New password and confirm password do not match" });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        user.password = hashedPassword;
+        await user.save();
+
+        res.status(200).json({ message: "Password updated successfully" });
     } catch (error) {
-      console.error("Error updating password:", error);
-      res.status(500).json({ message: "Error updating password" });
+        console.error("Error updating password:", error);
+        res.status(500).json({ message: "Error updating password" });
     }
-  };
+};
+
 
   const shoppage = async (req, res) => {
     try {
@@ -175,7 +181,7 @@ const addToCart = async (req, res) => {
 
     // Check if the user is authenticated
     if (!req.session.userId) {
-        return res.status(401).send('Unauthorized');
+        return res.redirect('/login');
     }
 
     const userId = req.session.userId;
@@ -223,11 +229,11 @@ const addToCart = async (req, res) => {
         // Save the updated user cart
         await user.save();
 
-        // Redirect to the cart page
-        res.redirect('/shop'); // Assuming the cart page URL is '/cart'
+        // Redirect to the shop page
+        res.redirect('/cart');
 
     } catch (error) {
-        // Handle error
+        
         console.error(error);
         res.status(500).send('Internal Server Error'); 
     }
@@ -237,7 +243,9 @@ const cartpage = async (req, res) => {
     try {
         // Check if the user is authenticated
         if (!req.session.userId) {
-            return res.status(401).send('Unauthorized');
+
+            return   res.redirect('/login')
+            
         }
 
         // Find the logged-in user by ID
@@ -256,7 +264,7 @@ const cartpage = async (req, res) => {
             quantity: item.quantity
         }));
         totalPrice = user.cart.total 
-        console.log(totalPrice); 
+     
         // Render the cart page with the cart data
         res.render('user/cart', { usercartdata, totalPrice});
       
@@ -272,7 +280,6 @@ const deletecartproduct = async (req, res) => {
     try {
         const productId = req.params.productId; // Access productId from req.params
         
-        // Find the logged-in user by ID and update the cart by removing the product with the given ID
         const user = await User.findByIdAndUpdate(
             req.session.userId,
             { $pull: { 'cart.products': { productId: productId } } },
@@ -287,15 +294,11 @@ const deletecartproduct = async (req, res) => {
         const totalPrice = user.cart.products.reduce((total, product) => {
             return total + (product.productPrice * product.quantity);
         }, 0);
-
-        // Update the total field in the cart object
+ 
         user.cart.total = totalPrice;
            
-        console.log(totalPrice);
-        // Save the updated user cart
         await user.save();
 
-        // Redirect back to the cart page after successful deletion
         res.render('user/cart', { usercartdata: user.cart.products, totalPrice: totalPrice });
     } catch (error) {
         // Handle error
@@ -303,6 +306,14 @@ const deletecartproduct = async (req, res) => {
         res.status(500).send('Internal Server Error'); 
     }
 }
+
+const checkoutpage =(req,res)=>{
+      res.render('user/chackout');
+}
+
+
+
+
 
 
 const succesGoogleLogin = async (req, res) => {
@@ -339,7 +350,6 @@ const succesGoogleLogin = async (req, res) => {
     }
   };
   
-  // Failure route handler for Google authentication
   const failureGooglelogin = (req, res) => {
     res.send('Error');
   };
@@ -352,6 +362,7 @@ module.exports={
     Homepage,
     userprofilepage,
     loginpage,
+    blockpage,
     dataslogin,
     signuppage,
     getsignupdata,
@@ -363,6 +374,7 @@ module.exports={
     addToCart,
     cartpage,
     deletecartproduct,
+    checkoutpage,
     succesGoogleLogin,
     failureGooglelogin,
     googleAuth,
