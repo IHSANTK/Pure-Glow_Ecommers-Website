@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/usercontroller');
 const passport = require('passport');
+const upload = require('../config/multer');
 const preventBack = require("../middlewears/preventback");
 
 // Include the passport initialization
@@ -9,14 +10,16 @@ router.use(passport.initialize());
 
 // Routes
 router.get('/', preventBack,userController.Homepage);
-router.get('/profile',preventBack, userController.userprofilepage);
+router.get('/profile', userController.userprofilepage);
 router.get('/login',preventBack, userController.loginpage);
 router.get('/block',preventBack,userController.blockpage)
 router.post('/login',preventBack, userController.dataslogin);
 router.get('/signup',preventBack, userController.signuppage);
 router.post('/signup',preventBack, userController.getsignupdata);
 router.get('/logout', preventBack,userController.logout);
-router.get('/change-password/:id',preventBack,userController.changepassword)
+// router.get('/change-password/:id',preventBack,userController.changepassword)
+router.get('/edit-profile/:id',preventBack,userController.editprofileget)
+router.post('/edit-profile/:id',upload.array('profileImage', 1),userController.editprofile)
 router.post('/edit-password/:id',preventBack,userController.editpassword)
 router.get('/shop',preventBack,userController.shoppage)
 router.get('/getshopproduct/:category',preventBack,userController.getproductdetails)

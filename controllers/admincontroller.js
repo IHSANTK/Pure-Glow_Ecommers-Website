@@ -221,8 +221,8 @@ let productlist = async (req, res) => {
 
  }
  const AddProductlist = async (req, res) => {
-    console.log("req.body :", req.body);
-    console.log("req.files :", req.files);
+    // console.log("req.body :", req.body);
+    // console.log("req.files :", req.files);
     const imageData = req.files || [];
     const productData = req.body;
 
@@ -235,7 +235,7 @@ let productlist = async (req, res) => {
             imageUrls.push(result.secure_url);
         }
 
-        console.log("imageUrls:", imageUrls);
+        // console.log("imageUrls:", imageUrls);
 
         const newProduct = {
             productName: ProductName,

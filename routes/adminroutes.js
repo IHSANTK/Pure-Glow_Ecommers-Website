@@ -3,10 +3,11 @@ const express = require('express');
 const router = express.Router();
 const upload = require('../config/multer');
 const adminMiddleware = require('../middlewears/adminMiddleware'); // Corrected typo
+const preventBack = require("../middlewears/preventback");
 
-router.get('/admin', adminMiddleware, admincontroller.admindashbord);
-router.get('/adminlogin', adminMiddleware,admincontroller.loginpage);
-router.post('/admin', adminMiddleware, admincontroller.logindatas);
+router.get('/admin',preventBack, adminMiddleware, admincontroller.admindashbord);
+router.get('/adminlogin',preventBack, adminMiddleware,admincontroller.loginpage);
+router.post('/admin',preventBack, adminMiddleware, admincontroller.logindatas);
 router.post('/toggleBlock', adminMiddleware, admincontroller.blockuser);
 router.get('/userlist', adminMiddleware, admincontroller.userslist);
 router.get('/categorie-list', adminMiddleware, admincontroller.categorilist);

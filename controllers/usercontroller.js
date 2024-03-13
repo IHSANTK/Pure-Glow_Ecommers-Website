@@ -3,7 +3,8 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const Products = require('../models/Products');
 const passport = require('passport');
-
+const cloudinary = require('../config/cloudinary')
+const upload = require('../config/multer.js');
 
 let Homepage = (req, res) => {
     res.render('user/index');
@@ -13,7 +14,14 @@ let userprofilepage = async (req, res) => {
 
 
     if (req.session.userId) {
-        res.render('user/profile', { userName: req.session.userName, email: req.session.userEmail, phoneNumber: req.session.phoneNumber, userId:req.session.userId });
+        res.render('user/profile', { userName: req.session.userName,
+               email: req.session.userEmail, 
+               phoneNumber: req.session.phoneNumber,
+               userId:req.session.userId,
+               errorMessage:req.errorMessage,
+               successMessage:req.successMessage,
+               profileImage:req.image
+              });
     } else {
         res.redirect('/login');
     }
@@ -93,10 +101,10 @@ let logout =(req, res) => {
     res.redirect('/');
   };
 
-  const changepassword = (req, res) => {
-    const userId = req.params.id;
-    res.render('user/editpassword', { userId, errorMessage: req.errorMessage });
-};
+// const changepassword = (req, res) => {
+//     const userId = req.params.id;
+//     res.render('user/editpassword', { userId, errorMessage: req.errorMessage ,successMessage:req.successMessage });
+// };
 
 const editpassword = async (req, res) => {
     const userId = req.params.id;
@@ -111,15 +119,30 @@ const editpassword = async (req, res) => {
         const isPasswordMatch = await bcrypt.compare(currentPassword, user.password);
 
         if (!isPasswordMatch) {
-            // Setting error message to req.errorMessage
-            req.errorMessage = "Current password is not correct";
-            return changepassword(req, res);
+            // Sending error message along with the rendered profile edit page
+            return res.render('user/profile', {
+                errorMessage: "Current password is not correct",
+                userId: userId,
+                userName: user.name,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                successMessage:req.successMessage,
+                profileImage:user.image
+            });
         }
 
         if (newPassword !== confirmPassword) {
-            // Clearing previous error message if any
-            req.errorMessage = "";
-            return res.status(400).json({ message: "New password and confirm password do not match" });
+            // Sending error message along with the rendered profile edit page
+            return res.render('user/profile', {
+                errorMessage: "New password and confirm password do not match",
+                userId: userId,
+                userName: user.name,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                successMessage:req.successMessage,
+                profileImage:user.image
+
+            });
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -127,15 +150,120 @@ const editpassword = async (req, res) => {
         user.password = hashedPassword;
         await user.save();
 
-        res.status(200).json({ message: "Password updated successfully" });
+        // Render the edit password page with success message
+        res.render('user/profile', {
+            userId: userId,
+            userName: user.name,
+            email: user.email,
+            phoneNumber: user.phoneNumber,
+            errorMessage: req.errorMessage,
+            successMessage: "Password successfully updated",
+            profileImage:user.image
+        });
     } catch (error) {
         console.error("Error updating password:", error);
         res.status(500).json({ message: "Error updating password" });
     }
 };
 
+const editprofileget = async (req,res)=>{
+    const userId = req.params.id;
+    const user = await User.findOne(userId)
 
-  const shoppage = async (req, res) => {
+    console.log(user);
+
+
+}
+const editprofile = async (req, res) => {
+    const userId = req.params.id;
+    const { userName, email, phoneNumber } = req.body;
+  
+    try {
+      // Handle image upload
+      let imageUrls = [];
+      if (req.files && req.files.length > 0) {
+        // Upload each file to Cloudinary
+        for (const file of req.files) {
+          const result = await cloudinary.uploader.upload(file.path);
+          imageUrls.push(result.secure_url);
+        }
+      }
+  console.log(userName);
+  console.log(email);
+  console.log(phoneNumber);
+  console.log(imageUrls);
+      // Update user data including the image URLs
+      const user = await User.findByIdAndUpdate(userId, {
+        name: userName,
+        email: email,
+        phoneNumber: phoneNumber,
+        image: imageUrls // Assuming 'image' is the field where you store the image URLs in your User model
+      }, { new: true });
+  
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+  
+      // Render the profile view with updated data
+      return res.render('user/profile', {
+        userId: userId,
+        userName: user.name,
+        email: user.email,
+        errorMessage:req.errorMessage,
+        phoneNumber: user.phoneNumber,
+        successMessage: "Profile updated successfully" ,// Assuming you want to display a success message
+        profileImage:user.image
+      });
+  
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).send("An error occurred while updating profile");
+    }
+  };
+
+
+
+
+    // const productData = req.body;
+
+    // try {
+    //     const { ProductName, Price, description, Category } = productData;
+    //     const imageUrls = [];
+
+      
+
+    //     // console.log("imageUrls:", imageUrls);
+
+    //     const newProduct = {
+    //         productName: ProductName,
+    //         productPrice: Price,
+    //         description: description,
+    //         category: Category,
+           
+    //     };
+
+    //     let product = await Products.findOne();
+        
+    //     if (!product) {
+    //         return res.status(400).send('Product not found');
+    //     }
+
+    //     product.products.push(newProduct);
+    //     await product.save();
+
+    //     res.redirect('/product-list');
+        
+    // } catch (error) {
+    //     console.log(error);
+    //     res.status(500).send('Internal Server Error');
+    // }
+
+
+
+
+
+
+const shoppage = async (req, res) => {
     try {
         const data = await Products.findOne();
 
@@ -201,10 +329,10 @@ const addToCart = async (req, res) => {
             return res.status(404).send('User not found');
         }
 
-        // Check if the product already exists in the cart
+       
         const existingProduct = user.cart.products.find(item => item.productId == productId);
         if (existingProduct) {
-            // If the product already exists, update its quantity
+           
             existingProduct.quantity += 1;
         } else {
             // If the product doesn't exist, add it to the cart
@@ -223,13 +351,13 @@ const addToCart = async (req, res) => {
             return total + (product.productPrice * product.quantity);
         }, 0);
 
-        // Update the total price in the cart object
+        
         user.cart.total = totalPrice;
 
         // Save the updated user cart
         await user.save();
 
-        // Redirect to the shop page
+      
         res.redirect('/cart');
 
     } catch (error) {
@@ -241,7 +369,7 @@ const addToCart = async (req, res) => {
 
 const cartpage = async (req, res) => {
     try {
-        // Check if the user is authenticated
+      
         if (!req.session.userId) {
 
             return   res.redirect('/login')
@@ -367,8 +495,10 @@ module.exports={
     signuppage,
     getsignupdata,
     logout,
-    changepassword,
+    // changepassword,
     editpassword,
+    editprofile,
+    editprofileget,
     shoppage,
     getproductdetails ,
     addToCart,

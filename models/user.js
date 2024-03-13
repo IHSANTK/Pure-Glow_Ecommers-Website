@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
     email: String,
     phoneNumber: String,
     password: String,
+    image: [String],
     blocked: { type: Boolean, default: false },
     cart: {
         products: [{

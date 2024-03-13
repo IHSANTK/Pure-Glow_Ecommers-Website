@@ -162,8 +162,20 @@
                                         <td>
                                             <p class="mb-0 mt-4"><%= product.productPrice %></p>
                                         </td>
+                                    
                                         <td>
-                                            <p class="mb-0 mt-4 ms-4"><%= product.quantity %></p>
+                                            <div class="input-group">
+                                                <!-- Minus button -->
+                                                <button class="btn btn-sm btn-plus rounded-circle bg-light border mt-4" style="width:30px ; height: 30px;">
+                                                    <i class="fa fa-minus"></i>
+                                                </button>
+                                                <!-- Quantity value -->
+                                                <p class="mb-0 mt-4 mx-2"><%= product.quantity %></p>
+                                                <!-- Plus button -->
+                                                <button class="btn btn-sm btn-plus rounded-circle bg-light border mt-4" style="width:30px ; height: 30px;">
+                                                    <i class="fa fa-plus"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                         <td>
                                             <!-- Delete button form -->
@@ -256,6 +268,7 @@
                     <input type="text" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
                     <button class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="button">Apply Coupon</button>
                 </div> -->
+                <% if (usercartdata.length !== 0) { %>
                 <div class="row g-4 justify-content-end">
                     <div class="col-8"></div>
                     <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
@@ -282,6 +295,7 @@
                         </div>
                     </div>
                 </div>
+                <% }%>
             </div>
         </div>
         <!-- Cart Page End -->
