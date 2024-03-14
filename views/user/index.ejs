@@ -27,6 +27,7 @@
 
         <!-- Template Stylesheet -->
         <link href="css/style.css" rel="stylesheet">
+        
     </head>
 
     <body>
@@ -207,118 +208,102 @@
 
 
         <!-- Fruits Shop Start-->
-        <div class="container-fluid fruite py-5">
-            <div class="container py-5">
-                <div class="tab-class text-center">
+        
+   <script>
+    $(document).ready(function() {
+        $('#latestProductForm').submit(function(e) {
+            e.preventDefault(); // Prevent the default form submission
+        
+            // Serialize form data
+            var formData = $(this).serialize();
+        
+            // Submit form data using AJAX
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: formData,
+                success: function(response) {
+                    // Handle success response (if needed)
+                    console.log(response);
+                    // Optionally, you can reload specific parts of the page here
+                },
+                error: function(xhr, status, error) {
+                    // Handle error response (if needed)
+                    console.error(error);
+                }
+            });
+        });
+    });
+</script>
+
+<div class="container-fluid fruite py-5">
+    <div class="container py-5">
+        <div class="tab-class text-center">
+            <div class="row g-4">
+                <div class="col-lg-4 text-start">
+                    <h1>Our Organic Products</h1>
+                </div>
+                <div class="col-lg-8 text-end">
+                    <form id="latestProductForm" action="/latestproduct" method="post">
+                        <ul class="nav nav-pills d-inline-flex text-center mb-5">
+                            <% uniqueCategories.forEach(category => { %>
+                                <li class="nav-item">
+                                    <button type="submit" name="category" value="<%= category %>" class="d-flex m-2 py-2 bg-light rounded-pill active" style="border: none; background: none;">
+                                        <span class="text-dark" style="width: 130px;"><%= category %></span>
+                                    </button>
+                                </li>
+                            <% }); %>
+                        </ul>
+                    </form>
+                </div>
+            </div>
+            <div class="tab-content">
+                <div id="tab-1" class="tab-pane fade show p-0 active">
                     <div class="row g-4">
-                        <div class="col-lg-4 text-start">
-                            <h1>Our Organic Products</h1>
-                        </div>
-                        <div class="col-lg-8 text-end">
-                            <ul class="nav nav-pills d-inline-flex text-center mb-5">
-                                <li class="nav-item">
-                                    <a class="d-flex m-2 py-2 bg-light rounded-pill active" data-bs-toggle="pill" href="#tab-1">
-                                        <span class="text-dark" style="width: 130px;">All Products</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="d-flex py-2 m-2 bg-light rounded-pill" data-bs-toggle="pill" href="#tab-2">
-                                        <span class="text-dark" style="width: 130px;">Face Wash</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="d-flex m-2 py-2 bg-light rounded-pill" data-bs-toggle="pill" href="#tab-3">
-                                        <span class="text-dark" style="width: 130px;">Hair Oil</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="d-flex m-2 py-2 bg-light rounded-pill" data-bs-toggle="pill" href="#tab-4">
-                                        <span class="text-dark" style="width: 130px;">Beard Oil</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="d-flex m-2 py-2 bg-light rounded-pill" data-bs-toggle="pill" href="#tab-5">
-                                        <span class="text-dark" style="width: 130px;">Skin Mostulizer</span>
-                                    </a>
-                                </li>
-                                <!-- <li class="nav-item">
-                                    <a class="d-flex m-2 py-2 bg-light rounded-pill" data-bs-toggle="pill" href="#tab-5">
-                                        <span class="text-dark" style="width: 130px;">Face Cream</span>
-                                    </a>
-                                </li> -->
-                            </ul>
+                        <div class="col-lg-12">
+                            <div class="row g-4">
+                                <% if (categor && categor.length > 0) { %>
+                                <!-- Product details -->
+                                <% categor.forEach(product => { %>
+                                <div class="col-md-6 col-lg-4 col-xl-3">
+                                    <div class="rounded position-relative fruite-item">
+                                        <div class="fruite-img position-relative">
+                                            <img src="<%= product.image %>" class="img-fluid w-100 rounded-top" alt="">
+                                            <!-- Heart icon -->
+                                            <div class="heart-icon position-absolute top-0 end-0">
+                                                <a href="/whishlist"><i class="fa fa-heart me-3 mt-2"></i></a>
+                                            </div>
+                                            <!-- End Heart icon -->
+                                        </div>
+                                        <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;"><%= product.category %></div>
+                                        <div class="p-4 border border-secondary border-top-0 rounded-bottom">
+                                            <h4><%= product.productName %></h4>
+                                            <p><%= product.description %></p>
+                                            <div class="d-flex justify-content-between flex-lg-wrap">
+                                                <p class="text-dark fs-5 fw-bold mb-0 mt-1">₹<%= product.productPrice %></p>
+                                                <form id="addToCartForm<%= product._id %>" action="/cart/<%= product._id %>" method="POST">
+                                                    <!-- Add any necessary hidden input fields for additional data -->
+                                                    <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn">
+                                                        <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }); %>
+                                <% } %>
+                            </div>
                         </div>
                     </div>
-                    <div class="tab-content">
-                        <div id="tab-1" class="tab-pane fade show p-0 active">
-                            <div class="row g-4">
-                                <div class="col-lg-12">
-                                    <div class="row g-4">
-                                        <div class="col-md-6 col-lg-4 col-xl-3">
-                                            <div class="rounded position-relative fruite-item">
-                                                <div class="fruite-img">
-                                                    <img src="/img/images.jpeg" class="img-fluid w-100 rounded-top" alt="">
-                                                </div>
-                                                <!-- <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">Fruits</div> -->
-                                                <div class="p-4 border border-secondary border-top-0 rounded-bottom">
-                                                    <h4>Face Wash</h4>
-                                                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                                                    <div class="d-flex justify-content-between flex-lg-wrap">
-                                                        <p class="text-dark fs-5 fw-bold mb-0 mt-1"> ₹299</p>
-                                                        <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6 col-lg-4 col-xl-3">
-                                            <div class="rounded position-relative fruite-item">
-                                                <div class="fruite-img">
-                                                    <img src="/img/download.jpeg" class="img-fluid w-100 rounded-top" alt="">
-                                                </div>
-                                                <!-- <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">Fruits</div> -->
-                                                <div class="p-4 border border-secondary border-top-0 rounded-bottom">
-                                                    <h4>Hair Oil</h4>
-                                                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                                                    <div class="d-flex justify-content-between flex-lg-wrap">
-                                                        <p class="text-dark fs-5 fw-bold mb-0">₹499 </p>
-                                                        <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6 col-lg-4 col-xl-3">
-                                            <div class="rounded position-relative fruite-item">
-                                                <div class="fruite-img">
-                                                    <img src="/img/61mtPC5cPSL._AC_UF1000,1000_QL80_.jpg" class="img-fluid w-100 rounded-top" alt="">
-                                                </div>
-                                                <!-- <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">Fruits</div> -->
-                                                <div class="p-4 border border-secondary border-top-0 rounded-bottom">
-                                                    <h4>Beard Oil</h4>
-                                                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                                                    <div class="d-flex justify-content-between flex-lg-wrap">
-                                                        <p class="text-dark fs-5 fw-bold mb-0">₹399</p>
-                                                        <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6 col-lg-4 col-xl-3">
-                                            <div class="rounded position-relative fruite-item">
-                                                <div class="fruite-img">
-                                                    <img src="/img/gh-070522-natural-face-moisturizers-1657040888.png" class="img-fluid w-100 rounded-top" alt="">
-                                                </div>
-                                                <!-- <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">Fruits</div> -->
-                                                <div class="p-4 border border-secondary border-top-0 rounded-bottom">
-                                                    <h4>Skin Mostulizer</h4>
-                                                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                                                    <div class="d-flex justify-content-between flex-lg-wrap">
-                                                        <p class="text-dark fs-5 fw-bold mb-0">₹499</p>
-                                                        <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- <div class="col-md-6 col-lg-4 col-xl-3">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- <div class="col-md-6 col-lg-4 col-xl-3">
                                             <div class="rounded position-relative fruite-item">
                                                 <div class="fruite-img">
                                                     <img src="img/fruite-item-3.jpg" class="img-fluid w-100 rounded-top" alt="">
@@ -386,7 +371,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="tab-2" class="tab-pane fade show p-0">
+                        <!-- <div id="tab-2" class="tab-pane fade show p-0">
                             <div class="row g-4">
                                 <div class="col-lg-12">
                                     <div class="row g-4">
@@ -565,7 +550,7 @@
                     </div>
                 </div>      
             </div>
-        </div>
+        </div> -->
         <!-- Fruits Shop End-->
 
 

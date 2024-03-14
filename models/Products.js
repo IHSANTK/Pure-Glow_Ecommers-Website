@@ -1,15 +1,33 @@
 const mongoose = require('mongoose');
 
 
-const productscheama = new mongoose.Schema({
-  productName: String,
-  productPrice:String,
-  description: String,
-  category:String,
-  subcategory:String,
-  image: [String]
-
-})
+const productcheama = new mongoose.Schema({
+  productName: {
+      type: String,
+      required: true
+  },
+  productPrice: {
+      type: String,
+      required: true
+  },
+  description: {
+      type: String,
+      required: true
+  },
+  category: {
+      type: String,
+      required: true
+  },
+  subcategory: String, // Optional field
+  createdAt: {
+      type: Date,
+      default: Date.now
+  },
+  image: {
+      type: [String],
+      required: true
+  }
+});
 
 
 const adminSchema = new mongoose.Schema({
@@ -19,7 +37,7 @@ const adminSchema = new mongoose.Schema({
         categoryName: { type: String },
         createdAt: { type: Date, default: Date.now }
     }],
-    products:[productscheama]
+    products:[productcheama]
 }, { collection: 'products' });
 
 const Products = mongoose.model('Product', adminSchema);

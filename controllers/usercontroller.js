@@ -6,9 +6,39 @@ const passport = require('passport');
 const cloudinary = require('../config/cloudinary')
 const upload = require('../config/multer.js');
 
-let Homepage = (req, res) => {
-    res.render('user/index');
+const Homepage = async (req, res) => {
+    try {
+        const data = await Products.findOne();
+
+        if (!data || !data.products || data.products.length === 0) {
+            return res.status(404).json({ error: "Data not found or empty" });
+        }
+      
+        // Extracting unique categories
+        const uniqueCategories = [...new Set(data.products.map(product => product.category))];
+        
+        // Create a map to store products by category
+        const productsByCategory = new Map();
+        data.products.forEach(product => {
+            if (!productsByCategory.has(product.category)) {
+                productsByCategory.set(product.category, product);
+            }
+        });
+
+        // Extract one product from each category
+        const categor = Array.from(productsByCategory.values()).slice(0, 4);
+
+        // Pass uniqueCategories and categor to the template
+        res.render('user/index', { uniqueCategories, categor }); // Replace 'user/index' with your actual template file path
+
+        console.log(uniqueCategories);
+
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
 }
+
 
 let userprofilepage = async (req, res) => {
 
@@ -119,29 +149,26 @@ const editpassword = async (req, res) => {
         const isPasswordMatch = await bcrypt.compare(currentPassword, user.password);
 
         if (!isPasswordMatch) {
-            // Sending error message along with the rendered profile edit page
             return res.render('user/profile', {
                 errorMessage: "Current password is not correct",
                 userId: userId,
                 userName: user.name,
                 email: user.email,
                 phoneNumber: user.phoneNumber,
-                successMessage:req.successMessage,
-                profileImage:user.image
+                successMessage: null, // Clear success message
+                profileImage: user.image
             });
         }
 
         if (newPassword !== confirmPassword) {
-            // Sending error message along with the rendered profile edit page
             return res.render('user/profile', {
                 errorMessage: "New password and confirm password do not match",
                 userId: userId,
                 userName: user.name,
                 email: user.email,
                 phoneNumber: user.phoneNumber,
-                successMessage:req.successMessage,
-                profileImage:user.image
-
+                successMessage: null, // Clear success message
+                profileImage: user.image
             });
         }
 
@@ -156,9 +183,9 @@ const editpassword = async (req, res) => {
             userName: user.name,
             email: user.email,
             phoneNumber: user.phoneNumber,
-            errorMessage: req.errorMessage,
+            errorMessage: null,
             successMessage: "Password successfully updated",
-            profileImage:user.image
+            profileImage: user.image
         });
     } catch (error) {
         console.error("Error updating password:", error);
@@ -166,61 +193,49 @@ const editpassword = async (req, res) => {
     }
 };
 
-const editprofileget = async (req,res)=>{
-    const userId = req.params.id;
-    const user = await User.findOne(userId)
-
-    console.log(user);
-
-
-}
 const editprofile = async (req, res) => {
     const userId = req.params.id;
     const { userName, email, phoneNumber } = req.body;
-  
-    try {
-      // Handle image upload
-      let imageUrls = [];
-      if (req.files && req.files.length > 0) {
-        // Upload each file to Cloudinary
-        for (const file of req.files) {
-          const result = await cloudinary.uploader.upload(file.path);
-          imageUrls.push(result.secure_url);
-        }
-      }
-  console.log(userName);
-  console.log(email);
-  console.log(phoneNumber);
-  console.log(imageUrls);
-      // Update user data including the image URLs
-      const user = await User.findByIdAndUpdate(userId, {
-        name: userName,
-        email: email,
-        phoneNumber: phoneNumber,
-        image: imageUrls // Assuming 'image' is the field where you store the image URLs in your User model
-      }, { new: true });
-  
-      if (!user) {
-        return res.status(404).send("User not found");
-      }
-  
-      // Render the profile view with updated data
-      return res.render('user/profile', {
-        userId: userId,
-        userName: user.name,
-        email: user.email,
-        errorMessage:req.errorMessage,
-        phoneNumber: user.phoneNumber,
-        successMessage: "Profile updated successfully" ,// Assuming you want to display a success message
-        profileImage:user.image
-      });
-  
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      res.status(500).send("An error occurred while updating profile");
-    }
-  };
 
+    try {
+        // Handle image upload
+        let imageUrls = [];
+        if (req.files && req.files.length > 0) {
+            // Upload each file to Cloudinary
+            for (const file of req.files) {
+                const result = await cloudinary.uploader.upload(file.path);
+                imageUrls.push(result.secure_url);
+            }
+        }
+
+        // Update user data including the image URLs
+        const user = await User.findByIdAndUpdate(userId, {
+            name: userName,
+            email: email,
+            phoneNumber: phoneNumber,
+            image: imageUrls
+        }, { new: true });
+
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
+
+        // Render the profile view with updated data
+        return res.render('user/profile', {
+            userId: userId,
+            userName: user.name,
+            email: user.email,
+            errorMessage: null,
+            phoneNumber: user.phoneNumber,
+            successMessage: "Profile updated successfully",
+            profileImage: user.image
+        });
+
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        res.status(500).send("An error occurred while updating profile");
+    }
+};
 
 
 
@@ -434,6 +449,74 @@ const deletecartproduct = async (req, res) => {
         res.status(500).send('Internal Server Error'); 
     }
 }
+// const latestproduct = async (req, res) => {
+//     try {
+//         const data = await Products.findOne();
+
+//         if (!data || !data.products || data.products.length === 0) {
+//             return res.status(404).json({ error: "Data not found or empty" });
+//         }
+
+//         const uniqueCategories = [...new Set(data.products.map(product => product.category))];
+       
+//         // Pass uniqueCategories to the template
+//         res.render('user/index', { uniqueCategories }); // Replace 'user/index' with your actual template file path
+
+//     } catch (error) {
+//         console.error("Error:", error);
+//         res.status(500).json({ error: "Internal server error" });
+//     }
+// }
+
+const latestproduct = async (req, res) => {
+    try {
+        const category = req.body.category;
+
+        const data = await Products.findOne({ 'products.category': category }).sort({ createdAt: -1 }).limit(1);
+
+        if (!data) {
+            return res.render('user/error404', { error: "Product Not Available Now !!" });
+        }
+
+        const categor = data.products.filter(produ => produ.category === category).slice(0, 4);
+
+        const allCategories = await Products.distinct("products.category");
+
+        res.render('user/index', { categor, uniqueCategories: allCategories });
+
+    } catch (error) {
+        console.error("Error:", error);
+        res.render('user/error404', { errormessage: "Product Not Available" });
+    }
+}
+
+const whishlist =(rwq,res)=>{
+
+     res.render('user/whishlist')
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const checkoutpage =(req,res)=>{
       res.render('user/chackout');
@@ -498,12 +581,15 @@ module.exports={
     // changepassword,
     editpassword,
     editprofile,
-    editprofileget,
+    // editprofileget,
     shoppage,
     getproductdetails ,
     addToCart,
     cartpage,
     deletecartproduct,
+    // latestproduct,
+    latestproduct,
+    whishlist,
     checkoutpage,
     succesGoogleLogin,
     failureGooglelogin,
