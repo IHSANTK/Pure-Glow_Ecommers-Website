@@ -21,6 +21,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({ secret: 'mysecretkey', resave: true, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(bodyParser.json());
 
 passport.serializeUser((user, done) => {
     done(null, user._id);

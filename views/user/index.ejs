@@ -27,6 +27,12 @@
 
         <!-- Template Stylesheet -->
         <link href="css/style.css" rel="stylesheet">
+
+        <style>
+            .ok {
+                color: red; /* Set the color to red */
+            }
+        </style>
         
     </head>
 
@@ -77,7 +83,7 @@
                             <a href="contact.html" class="nav-item nav-link">Contact</a>
                         </div>
                         <div class="d-flex m-3 me-0">
-                            <button class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" data-bs-toggle="modal" data-bs-target="#searchModal"><i class="fas fa-search text-primary"></i></button>
+                           <a href="/whishlist" class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" ><i class="fas fa-heart heart-icon ok"></i></a>
                             <a href="/cart" class="position-relative me-4 my-auto">
                                 <i class="fa fa-shopping-bag fa-2x"></i>
                                 <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">3</span>
@@ -120,10 +126,10 @@
                     <div class="col-md-12 col-lg-7">
                         <h4 class="mb-3 text-secondary">100% Organic Products</h4>
                         <h1 class="mb-5 display-3 text-primary">Organic Skin Care & Hair Care</h1>
-                        <div class="position-relative mx-auto">
+                        <!-- <div class="position-relative mx-auto">
                             <input class="form-control border-2 border-secondary w-75 py-3 px-4 rounded-pill" type="number" placeholder="Search">
                             <button type="submit" class="btn btn-primary border-2 border-secondary py-3 px-4 position-absolute rounded-pill text-white h-100" style="top: 0; right: 25%;">Submit Now</button>
-                        </div>
+                        </div> -->
                     </div>
                     <div class="col-md-12 col-lg-5">
                         <div id="carouselId" class="carousel slide position-relative" data-bs-ride="carousel">
@@ -209,7 +215,7 @@
 
         <!-- Fruits Shop Start-->
         
-   <script>
+   <!-- <script>
     $(document).ready(function() {
         $('#latestProductForm').submit(function(e) {
             e.preventDefault(); // Prevent the default form submission
@@ -234,7 +240,7 @@
             });
         });
     });
-</script>
+</script> -->
 
 <div class="container-fluid fruite py-5">
     <div class="container py-5">
@@ -244,55 +250,175 @@
                     <h1>Our Organic Products</h1>
                 </div>
                 <div class="col-lg-8 text-end">
-                    <form id="latestProductForm" action="/latestproduct" method="post">
-                        <ul class="nav nav-pills d-inline-flex text-center mb-5">
-                            <% uniqueCategories.forEach(category => { %>
-                                <li class="nav-item">
-                                    <button type="submit" name="category" value="<%= category %>" class="d-flex m-2 py-2 bg-light rounded-pill active" style="border: none; background: none;">
-                                        <span class="text-dark" style="width: 130px;"><%= category %></span>
-                                    </button>
-                                </li>
-                            <% }); %>
-                        </ul>
-                    </form>
+                    <ul class="nav nav-pills d-inline-flex text-center mb-5">
+                        <% uniqueCategories.forEach(category => { %>
+                            <!-- Adjusted onclick syntax -->
+                            <li class="nav-item">
+                                <button type="button" onclick="submitCategory('<%= category %>')" class="d-flex m-2 py-2 bg-light rounded-pill active" style="border: none; background: none;">
+                                    <span class="text-dark" style="width: 130px;"><%= category %></span>
+                                </button>
+                            </li>
+                        <% }); %>
+                    </ul>
                 </div>
-            </div>
-            <div class="tab-content">
-                <div id="tab-1" class="tab-pane fade show p-0 active">
-                    <div class="row g-4">
-                        <div class="col-lg-12">
-                            <div class="row g-4">
-                                <% if (categor && categor.length > 0) { %>
-                                <!-- Product details -->
-                                <% categor.forEach(product => { %>
-                                <div class="col-md-6 col-lg-4 col-xl-3">
-                                    <div class="rounded position-relative fruite-item">
-                                        <div class="fruite-img position-relative">
-                                            <img src="<%= product.image %>" class="img-fluid w-100 rounded-top" alt="">
-                                            <!-- Heart icon -->
-                                            <div class="heart-icon position-absolute top-0 end-0">
-                                                <a href="/whishlist"><i class="fa fa-heart me-3 mt-2"></i></a>
-                                            </div>
-                                            <!-- End Heart icon -->
-                                        </div>
-                                        <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;"><%= product.category %></div>
-                                        <div class="p-4 border border-secondary border-top-0 rounded-bottom">
-                                            <h4><%= product.productName %></h4>
-                                            <p><%= product.description %></p>
-                                            <div class="d-flex justify-content-between flex-lg-wrap">
-                                                <p class="text-dark fs-5 fw-bold mb-0 mt-1">₹<%= product.productPrice %></p>
-                                                <form id="addToCartForm<%= product._id %>" action="/cart/<%= product._id %>" method="POST">
-                                                    <!-- Add any necessary hidden input fields for additional data -->
-                                                    <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn">
-                                                        <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
-                                                    </button>
-                                                </form>
-                                            </div>
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane fade show p-0 active">
+                        <div class="row g-4" id="productsContainer">
+                            <% categor.forEach(product => { %>
+                            <div class="col-md-6 col-lg-4 col-xl-3">
+                                <div class="rounded position-relative fruite-item">
+                                    <div class="fruite-img position-relative">
+                                        <a href="/productveiw/<%= product._id %>"><img src="<%= product.image[0] %>" class="img-fluid w-100 rounded-top" alt=""></a>
+                                        <!-- Heart icon -->
+                                        <form id="wishlistForm_<%= product._id %>" class="wishlist-form" action="/wishlist/<%= product._id %>" method="post">
+                                            <button type="submit" class="btn p-0 heart-icon position-absolute top-0 end-0" onclick="toggleWishlist('<%= product._id %>')">
+                                                <i id="heartIcon_<%= product._id %>" class="fa fa-heart me-3 mt-2 <%= product.isInWishlist ? 'text-danger' : '' %>"></i>
+                                            </button>
+                                        </form>
+                                        <!-- End Heart icon -->
+                                    </div>
+                                    <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;"><%= product.category %></div>
+                                    <div class="p-4 border border-secondary border-top-0 rounded-bottom">
+                                        <h4><%= product.productName %></h4>
+                                        <p><%= product.description %></p>
+                                        <div class="d-flex justify-content-between flex-lg-wrap">
+                                            <p class="text-dark fs-5 fw-bold mb-0 mt-1">₹<%= product.productPrice %></p>
+                                            <form id="addToCartForm<%= product._id %>" action="/cart/<%= product._id %>" method="post">
+                                                <!-- Add any necessary hidden input fields for additional data -->
+                                                <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn">
+                                                    <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
-                                <% }); %>
-                                <% } %>
+                            </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                </div>
+                
+              
+                <script>
+                    // Function to toggle the wishlist status
+                    function toggleWishlist(productId) {
+                        const heartIcon = document.getElementById(`heartIcon_${productId}`);
+                        const isInWishlist = heartIcon.classList.contains('text-danger');
+                
+                        // Toggle the heart icon color
+                        if (isInWishlist) {
+                            removeFromWishlist(productId);
+                            heartIcon.classList.remove('text-danger');
+                            // Remove from local storage
+                            localStorage.removeItem(productId);
+                        } else {
+                            addToWishlist(productId);
+                            heartIcon.classList.add('text-danger');
+                            // Add to local storage
+                            localStorage.setItem(productId, 'true');
+                        }
+                    }
+                
+                    // Function to set the initial state of heart icons on page load
+                    function setInitialHeartIconState() {
+                        const productIds = document.querySelectorAll('[id^="heartIcon_"]');
+                        productIds.forEach(productId => {
+                            const isInWishlist = localStorage.getItem(productId.id.split('_')[1]);
+                            if (isInWishlist === 'true') {
+                                productId.classList.add('text-danger');
+                            }
+                        });
+                    }
+                
+                    // Function to add the product to the wishlist
+                    function addToWishlist(productId) {
+                        axios.post('/wishlist/' + productId)
+                            .then(function(response) {
+                                console.log(response.data);
+                            })
+                            .catch(function(error) {
+                                console.error('Error adding product to wishlist:', error);
+                                // Optionally, show an error message to the user
+                            });
+                    }
+                
+                    // Function to remove the product from the wishlist
+                    function removeFromWishlist(productId) {
+                        axios.delete('/wishlist/' + productId)
+                            .then(function(response) {
+                                console.log(response.data);
+                            })
+                            .catch(function(error) {
+                                console.error('Error removing product from wishlist:', error);
+                                // Optionally, show an error message to the user
+                            });
+                    }
+                
+                    // Call the function to set the initial state of heart icons on page load
+                    setInitialHeartIconState();
+                </script>
+
+                <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+                <script>
+                    function submitCategory(category) {
+                        console.log("add triggered:", category);
+                        axios.post('/latestproduct', {
+                            category: category
+                        })
+                        .then(function(response) {
+                            console.log(response.data);
+            
+                            // Update the page dynamically with the received data
+                            const products = response.data.categor;
+            
+                            // Assuming you have a container element to append the products
+                            const container = document.getElementById('productsContainer');
+            
+                            // Clear previous content
+                            container.innerHTML = '';
+            
+                            // Iterate over products and create HTML elements dynamically
+                            products.forEach(product => {
+                                const productHTML = `
+                                    <div class="col-md-6 col-lg-4 col-xl-3">
+                                        <div class="rounded position-relative fruite-item">
+                                            <div class="fruite-img position-relative">
+                                                <a href="/productveiw/${product._id}"><img src="${product.image[0]}" class="img-fluid w-100 rounded-top" alt=""></a>
+                                                <!-- Heart icon -->
+                                             <form id="wishlistForm_${product._id}" class="wishlist-form" action="/wishlist/${product._id}" method="post">
+                                                <button type="submit" class="btn p-0 heart-icon position-absolute top-0 end-0" onclick="toggleWishlist('${product._id}')">
+                                                  <i id="heartIcon_${product._id}" class="fa fa-heart me-3 mt-2${product._id}.isInWishlist ? 'text-danger' : '' %>"></i>
+                                                </button>
+                                             </form>
+                                                <!-- End Heart icon -->
+                                            </div>
+                                            <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">${product.category}</div>
+                                            <div class="p-4 border border-secondary border-top-0 rounded-bottom">
+                                                <h4>${product.productName}</h4>
+                                                <p>${product.description}</p>
+                                                <div class="d-flex justify-content-between flex-lg-wrap">
+                                                    <p class="text-dark fs-5 fw-bold mb-0 mt-1">₹${product.productPrice}</p>
+                                                    <form id="addToCartForm${product._id}" action="/cart/${product._id}" method="POST">
+                                                        <!-- Add any necessary hidden input fields for additional data -->
+                                                        <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn">
+                                                            <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+            
+                                container.innerHTML += productHTML;
+                            });
+                        })
+                        .catch(function(error) {
+                            console.error('Error adding product to cart:', error);
+                            // Optionally, show an error message to the user
+                        });
+                    }
+                </script>
                             </div>
                         </div>
                     </div>
@@ -555,7 +681,7 @@
 
 
         <!-- Featurs Start -->
-        <div class="container-fluid service py-5">
+        <!-- <div class="container-fluid service py-5">
             <div class="container py-5">
                 <div class="row g-4 justify-content-center">
                     <div class="col-md-6 col-lg-4">
@@ -599,127 +725,55 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
         <!-- Featurs End -->
 
 
         <!-- Vesitable Shop Start-->
         <div class="container-fluid vesitable py-5">
             <div class="container py-5">
-                <h1 class="mb-0">Fresh Organic Vegetables</h1>
+                <% if (wishlist.length > 0) { %>
+                <h1 class="mb-0">Favorite Products</h1>
                 <div class="owl-carousel vegetable-carousel justify-content-center">
-                    <div class="border border-primary rounded position-relative vesitable-item">
-                        <div class="vesitable-img">
-                            <img src="img/vegetable-item-6.jpg" class="img-fluid w-100 rounded-top" alt="">
-                        </div>
-                        <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
-                        <div class="p-4 rounded-bottom">
-                            <h4>Parsely</h4>
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                            <div class="d-flex justify-content-between flex-lg-wrap">
-                                <p class="text-dark fs-5 fw-bold mb-0">$4.99 / kg</p>
-                                <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
+                    <!-- <% categor.forEach(product => { %>
+                        <div class="border border-primary rounded position-relative vesitable-item">
+                            <div class="vesitable-img">
+                                <img src="<%= product.image[0] %>" class="img-fluid w-100 rounded-top" alt="<%= product.name %>">
+                            </div>
+                            <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
+                            <div class="p-4 rounded-bottom">
+                                <h4><%= product.name %></h4>
+                                <p><%= product.description %></p>
+                                <div class="d-flex justify-content-between flex-lg-wrap">
+                                    <p class="text-dark fs-5 fw-bold mb-0">$<%= product.price %> / kg</p>
+                                    <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="border border-primary rounded position-relative vesitable-item">
-                        <div class="vesitable-img">
-                            <img src="img/vegetable-item-1.jpg" class="img-fluid w-100 rounded-top" alt="">
-                        </div>
-                        <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
-                        <div class="p-4 rounded-bottom">
-                            <h4>Parsely</h4>
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                            <div class="d-flex justify-content-between flex-lg-wrap">
-                                <p class="text-dark fs-5 fw-bold mb-0">$4.99 / kg</p>
-                                <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
+                    <% }); %>
+         -->
+                    
+                        <% wishlist.forEach(wishlistItem => { %>
+                            <div class="border border-primary rounded position-relative vesitable-item">
+                                <div class="vesitable-img">
+                                    <a href="/productveiw/<%= wishlistItem.productId %>"><img src="<%= wishlistItem.image %>" class="img-fluid w-100 rounded-top" alt=""></a>
+                                </div>
+                                <!-- <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Wishlist</div> -->
+                                <div class="p-4 rounded-bottom">
+                                    <h4><%= wishlistItem.productName %></h4>
+                                   
+                                    <div class="d-flex justify-content-between flex-lg-wrap">
+                                        <p class="text-dark fs-5 fw-bold mb-0">₹<%= wishlistItem.productPrice %> </p>
+                                        <!-- <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a> -->
+                                    </div>
+                                </div>
                             </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="text-center mt-5">
+                            <p>No wishlist items available.</p>
                         </div>
-                    </div>
-                    <div class="border border-primary rounded position-relative vesitable-item">
-                        <div class="vesitable-img">
-                            <img src="img/vegetable-item-3.png" class="img-fluid w-100 rounded-top bg-light" alt="">
-                        </div>
-                        <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
-                        <div class="p-4 rounded-bottom">
-                            <h4>Banana</h4>
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                            <div class="d-flex justify-content-between flex-lg-wrap">
-                                <p class="text-dark fs-5 fw-bold mb-0">$7.99 / kg</p>
-                                <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="border border-primary rounded position-relative vesitable-item">
-                        <div class="vesitable-img">
-                            <img src="img/vegetable-item-4.jpg" class="img-fluid w-100 rounded-top" alt="">
-                        </div>
-                        <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
-                        <div class="p-4 rounded-bottom">
-                            <h4>Bell Papper</h4>
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                            <div class="d-flex justify-content-between flex-lg-wrap">
-                                <p class="text-dark fs-5 fw-bold mb-0">$7.99 / kg</p>
-                                <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="border border-primary rounded position-relative vesitable-item">
-                        <div class="vesitable-img">
-                            <img src="img/vegetable-item-5.jpg" class="img-fluid w-100 rounded-top" alt="">
-                        </div>
-                        <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
-                        <div class="p-4 rounded-bottom">
-                            <h4>Potatoes</h4>
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                            <div class="d-flex justify-content-between flex-lg-wrap">
-                                <p class="text-dark fs-5 fw-bold mb-0">$7.99 / kg</p>
-                                <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="border border-primary rounded position-relative vesitable-item">
-                        <div class="vesitable-img">
-                            <img src="img/vegetable-item-6.jpg" class="img-fluid w-100 rounded-top" alt="">
-                        </div>
-                        <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
-                        <div class="p-4 rounded-bottom">
-                            <h4>Parsely</h4>
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                            <div class="d-flex justify-content-between flex-lg-wrap">
-                                <p class="text-dark fs-5 fw-bold mb-0">$7.99 / kg</p>
-                                <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="border border-primary rounded position-relative vesitable-item">
-                        <div class="vesitable-img">
-                            <img src="img/vegetable-item-5.jpg" class="img-fluid w-100 rounded-top" alt="">
-                        </div>
-                        <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
-                        <div class="p-4 rounded-bottom">
-                            <h4>Potatoes</h4>
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                            <div class="d-flex justify-content-between flex-lg-wrap">
-                                <p class="text-dark fs-5 fw-bold mb-0">$7.99 / kg</p>
-                                <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="border border-primary rounded position-relative vesitable-item">
-                        <div class="vesitable-img">
-                            <img src="img/vegetable-item-6.jpg" class="img-fluid w-100 rounded-top" alt="">
-                        </div>
-                        <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
-                        <div class="p-4 rounded-bottom">
-                            <h4>Parsely</h4>
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                            <div class="d-flex justify-content-between flex-lg-wrap">
-                                <p class="text-dark fs-5 fw-bold mb-0">$7.99 / kg</p>
-                                <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                            </div>
-                        </div>
-                    </div>
+                    <% } %>
                 </div>
             </div>
         </div>

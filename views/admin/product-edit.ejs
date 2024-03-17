@@ -513,13 +513,14 @@
                                         <div class="row g-3 align-items-center">
                                             <div class="col-md-12">
                                                 <label class="form-label">Update Product Images</label><br>
-                                                <% data.image.forEach(image => { %>
+                                                
                                                     <div>
-                                                        <img src="<%= image %>" alt="Current Image" style="max-width: 200px;">
-                                                        <input type="hidden" name="existingImages[]" value="<%= image %>">
+                                                        <img src="<%= data.image[0] %>" alt="Current Image" style="max-width: 200px;">
+                                                        <input type="file" name="image" id="input-file-to-destroy" class="dropify" multiple data-allowed-formats="portrait square" data-max-file-size="2M" data-max-height="2000">
+                                                        <img src="<%= data.image[1] %>" alt="Current Image" style="max-width: 200px;">
+                                                        <input type="file" name="image" id="input-file-to-destroy" class="dropify" multiple data-allowed-formats="portrait square" data-max-file-size="2M" data-max-height="2000">
                                                     </div>
-                                                <% }); %>
-                                                <input type="file" name="image" id="input-file-to-destroy" class="dropify" multiple data-allowed-formats="portrait square" data-max-file-size="2M" data-max-height="2000">
+                                               
                                             </div>
                                         </div>
                                     </div>

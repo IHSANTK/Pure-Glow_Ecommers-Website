@@ -27,8 +27,14 @@ router.post('/cart/:id',preventBack, userController.addToCart);
 router.get('/cart',preventBack, userController.cartpage);
 router.post('/deletecartproduct/:productId',preventBack, userController.deletecartproduct);
 // router.get('/latestproduct', userController.latestproduct);
+
 router.post('/latestproduct', userController.latestproduct);
-router.get('/whishlist',userController.whishlist)
+
+router.get('/whishlist',userController.whishlistget);
+
+router.post('/wishlist/:id', userController.wishlist);
+
+router.get('/productveiw/:id',userController.productveiw);
 
 router.get('/checkout',preventBack,userController.checkoutpage);
 

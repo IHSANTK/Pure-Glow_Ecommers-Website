@@ -18,9 +18,9 @@ router.post('/categories-edit/:id', admincontroller.categorieeditdatas);
 router.post('/categories-delete/:id', admincontroller.deletecategorie);
 router.get('/product-list', adminMiddleware, admincontroller.productlist);
 router.get('/product-add', admincontroller.productadd);
-router.post('/product-add', upload.array('image', 1), admincontroller.AddProductlist);
+router.post('/product-add', upload.array('image', 2), admincontroller.AddProductlist);
 router.get('/product-edit/:id', admincontroller.productedit);
-router.post('/product-edit/:id', upload.array('image', 1), admincontroller.updateProduct);
+router.post('/product-edit/:id', upload.array('image', 2), admincontroller.updateProduct);
 router.get('/product-delete/:id', admincontroller.deleteproduct);
 router.get('/admin-logout', adminMiddleware, admincontroller.adminlogout);
 

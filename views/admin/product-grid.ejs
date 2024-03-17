@@ -727,11 +727,11 @@
                                                 <div class="product">
                                                     <div class="product-image">
                                                         <!-- Iterate over the array of image URLs for the current product -->
-                                                        <% product.image.forEach(imageUrl => { %>
+                                                        
                                                             <div class="product-item">
-                                                                <img src="<%= imageUrl %>" alt="<%= product.productName %>" class="img-fluid w-100">
+                                                                <img src="<%= product.image[1] %>" alt="<%= product.productName %>" class="img-fluid w-100">
                                                             </div>
-                                                        <% }); %>
+                                                       
                                                         <a class="add-wishlist" href="#">
                                                             <i class="bi bi-heart text-danger"></i>
                                                         </a>

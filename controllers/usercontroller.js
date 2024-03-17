@@ -11,34 +11,37 @@ const Homepage = async (req, res) => {
         const data = await Products.findOne();
 
         if (!data || !data.products || data.products.length === 0) {
-            return res.status(404).json({ error: "Data not found or empty" });
+            return res.render('user/error404',{ errormessage: "Data not found or empty" });
         }
       
         // Extracting unique categories
         const uniqueCategories = [...new Set(data.products.map(product => product.category))];
         
-        // Create a map to store products by category
-        const productsByCategory = new Map();
-        data.products.forEach(product => {
-            if (!productsByCategory.has(product.category)) {
-                productsByCategory.set(product.category, product);
-            }
+        // Fetch latest product from each category
+        const latestProducts = uniqueCategories.map(category => {
+            return data.products.filter(product => product.category === category).sort((a, b) => b.createdAt - a.createdAt)[0];
         });
 
-        // Extract one product from each category
-        const categor = Array.from(productsByCategory.values()).slice(0, 4);
+        let userWishlist = [];
+        if (req.session.userId) {
+           
+                const user = await User.findById(req.session.userId);
+                console.log(user);
+                if (user) {
+                   
+                    userWishlist = user.wishlist;
+                    
+                }   
+            
+        }
 
-        // Pass uniqueCategories and categor to the template
-        res.render('user/index', { uniqueCategories, categor }); // Replace 'user/index' with your actual template file path
-
-        console.log(uniqueCategories);
-
+        // Render the homepage with the latest product from each category and user's wishlist
+        res.render('user/index', { uniqueCategories, categor: latestProducts, wishlist: userWishlist }); // Replace 'user/index' with your actual template file path
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 }
-
 
 let userprofilepage = async (req, res) => {
 
@@ -449,56 +452,151 @@ const deletecartproduct = async (req, res) => {
         res.status(500).send('Internal Server Error'); 
     }
 }
-// const latestproduct = async (req, res) => {
-//     try {
-//         const data = await Products.findOne();
-
-//         if (!data || !data.products || data.products.length === 0) {
-//             return res.status(404).json({ error: "Data not found or empty" });
-//         }
-
-//         const uniqueCategories = [...new Set(data.products.map(product => product.category))];
-       
-//         // Pass uniqueCategories to the template
-//         res.render('user/index', { uniqueCategories }); // Replace 'user/index' with your actual template file path
-
-//     } catch (error) {
-//         console.error("Error:", error);
-//         res.status(500).json({ error: "Internal server error" });
-//     }
-// }
 
 const latestproduct = async (req, res) => {
     try {
         const category = req.body.category;
 
-        const data = await Products.findOne({ 'products.category': category }).sort({ createdAt: -1 }).limit(1);
+        console.log(category);
+        console.log("hi");
+
+        const data = await Products.findOne({ 'products.category': category }).sort({ createdAt: -1 }).limit(4);
 
         if (!data) {
-            return res.render('user/error404', { error: "Product Not Available Now !!" });
+            return res.render('user/error404', { errormessage: "Product Not Available Now !!" });
         }
 
-        const categor = data.products.filter(produ => produ.category === category).slice(0, 4);
+        const categor = data.products.filter(produ => produ.category === category);
 
         const allCategories = await Products.distinct("products.category");
 
-        res.render('user/index', { categor, uniqueCategories: allCategories });
+        res.json({ message: "successfully passed", categor, uniqueCategories: allCategories, wishlist: [] });
 
     } catch (error) {
         console.error("Error:", error);
         res.render('user/error404', { errormessage: "Product Not Available" });
     }
 }
+const whishlistget = async (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.redirect('/login');
+        }
 
-const whishlist =(rwq,res)=>{
+        // Find the logged-in user by ID
+        const user = await User.findById(req.session.userId);
+       
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
 
-     res.render('user/whishlist')
+        // Extract the wishlist data from the user document
+        const wishlistData = user.wishlist.map(item => ({
+            productId: item.productId,
+            productName: item.productName,
+            productPrice: item.productPrice,
+            image: item.image,
+        }));
+       
+        console.log(wishlistData);
 
+        // Render the wishlist page with the wishlist data
+        res.render('user/whishlist', { wishlist: wishlistData });
+      
+    } catch (error) {
+        // Handle error
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
 }
 
+const wishlist = async (req, res) => {
+    const productId = req.params.id;
+    const userId = req.session.userId;
+
+    console.log("Product ID:", productId);
+
+    if (!userId) {
+        return res.redirect('/login'); // Redirect if user is not logged in
+    }
+
+    try {
+        // Find the product by ID
+        const product = await Products.findOne({ 'products._id': productId });
+
+        console.log("Product:", product); // Log the product to check if it's null or exists
+
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        // Find the user by ID
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Check if the product already exists in the wishlist
+        const existingProductIndex = user.wishlist.findIndex(item => item.productId == productId);
+
+        const productData = product.products.find(prod => prod._id == productId);
+        console.log(productData);
+        
+        if (existingProductIndex !== -1) {
+            // If the product exists, remove it from the wishlist
+            user.wishlist.splice(existingProductIndex, 1);
+        } else {
+            // If the product doesn't exist, add it to the wishlist
+            user.wishlist.push({
+                productId: productData._id,
+                productName: productData.productName,
+                productPrice: productData.productPrice,
+                image: productData.image[0], // Assuming image is an array and you want the first image
+            });
+        }
+      
+        // Save the updated user wishlist
+        await user.save();
+
+        // Respond with success and whether the product exists in the wishlist
+        // res.status(200).json({ exists: existingProductIndex !== -1 });
+
+        // res.redirect('/whishlist')
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: 'Internal Server Error' }); // Handle internal server errors
+    }
+};
 
 
 
+
+
+const productveiw = async (req, res) => {
+    try {
+        const productId = req.params.id;
+        console.log(productId);
+        const product = await Products.findOne({ 'products._id': productId });
+
+       
+        if (!product) {
+            return res.status(404).send('Product not found');
+        }
+
+        // Find the exact product within the products array
+        const exactProduct = product.products.find(p => p._id == productId);
+
+        if (!exactProduct) {
+            return res.status(404).send('Product not found');
+        }
+
+        res.render('user/shop-detail', { product: exactProduct });
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
 
 
 
@@ -589,7 +687,9 @@ module.exports={
     deletecartproduct,
     // latestproduct,
     latestproduct,
-    whishlist,
+    wishlist,
+    whishlistget,
+    productveiw,
     checkoutpage,
     succesGoogleLogin,
     failureGooglelogin,
