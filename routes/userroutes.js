@@ -22,7 +22,9 @@ router.get('/logout',preventBack, userController.logout);
 router.post('/edit-profile/:id',upload.array('profileImage', 1),userController.editprofile)
 router.post('/edit-password/:id',userController.editpassword)
 router.get('/shop',preventBack,userController.shoppage)
-router.get('/getshopproduct/:category',preventBack,userController.getproductdetails)
+
+
+router.get('/getshopproduct/:category', preventBack, userController.getproductdetails);
 router.post('/cart/:id',preventBack, userController.addToCart);
 router.get('/cart',preventBack, userController.cartpage);
 router.post('/deletecartproduct/:productId',preventBack, userController.deletecartproduct);

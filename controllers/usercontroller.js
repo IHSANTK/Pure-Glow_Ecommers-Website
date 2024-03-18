@@ -44,22 +44,23 @@ const Homepage = async (req, res) => {
 }
 
 let userprofilepage = async (req, res) => {
-
-
     if (req.session.userId) {
-        res.render('user/profile', { userName: req.session.userName,
-               email: req.session.userEmail, 
-               phoneNumber: req.session.phoneNumber,
-               userId:req.session.userId,
-               errorMessage:req.errorMessage,
-               successMessage:req.successMessage,
-               profileImage:req.image
-              });
+        res.render('user/profile', { 
+            userName: req.session.userName,
+            email: req.session.userEmail, 
+            phoneNumber: req.session.phoneNumber,
+            userId: req.session.userId,
+            errorMessage: req.errorMessage,
+            successMessage: req.successMessage,
+            profileImage: req.image,
+            wishlist: req.session.wishlist // Pass wishlist data to the template
+        });
     } else {
         res.redirect('/login');
     }
 }
 
+// Login page route
 let loginpage = (req, res) => {
     if (req.session.userId) {
         res.redirect('/profile');
@@ -68,26 +69,24 @@ let loginpage = (req, res) => {
     }
 };
 
-
+// Handle user login
 let dataslogin =  async (req, res) => {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
-
-    if (user && user.blocked) {
-        res.redirect('/block'); // Redirect to blocked page if user is blocked
-        return;
-    }
+    const user = await User.findOne({ email }).populate('wishlist');
 
     if (user && bcrypt.compareSync(password, user.password)) {
         req.session.userId = user._id;
         req.session.userName = user.name;
         req.session.userEmail = user.email;
         req.session.phoneNumber = user.phoneNumber;
+        req.session.wishlist = user.wishlist.map(product => product._id.toString()); // Store wishlist data in session as array of product ids
         res.redirect('/');
     } else {
-        res.render('user/login',{errorMessage:'Invalid email or password. Please sign up.'});
+        res.render('user/login', { errorMessage: 'Invalid email or password. Please sign up.' });
     }
 }
+
+
 const blockpage =(req,res)=>{
 
     res.render('user/error404',{errormessage:"You Are Blocked !!"});
@@ -126,14 +125,16 @@ let getsignupdata = async (req, res) => {
     req.session.phoneNumber = newUser.phoneNumber;
     res.redirect('/');
 }
-let logout =(req, res) => {
+let logout = (req, res) => {
     delete req.session.userId;
     delete req.session.userName;
     delete req.session.userEmail;
     delete req.session.phoneNumber;
     res.redirect('/');
-  };
 
+    // Call the function to clear wishlist data from local storage
+    clearWishlistData();
+};
 // const changepassword = (req, res) => {
 //     const userId = req.params.id;
 //     res.render('user/editpassword', { userId, errorMessage: req.errorMessage ,successMessage:req.successMessage });
@@ -222,6 +223,11 @@ const editprofile = async (req, res) => {
         if (!user) {
             return res.status(404).send("User not found");
         }
+
+        // Update session with new profile information
+        req.session.userName = userName;
+        req.session.userEmail = email;
+        req.session.phoneNumber = phoneNumber;
 
         // Render the profile view with updated data
         return res.render('user/profile', {
@@ -313,9 +319,9 @@ const getproductdetails = async (req, res) => {
 
         const categor = data.products.filter(produ => produ.category === category);
 
-        const allCategories = await Products.distinct("products.category");
         
-        res.render('user/shop', { categor, uniqueCategories: allCategories });
+        
+        res.json( categor );
 
     } catch (error) {
         console.error("Error:", error);
@@ -324,7 +330,7 @@ const getproductdetails = async (req, res) => {
 }
 const addToCart = async (req, res) => {
     const productId = req.params.id;
-
+           
     // Check if the user is authenticated
     if (!req.session.userId) {
         return res.redirect('/login');
@@ -375,8 +381,7 @@ const addToCart = async (req, res) => {
         // Save the updated user cart
         await user.save();
 
-      
-        res.redirect('/cart');
+        res.json({  message: 'product added in to cart' });
 
     } catch (error) {
         
@@ -498,7 +503,6 @@ const whishlistget = async (req, res) => {
             image: item.image,
         }));
        
-        console.log(wishlistData);
 
         // Render the wishlist page with the wishlist data
         res.render('user/whishlist', { wishlist: wishlistData });
@@ -514,7 +518,7 @@ const wishlist = async (req, res) => {
     const productId = req.params.id;
     const userId = req.session.userId;
 
-    console.log("Product ID:", productId);
+   
 
     if (!userId) {
         return res.redirect('/login'); // Redirect if user is not logged in
@@ -524,7 +528,7 @@ const wishlist = async (req, res) => {
         // Find the product by ID
         const product = await Products.findOne({ 'products._id': productId });
 
-        console.log("Product:", product); // Log the product to check if it's null or exists
+        // Log the product to check if it's null or exists
 
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
@@ -541,11 +545,13 @@ const wishlist = async (req, res) => {
         const existingProductIndex = user.wishlist.findIndex(item => item.productId == productId);
 
         const productData = product.products.find(prod => prod._id == productId);
-        console.log(productData);
+       
         
         if (existingProductIndex !== -1) {
             // If the product exists, remove it from the wishlist
             user.wishlist.splice(existingProductIndex, 1);
+            await user.save();
+            res.json({  message: 'Product removed from wishlist' });
         } else {
             // If the product doesn't exist, add it to the wishlist
             user.wishlist.push({
@@ -554,21 +560,14 @@ const wishlist = async (req, res) => {
                 productPrice: productData.productPrice,
                 image: productData.image[0], // Assuming image is an array and you want the first image
             });
+            await user.save();
+            res.json({  message: 'Product added to wishlist' });
         }
-      
-        // Save the updated user wishlist
-        await user.save();
-
-        // Respond with success and whether the product exists in the wishlist
-        // res.status(200).json({ exists: existingProductIndex !== -1 });
-
-        // res.redirect('/whishlist')
     } catch (error) {
         console.error("Error:", error);
-        res.status(500).json({ error: 'Internal Server Error' }); // Handle internal server errors
+        res.status(500).json({ success: false, error: 'Internal Server Error' }); // Handle internal server errors
     }
 };
-
 
 
 
@@ -601,26 +600,9 @@ const productveiw = async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const checkoutpage =(req,res)=>{
       res.render('user/chackout');
 }
-
-
 
 
 
@@ -676,16 +658,13 @@ module.exports={
     signuppage,
     getsignupdata,
     logout,
-    // changepassword,
     editpassword,
     editprofile,
-    // editprofileget,
     shoppage,
     getproductdetails ,
     addToCart,
     cartpage,
     deletecartproduct,
-    // latestproduct,
     latestproduct,
     wishlist,
     whishlistget,
