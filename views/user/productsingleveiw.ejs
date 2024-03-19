@@ -101,40 +101,62 @@
 
 
         <!-- Single Product Start -->
-        <div class="container-fluid py-5 mt-5">
+        <div class="container-fluid py-5 mt-2">
             <div class="container py-5">
                 <div class="row g-4 mb-5" style="margin-top: 50px;">
                     <div class="col-lg-8 col-xl-9">
                         <div class="row g-4">
                             <div class="col-lg-6">
                                 <div class="border rounded">
-                                    <a href="#">
-                                        <img src="<%= product.image[0] %>" class="img-fluid rounded" alt="Image">
-                                    </a>
+                                    <!-- Display main product image -->
+                                    <img id="mainImage" src="<%= product.image[0] %>" class="img-fluid rounded w-100 h-100" alt="Image">
                                 </div>
                             </div>
-                            <div class="col-lg-6">
-                                <h4 class="fw-bold mb-3"><%= product.productName %></h4>
-                                <p class="mb-3">Category: <%= product.category %></p>
-                                <h6 class="fw-bold mb-3"><%= product.description %></h6>
-                                <h5 class="fw-bold mb-3">₹<%= product.productPrice %></h5>
-                                <!-- Add your product details here -->
-                                <div class="input-group quantity mb-5" style="width: 100px;">
-                                    <!-- Quantity input -->
+                            <div class="col-lg-6 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h4 class="fw-bold mb-3 mt-3"><%= product.productName %></h4>
+                                    <!-- Container for inline images -->
+                                    <div class="d-flex">
+                                        <!-- Display additional product images inline -->
+                                        <div class="me-2">
+                                            <img src="<%= product.image[0] %>" class="img-fluid rounded w-50 h-auto small-image" alt="Image" onclick="changeMainImage(this)">
+                                        </div>
+                                        <div class="me-3">
+                                            <img src="<%= product.image[1] %>" class="img-fluid rounded w-50 h-auto small-image" alt="Image" onclick="changeMainImage(this)">
+                                        </div>
+                                    </div>
+                                    <p class="fw-bold mb-3 mt-3"><%= product.description %></p>
+                                    <h6 class="mb-3"><%= product.category %></h6>
+                                    <h5 class="fw-bold mb-2">₹<%= product.productPrice %></h5>
+                                    <!-- Add your product details here -->
+                                    <div class="input-group quantity mb-5" style="width: 100px;">
+                                        <!-- Quantity input -->
+                                    </div>
                                 </div>
-                                <!-- Add to cart button -->
-                                <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn" onclick="addtoCart(`<%= product._id %>`)">
-                                    <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
-                                </button>
-    
-                                <a href="#" class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"> Buy Now</a>
-
+                                <div>
+                                    <!-- Arrange buttons -->
+                                    <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn mb-3" onclick="addtoCart('<%= product._id %>')">
+                                        <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
+                                    </button>
+                                    <form action="/checkout/<%=product._id %>" method="post">
+                                  <button  type="submit" class="btn border border-secondary rounded-pill px-3 text-primary  mb-3">
+                                     Buy Now
+                                  </button>
+                                </form>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        
+        <script>
+            function changeMainImage(image) {
+                var mainImage = document.getElementById("mainImage");
+                mainImage.src = image.src;
+            }
+        </script>
         <div class="modal fade" id="wishlistModal" tabindex="-1" aria-labelledby="wishlistModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content   " style="background-color: rgb(228, 186, 131); width: 300px; margin-left: 21%; height: 55px;">
@@ -173,6 +195,24 @@
                                   console.error('Error:', error);
                        });
                  }
+
+                // function chekoutpage(productId){
+ 
+                //     console.log(productId);
+                //                 axios.post(`/checkout/${productId}`)
+                //                    .then(function (response) {
+                //                         console.log(response.data.message);
+                       
+                //                            // Show wishlist status message from response
+                                         
+                //                          // Optionally, update UI based on response
+                //        })
+                //                     .catch(function (error) {
+                //                   console.error('Error:', error);
+                //        });
+
+
+                // }
 </script>
 
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>

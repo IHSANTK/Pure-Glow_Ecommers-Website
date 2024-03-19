@@ -52,11 +52,13 @@ router.get('/whishlist',userController.whishlistget);
 
 router.post('/wishlist/:id', userController.wishlist);
 
-router.post('/removewishilist/:id',userController.removewishlist);
+router.post('/removewishlist/:id', userController.removewishlist);
 
 router.get('/productveiw/:id',userController.productveiw);
 
-router.get('/checkout',preventBack,userController.checkoutpage);
+router.get('/checkoutfromcart',preventBack,userController.checkoutfromcart);
+
+router.post('/checkout/:id',preventBack,userController.checkoutpage);
 
 router.get('/auth/google', userController.googleAuth);
 

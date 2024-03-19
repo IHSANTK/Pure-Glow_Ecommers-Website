@@ -26,13 +26,12 @@ const Homepage = async (req, res) => {
         if (req.session.userId) {
            
                 const user = await User.findById(req.session.userId);
-                console.log(user);
+    
                 if (user) {
                    
                     userWishlist = user.wishlist;
                     
                 }   
-            
         }
 
         // Render the homepage with the latest product from each category and user's wishlist
@@ -45,7 +44,7 @@ const Homepage = async (req, res) => {
 
 let userprofilepage = async (req, res) => {
     let message = req.query.passwordUpdate; // Retrieve the password update message from query parameters
-    console.log(message);
+  
     if (req.session.userId) {
         res.render('user/profile', { 
             userName: req.session.userName,
@@ -590,27 +589,26 @@ const wishlist = async (req, res) => {
 const removewishlist = async (req, res) => {
     const productId = req.params.id;
     console.log(productId);
-    // Implement your logic to remove the product from the wishlist
-    // Here, you might want to query the user document and remove the product from the wishlist array
-    // Then, save the updated user document
+    try {
+        // Find the user by ID and remove the product from the wishlist array
+        const user = await User.findOneAndUpdate(
+            { _id: req.session.userId },
+            { $pull: { wishlist: { productId: productId } } }, // Use { productId: productId }
+            { new: true }
+        );
 
-    // Example:
-   await User.findOneAndUpdate(
-        { _id: req.session.userId },
-        { $pull: { wishlist: productId } },
-        { new: true },
-        (err, user) => {
-            if (err) {
-                return res.status(500).json({ error: 'Internal Server Error' });
-            }
-            if (!user) {
-                return res.status(404).json({ error: 'User not found' });
-            }
-            res.json({ message: 'Product removed from wishlist successfully' });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
         }
-    );
+        
+        // Optionally, you may want to save the user here if necessary
+        // await user.save();
 
-    res.json('ok');
+        res.json({ message: 'Product removed from wishlist' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 }
 
 const productveiw = async (req, res) => {
@@ -631,7 +629,7 @@ const productveiw = async (req, res) => {
             return res.status(404).send('Product not found');
         }
 
-        res.render('user/shop-detail', { product: exactProduct });
+        res.render('user/productsingleveiw', { product: exactProduct });
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ error: "Internal server error" });
@@ -639,10 +637,50 @@ const productveiw = async (req, res) => {
 }
 
 
+const checkoutfromcart = async(req,res)=>{
+
+    try{
+
+    console.log("hi");
+    let user = await User.findOne()
+
+    let cartdats = user.cart.products;   
+    let cartTotal = user.cart.total;  
+
+    console.log(cartTotal);
+    res.render('user/checkout', { products: cartdats,cartTotal });
+ } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+ }
+
+}
+
+const checkoutpage = async (req, res) => {
+    try {
+        const productId = req.params.id;
+        
+        
+        const product = await Products.findOne({ 'products._id': productId });
+
+        if (!product) {
+            return res.status(404).send('Product not found');
+        }
+
+        // Find the exact product within the products array
+        const exactProduct = product.products.find(p => p._id == productId);
 
 
-const checkoutpage =(req,res)=>{
-      res.render('user/chackout');
+        if (!exactProduct) {
+            return res.status(404).send('Product not found');
+        }
+
+        // Render the checkout page with the exact product
+        res.render('user/checkout', { products: [exactProduct], cartTotal:req.cartTotal });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
 }
 
 
@@ -715,6 +753,7 @@ module.exports={
     removewishlist,
     productveiw,
     checkoutpage,
+    checkoutfromcart,
     succesGoogleLogin,
     failureGooglelogin,
     googleAuth,

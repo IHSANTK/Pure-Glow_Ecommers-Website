@@ -129,11 +129,11 @@
                     <div class="card position-relative custom-card-shadow">
                         <!-- Heart icon -->
                         <div class="heart-icon position-absolute top-0 end-0">
-                            <button  class="btn p-0 heart-icon position-absolute top-0 end-0" onclick="removewhsilist('<%= product._id %>')">
+                            <button class="btn p-0 heart-icon position-absolute top-0 end-0" onclick="removewishlist('<%= product.productId %>')">
                                 <i class="fa fa-heart text-danger" style="font-size: 20px;"></i>
                             </button>
                         </div>
-                        <a href="/productview/<%= product.productId %>"><img src="<%= product.image[0] %>" class="img-fluid w-100 rounded-top" alt=""></a>
+                <a href="/productveiw/<%= product.productId %>"><img src="<%= product.image[0] %>" class="img-fluid w-100 rounded-top" alt=""></a>                                                        
                         <div class="card-body">
                             <h5 class="card-title"><%= product.productName %></h5>
                             <p class="card-text">Price: ₹ <%= product.productPrice %></p>
@@ -143,23 +143,50 @@
                 </div>
             <% }); %>
         <% } else { %>
-            <p class="text-center">No items in wishlist</p>
+            <h6 class="text-center">No items in wishlist</h6>
         <% } %>
     </div>
 </div>
+<!---modal-->
+<div class="modal fade" id="wishlistModal" tabindex="-1" aria-labelledby="wishlistModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content   " style="background-color: rgb(228, 186, 131); width: 300px; margin-left: 21%; height: 55px;">
+            <!-- <div class="modal-header"> -->
+                <!-- <h5 class="modal-title" id="wishlistModalLabel">Wishlist Status</h5> -->
+                <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div> -->
+            <div class="modal-body  " id="wishlistModalBody" style="margin: auto; color: rgb(27, 24, 24);">
+                <!-- Wishlist status message will be displayed here -->
+            </div>
+            <!-- <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div> -->
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
-  function removewhsilist(productId) {
-    console.log(productId); // Check if productId is correctly received
-    axios.post(`/removewishilist/${productId}`)
-        .then(function (response) {
-            console.log(response.data);
-            // Optionally, update UI based on response
-        })
-        .catch(function (error) {
-            console.error('Error:', error);
-        });
-}
+    function removewishlist(productId) {
+        
+        axios.post(`/removewishlist/${productId}`)
+            .then(function (response) {
+                console.log(response.data);
+              
+                showWishlistStatusMessage(response.data.message);
+                
+            })
+            .catch(function (error) {
+                console.error('Error:', error);
+            });
+    }
+
+    function showWishlistStatusMessage(message) {
+        const wishlistModalBody = document.getElementById('wishlistModalBody');
+        wishlistModalBody.innerHTML = `<p>${message}</p>`;
+        $('#wishlistModal').modal('show');
+       
+    }
 </script>
 
 <!-- Bootstrap JS -->

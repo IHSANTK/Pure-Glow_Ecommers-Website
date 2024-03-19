@@ -729,7 +729,7 @@
                                                         <!-- Iterate over the array of image URLs for the current product -->
                                                         
                                                             <div class="product-item">
-                                                                <img src="<%= product.image[1] %>" alt="<%= product.productName %>" class="img-fluid w-100">
+                                                                <img src="<%= product.image[0] %>" alt="<%= product.productName %>" class="img-fluid w-100">
                                                             </div>
                                                        
                                                         <a class="add-wishlist" href="#">
@@ -744,6 +744,7 @@
                                                         <!-- <form method="get" action=""> -->
                                                         <a href="/product-edit/<%=product._id %>" class="btn btn-primary mt-3">Edit</a>
                                                         <a href="/product-delete/<%=product._id %>" class="btn btn-primary mt-3">Delete</a>
+                                                        <a href="/product-disable/<%=product._id %>" class="btn btn-primary mt-3">Disable</a>
                                                         <!-- </form> -->
                                                     </div>
                                                 </div>
