@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <!-- Bootstrap Icons CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   
   <style>
     /* Custom styles */
@@ -103,7 +104,7 @@
           <div class="profile-buttons p-4" style="height: calc(70vh - 70px);">
             <a href="#" class="profile-btn" data-target="edit-profile"><i class="fas fa-edit"></i> Edit Profile</a>
             <a href="#" class="profile-btn mt-3" data-target="change-password"><i class="fas fa-key"></i> Change Password</a>
-            <a href="#" class="profile-btn mt-3" data-target="manage-payment"><i class="fas fa-credit-card"></i> Manage Payment</a>
+            <!-- <a href="#" class="profile-btn mt-3" data-target="manage-payment"><i class="fas fa-credit-card"></i> Manage Payment</a> -->
             <a href="#" class="profile-btn mt-3" data-target="manage-address"><i class="fas fa-map-marker-alt"></i> Manage Address</a>
             <a href="/whishlist" class="profile-btn mt-3" ><i class="fas fa-heart"></i> Wish List</a>
             <a href="/logout" class="profile-btn ms-5 mt-4"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -112,64 +113,112 @@
       </div>
 
       <div class="col-md-9 col-sm-12  right-content">
-        <div class="profile-top col-6" style="background-color:rgb(224, 224, 224); padding: 10%; margin-left: 15%;  border-radius: 10px;">
-          
-              <span class="profile-avatar" style="width: 100px; height: 100px; border-radius: 50%;"><i class="fas fa-user"></i></span>
-          <br><br>
-          <span class="profile-username"><%= userName %></span><br><br>
-          <span class="profile-mobile"><%= phoneNumber %></span>
-      </div>
-      <div id="edit-profile" class="profile-edit col-lg-5 col-sm-12  mt-3">
-        <form action="/edit-profile/<%= userId %>" method="POST" onsubmit="return validateForm()" enctype="multipart/form-data">
-          
-          <div class="form-group">
-            <label for="profileImage">
-              <i class="fas fa-user " style="cursor: pointer;margin-right: 20px;"></i>edit profile <!-- Use the user icon as the label -->
-            </label>
-            <input type="file" class="form-control-file d-none" id="profileImage" name="profileImage">
-            <span id="imageError" style="color: red;"></span> <!-- Error message for image -->
-          </div>
-          <div class="form-group">
-            <label for="fullName">Full Name</label>
-            <input type="text" class="form-control" id="fullName" name="userName" value="<%= userName %>">
-            <span id="nameError" style="color: red;"></span> <!-- Error message for name -->
-          </div>
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input type="text" class="form-control" id="email" name="email" value="<%= email %>">
-            <span id="emailError" style="color: red;"></span> <!-- Error message for email -->
-          </div>
-          <div class="form-group">
-            <label for="phoneNumber">Phone Number</label>
-            <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" value="<%= phoneNumber %>">
-            <span id="phoneError" style="color: red;"></span> <!-- Error message for phone number -->
-          </div>
-        
-          <button type="submit" class="btn btn-primary">Save Changes</button>
-        </form>
+        <div class="profile-top col-6" style="background-color: rgb(224, 224, 224); padding: 10%; margin-left: 15%; border-radius: 10px;">
+            <% if (profileImage) { %>
+                <img src="<%= profileImage %>" alt="Profile Image" style="width: 100px; height: 100px; border-radius: 50%;">
+            <% } else { %>
+                <span class="profile-avatar" style="width: 100px; height: 100px; border-radius: 50%;"><i class="fas fa-user"></i></span>
+            <% } %>
+            <br><br>
+            <span class="profile-username"><%= userName %></span><br><br>
+            <span class="profile-mobile"><%= phoneNumber %></span>
+        </div>
+    
+        <div id="edit-profile" class="profile-edit col-lg-5 col-sm-12 mt-3">
+          <form action="/edit-profile/<%= userId %>" method="POST" onsubmit="return validateForm()" enctype="multipart/form-data">
+              <div class="form-group">
+                  <label for="profileImage">
+                      <i class="fas fa-user " style="cursor: pointer;margin-right: 20px;"></i>Edit Profile 
+                  </label>
+                  <input type="file" class="form-control-file d-none" id="profileImage" name="profileImage">
+                  <span id="imageError" style="color: red;"></span> <!-- Error message for image -->
+                  <% if (profileImage) { %>
+                      <!-- Display the existing profile image as a preview -->
+                      <img src="<%= profileImage %>" alt="Profile Image" style="width: 100px; height: 100px; border-radius: 50%;">
+                      <!-- Delete button for profile image -->
+                      <button type="button" class="btn btn-danger btn-sm delete-profile-image">
+                        <i class="bi bi-trash3"></i>
+                      </button>
+                  <% } %>
+              </div>
+              <!-- Rest of the form -->
+              <div class="form-group">
+                  <label for="fullName">Full Name</label>
+                  <input type="text" class="form-control" id="fullName" name="userName" value="<%= userName %>">
+                  <span id="nameError" style="color: red;"></span> <!-- Error message for name -->
+              </div>
+              <div class="form-group">
+                  <label for="email">Email</label>
+                  <input type="text" class="form-control" id="email" name="email" value="<%= email %>">
+                  <span id="emailError" style="color: red;"></span> <!-- Error message for email -->
+              </div>
+              <div class="form-group">
+                  <label for="phoneNumber">Phone Number</label>
+                  <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" value="<%= phoneNumber %>">
+                  <span id="phoneError" style="color: red;"></span> <!-- Error message for phone number -->
+              </div>
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+          </form>
       </div>
       
-      <div id="change-password" class="profile-edit col-lg-5 col-sm-12">
-        <span style="color: red;"><%= errorMessage %></span>
-        <form action="/edit-password/<%= userId %>" method="POST" id="passwordForm">
-          <div class="form-group">
+      <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+      <script>
+          // Function to handle deleting the profile image
+          document.addEventListener("DOMContentLoaded", function() {
+              const deleteProfileImageButton = document.querySelector('.delete-profile-image');
+      
+              if (deleteProfileImageButton) {
+                  deleteProfileImageButton.addEventListener('click', function() {
+                      if (confirm("Are you sure you want to delete your profile image?")) {
+                          axios.delete('/delete-profile-image/<%= userId %>')
+                              .then(function(response) {
+                                  // Reload the page or update the UI as needed
+                                  location.reload();
+                              })
+                              .catch(function(error) {
+                                  console.error('Error deleting profile image:', error);
+                                  // Handle error, if needed
+                              });
+                      }
+                  });
+              }
+          });
+      </script>
+  
+  <div id="change-password" class="profile-edit col-lg-5 col-sm-12">
+    <!-- <span style="color: red;"><%= errorMessage %></span> -->
+    <form action="/edit-password/<%= userId %>" method="POST" id="passwordForm">
+        <div class="form-group">
             <label for="currentPassword">Current Password</label>
             <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
             <span id="currentError" style="color: red;"></span> <!-- Error message for current password -->
-          </div>
-          <div class="form-group">
+        </div>
+        <div class="form-group">
             <label for="newPassword">New Password</label>
             <input type="password" class="form-control" id="newPassword" name="newPassword" required>
             <span id="passwordError" style="color: red;"></span> <!-- Error message for password length -->
-          </div>
-          <div class="form-group">
+        </div>
+        <div class="form-group">
             <label for="confirmPassword">Confirm New Password</label>
             <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
             <span id="confirmError" style="color: red;"></span> <!-- Error message for password mismatch -->
-          </div>
-          <button type="submit" class="btn btn-primary" id="updatePassword">Update Password</button>
-        </form>
-      </div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="updatePassword">Update Password</button>
+    </form>
+</div>
+
+      
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function() {
+          var successMessage = "<%= successMessage %>";
+          console.log(successMessage);
+          if (successMessage) {
+             alert(successMessage)
+          }
+      });
+    </script>
       
       <div id="manage-address" class="profile-edit col-lg-5 col-sm-12">
         <h3 class="text-center">Manage Address</h3>
@@ -198,62 +247,57 @@
       </div>
     </div>
   </div>
-
+</div>
   <!-- Bootstrap JS -->
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <!-- jQuery -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
   <script>
     $(document).ready(function(){
-      $(".profile-btn").click(function(e){
-        var target = $(this).data("target");
-        if (!target) {
-          return; // Allow default navigation for links without data-target
-        }
-        e.preventDefault();
-        $(".profile-edit").removeClass("active");
-        $("#" + target).addClass("active");
-        $(".profile-top").hide(); // Hide profile information
-      });
+        $(".profile-btn").click(function(e){
+            var target = $(this).data("target");
+            if (!target) {
+                return; // Allow default navigation for links without data-target
+            }
+            e.preventDefault();
+            $(".profile-edit").removeClass("active");
+            $("#" + target).addClass("active");
+            $(".profile-top").hide(); // Hide profile information
+        });
 
-      // JavaScript validation for password length and matching passwords
-      $("#updatePassword").click(function() {
-        var newPassword = $("#newPassword").val();
-        var confirmPassword = $("#confirmPassword").val();
-        var currentPassword = $("#currentPassword").val();
-        
-        // Check if any field is empty
-        if (newPassword === "" || confirmPassword === "" || currentPassword === "") {
-          $("#passwordError").text("Please fill in all fields.");
-          $("#currentError").text("Please fill in all fields.");
-          $("#confirmError").text("Please fill in all fields.");
-          return false;
-        } else {
-          $("#passwordError").text("");
-          $("#currentError").text("");
-          $("#confirmError").text("");
-        }
+        // JavaScript validation for password length and matching passwords
+        $("#updatePassword").click(function() {
+            var newPassword = $("#newPassword").val();
+            var confirmPassword = $("#confirmPassword").val();
+            var currentPassword = $("#currentPassword").val();
+            
+            // Check if any field is empty
+            if (newPassword === "" || confirmPassword === "" || currentPassword === "") {
+                $("#passwordError").text("Please fill in all fields.");
+                $("#currentError").text("Please fill in all fields.");
+                $("#confirmError").text("Please fill in all fields.");
+                return false;
+            } else {
+                $("#passwordError").text("");
+                $("#currentError").text("");
+                $("#confirmError").text("");
+            }
 
-        if (newPassword.length < 6) {
-          $("#passwordError").text("Password must be at least 6 characters long.");
-          return false;
-        } else {
-          $("#passwordError").text("");
-        }
-        if (newPassword !== confirmPassword) {
-          $("#confirmError").text("Passwords do not match.");
-          return false;
-        } else {
-          $("#confirmError").text("");
-        }
-      });
-
-      // Display success message if it exists
-      var successMessage = "<%= successMessage %>";
-      if (successMessage) {
-        alert(successMessage);
-      }
+            if (newPassword.length < 6) {
+                $("#passwordError").text("Password must be at least 6 characters long.");
+                return false;
+            } else {
+                $("#passwordError").text("");
+            }
+            if (newPassword !== confirmPassword) {
+                $("#confirmError").text("Passwords do not match.");
+                return false;
+            } else {
+                $("#confirmError").text("");
+            }
+        });
     });
-  </script>
+</script>
 </body>
 </html>

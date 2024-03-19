@@ -41,7 +41,7 @@
         <!-- Navbar start -->
         <div class="container-fluid fixed-top">
             <div class="container topbar bg-primary d-none d-lg-block">
-                <div class="d-flex justify-content-between">
+                <!-- <div class="d-flex justify-content-between">
                     <div class="top-info ps-2">
                         <small class="me-3"><i class="fas fa-map-marker-alt me-2 text-secondary"></i> <a href="#" class="text-white">123 Street, New York</a></small>
                         <small class="me-3"><i class="fas fa-envelope me-2 text-secondary"></i><a href="#" class="text-white">Email@Example.com</a></small>
@@ -51,7 +51,7 @@
                         <a href="#" class="text-white"><small class="text-white mx-2">Terms of Use</small>/</a>
                         <a href="#" class="text-white"><small class="text-white ms-2">Sales and Refunds</small></a>
                     </div>
-                </div>
+                </div> -->
             </div>
             <div class="container px-0">
                 <nav class="navbar navbar-light bg-white navbar-expand-xl">
@@ -63,8 +63,8 @@
                         <div class="navbar-nav mx-auto">
                             <a href="/" class="nav-item nav-link">Home</a>
                             <a href="/shop" class="nav-item nav-link">Shop</a>
-                            <a href="shop-detail.html" class="nav-item nav-link">Shop Detail</a>
-                            <div class="nav-item dropdown">
+                            <!-- <a href="shop-detail.html" class="nav-item nav-link">Shop Detail</a> -->
+                            <!-- <div class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Pages</a>
                                 <div class="dropdown-menu m-0 bg-secondary rounded-0">
                                     <a href="cart.html" class="dropdown-item active">Cart</a>
@@ -72,8 +72,8 @@
                                     <a href="testimonial.html" class="dropdown-item">Testimonial</a>
                                     <a href="404.html" class="dropdown-item">404 Page</a>
                                 </div>
-                            </div>
-                            <a href="contact.html" class="nav-item nav-link">Contact</a>
+                            </div> -->
+                            <a href="/contact" class="nav-item nav-link">Contact</a>
                         </div>
                         <div class="d-flex m-3 me-0">
                             <button class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" data-bs-toggle="modal" data-bs-target="#searchModal"><i class="fas fa-search text-primary"></i></button>
@@ -166,29 +166,73 @@
                                         <td>
                                             <div class="input-group">
                                                 <!-- Minus button -->
-                                                <button class="btn btn-sm btn-plus rounded-circle bg-light border mt-4" style="width:30px ; height: 30px;">
+                                                <button class="btn btn-sm btn-plus rounded-circle bg-light border mt-4" style="width:30px ; height: 30px;" onclick="quantityminus(`<%= product.productId %>`)">
                                                     <i class="fa fa-minus"></i>
                                                 </button>
                                                 <!-- Quantity value -->
                                                 <p class="mb-0 mt-4 mx-2"><%= product.quantity %></p>
                                                 <!-- Plus button -->
-                                                <button class="btn btn-sm btn-plus rounded-circle bg-light border mt-4" style="width:30px ; height: 30px;">
+                                                <button class="btn btn-sm btn-plus rounded-circle bg-light border mt-4" style="width:30px ; height: 30px;" onclick="quantityplus(`<%= product.productId %>`)">
                                                     <i class="fa fa-plus"></i>
                                                 </button>
                                             </div>
                                         </td>
                                         <td>
                                             <!-- Delete button form -->
-                                            <form action="/deletecartproduct/<%= product.productId %>" method="POST">
-                                                <button type="submit" class="btn btn-md rounded-circle bg-light border mt-4">
+                                           
+                                                <button  class="btn btn-md rounded-circle bg-light border mt-4" onclick="deleteFromcart(`<%= product.productId %>`)">
                                                     <i class="fa fa-times text-danger"></i>
                                                 </button>
-                                            </form>
+                                            
                                         </td>
                                     </tr>
                                 </tbody>
                             <% }); %>
                         <% } %>
+                        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+                        <script>
+                            function deleteFromcart(productId) {
+                                axios.post(`/deletecartproduct/${productId}`)
+                                    .then(function (response) {
+                                        console.log(response.data);
+                                        // Handle success response, if needed
+                                        let total = document.getElementsByClassName('total')
+                                        total.innerHTML = response.data
+                        
+                                        location.reload(); // Reload the page after deletion
+                                    })
+                                    .catch(function (error) {
+                                        console.error('Error deleting product from cart:', error);
+                                        // Handle error, if needed
+                                    });
+                            }
+                        
+                            function quantityminus(productId) {
+                                axios.post(`/quantityminus/${productId}`)
+                                    .then(function (response) {
+                                        console.log(response.data);
+                                        // Handle success response, if needed
+                                        location.reload(); // Reload the page after updating quantity
+                                    })
+                                    .catch(function (error) {
+                                        console.error('Error decreasing quantity:', error);
+                                        // Handle error, if needed
+                                    });
+                            }
+                            
+                            function quantityplus(productId) {
+                                axios.post(`/quantityplus/${productId}`)
+                                    .then(function (response) {
+                                        console.log(response.data);
+                                        // Handle success response, if needed
+                                        location.reload(); // Reload the page after updating quantity
+                                    })
+                                    .catch(function (error) {
+                                        console.error('Error increasing quantity:', error);
+                                        // Handle error, if needed
+                                    });
+                            }
+                        </script>
                             <!-- <tr>
                                 <th scope="row">
                                     <div class="d-flex align-items-center">
@@ -277,7 +321,7 @@
                                 <h1 class="display-6 mb-4">Cart <span class="fw-normal">Total</span></h1>
                                 <div class="d-flex justify-content-between mb-4">
                                     <h5 class="mb-0 me-4">Subtotal:</h5>
-                                    <p class="mb-0">₹<%=totalPrice %></p>
+                                    <p class="mb-0 total">₹<%=totalPrice %></p>
                                 </div>
                                 <!-- <div class="d-flex justify-content-between">
                                     <h5 class="mb-0 me-4">Shipping</h5>
@@ -289,7 +333,7 @@
                             </div>
                             <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
                                 <h5 class="mb-0 ps-4 me-4">Total</h5>
-                                <p class="mb-0 pe-4">₹<%=totalPrice %></p>
+                                <p class="mb-0 pe-4 total ">₹<%=totalPrice %></p>
                             </div>
                             <a href="/checkout"><button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">Proceed Checkout</button></a>
                         </div>

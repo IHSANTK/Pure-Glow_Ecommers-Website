@@ -121,31 +121,46 @@
 </div>
 
 <div class="container mt-5">
-  <h2 class="text-center mb-4">My Wishlist</h2>
-  <div class="row mb-3" style="margin-top: 3%;">
-    
-      <% if (wishlist && wishlist.length > 0) { %>
-          <% wishlist.forEach(product => { %>
-              <div class="col-md-3 col-sm-6 mt-4">
-                  <div class="card position-relative custom-card-shadow">
-                      <!-- Heart icon -->
-                      <div class="heart-icon position-absolute top-0 end-0">
-                          <i class="fa fa-heart text-danger" style="font-size: 20px;"></i>
-                      </div>
-                      <a href="/productveiw/<%= product.productId %>"><img src="<%= product.image[0] %>" class="img-fluid w-100 rounded-top" alt=""></a>
-                               <div class="card-body">
-                          <h5 class="card-title"><%= product.productName %></h5>
-                          <p class="card-text">Price: ₹ <%= product.productPrice %></p>
-                          <!-- Add more product details as needed -->
-                      </div>
-                  </div>
-              </div>
-          <% }); %>
-      <% } else { %>
-          <p class="text-center">No items in wishlist</p>
-      <% } %>
-  </div>
+    <h2 class="text-center mb-4">My Wishlist</h2>
+    <div class="row mb-3" style="margin-top: 3%;">
+        <% if (wishlist && wishlist.length > 0) { %>
+            <% wishlist.forEach(product => { %>
+                <div class="col-md-3 col-sm-6 mt-4">
+                    <div class="card position-relative custom-card-shadow">
+                        <!-- Heart icon -->
+                        <div class="heart-icon position-absolute top-0 end-0">
+                            <button  class="btn p-0 heart-icon position-absolute top-0 end-0" onclick="removewhsilist('<%= product._id %>')">
+                                <i class="fa fa-heart text-danger" style="font-size: 20px;"></i>
+                            </button>
+                        </div>
+                        <a href="/productview/<%= product.productId %>"><img src="<%= product.image[0] %>" class="img-fluid w-100 rounded-top" alt=""></a>
+                        <div class="card-body">
+                            <h5 class="card-title"><%= product.productName %></h5>
+                            <p class="card-text">Price: ₹ <%= product.productPrice %></p>
+                            <!-- Add more product details as needed -->
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <p class="text-center">No items in wishlist</p>
+        <% } %>
+    </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  function removewhsilist(productId) {
+    console.log(productId); // Check if productId is correctly received
+    axios.post(`/removewishilist/${productId}`)
+        .then(function (response) {
+            console.log(response.data);
+            // Optionally, update UI based on response
+        })
+        .catch(function (error) {
+            console.error('Error:', error);
+        });
+}
+</script>
 
 <!-- Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

@@ -44,16 +44,18 @@ const Homepage = async (req, res) => {
 }
 
 let userprofilepage = async (req, res) => {
+    let message = req.query.passwordUpdate; // Retrieve the password update message from query parameters
+    console.log(message);
     if (req.session.userId) {
         res.render('user/profile', { 
             userName: req.session.userName,
             email: req.session.userEmail, 
             phoneNumber: req.session.phoneNumber,
+            profileImage: req.session.profileImage,
             userId: req.session.userId,
             errorMessage: req.errorMessage,
-            successMessage: req.successMessage,
-            profileImage: req.image,
-            wishlist: req.session.wishlist // Pass wishlist data to the template
+            successMessage: message, // Pass the password update message to the template
+            wishlist: req.session.wishlist
         });
     } else {
         res.redirect('/login');
@@ -79,6 +81,7 @@ let dataslogin =  async (req, res) => {
         req.session.userName = user.name;
         req.session.userEmail = user.email;
         req.session.phoneNumber = user.phoneNumber;
+        req.session.profileImage = user.image,
         req.session.wishlist = user.wishlist.map(product => product._id.toString()); // Store wishlist data in session as array of product ids
         res.redirect('/');
     } else {
@@ -130,10 +133,11 @@ let logout = (req, res) => {
     delete req.session.userName;
     delete req.session.userEmail;
     delete req.session.phoneNumber;
+    delete req.session.profileImage;
     res.redirect('/');
 
     // Call the function to clear wishlist data from local storage
-    clearWishlistData();
+    
 };
 // const changepassword = (req, res) => {
 //     const userId = req.params.id;
@@ -150,30 +154,15 @@ const editpassword = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
+
         const isPasswordMatch = await bcrypt.compare(currentPassword, user.password);
 
         if (!isPasswordMatch) {
-            return res.render('user/profile', {
-                errorMessage: "Current password is not correct",
-                userId: userId,
-                userName: user.name,
-                email: user.email,
-                phoneNumber: user.phoneNumber,
-                successMessage: null, // Clear success message
-                profileImage: user.image
-            });
+            return res.redirect('/profile?passwordUpdate= current password is not match'); // Password update failed
         }
 
         if (newPassword !== confirmPassword) {
-            return res.render('user/profile', {
-                errorMessage: "New password and confirm password do not match",
-                userId: userId,
-                userName: user.name,
-                email: user.email,
-                phoneNumber: user.phoneNumber,
-                successMessage: null, // Clear success message
-                profileImage: user.image
-            });
+            return res.redirect('/profile?passwordUpdate=false'); // Password update failed
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -181,16 +170,9 @@ const editpassword = async (req, res) => {
         user.password = hashedPassword;
         await user.save();
 
-        // Render the edit password page with success message
-        res.render('user/profile', {
-            userId: userId,
-            userName: user.name,
-            email: user.email,
-            phoneNumber: user.phoneNumber,
-            errorMessage: null,
-            successMessage: "Password successfully updated",
-            profileImage: user.image
-        });
+        // Redirect to the profile page with a query parameter indicating successful password update
+        res.redirect('/profile?passwordUpdate= password update sccesfully');
+
     } catch (error) {
         console.error("Error updating password:", error);
         res.status(500).json({ message: "Error updating password" });
@@ -202,23 +184,24 @@ const editprofile = async (req, res) => {
     const { userName, email, phoneNumber } = req.body;
 
     try {
+        let imageUrl = req.session.profileImage; // Initialize with an empty string
+
         // Handle image upload
-        let imageUrls = [];
         if (req.files && req.files.length > 0) {
-            // Upload each file to Cloudinary
-            for (const file of req.files) {
-                const result = await cloudinary.uploader.upload(file.path);
-                imageUrls.push(result.secure_url);
-            }
+            // Upload the file to Cloudinary
+            const result = await cloudinary.uploader.upload(req.files[0].path);
+            imageUrl = result.secure_url; // Get the uploaded image URL
         }
 
-        // Update user data including the image URLs
-        const user = await User.findByIdAndUpdate(userId, {
+        // Update user data including the image URL
+        const userUpdate = {
             name: userName,
             email: email,
             phoneNumber: phoneNumber,
-            image: imageUrls
-        }, { new: true });
+            image: imageUrl // Update the user's image URL
+        };
+
+        const user = await User.findByIdAndUpdate(userId, userUpdate, { new: true });
 
         if (!user) {
             return res.status(404).send("User not found");
@@ -228,17 +211,10 @@ const editprofile = async (req, res) => {
         req.session.userName = userName;
         req.session.userEmail = email;
         req.session.phoneNumber = phoneNumber;
+        req.session.profileImage = imageUrl; // Update the profile image in the session
 
         // Render the profile view with updated data
-        return res.render('user/profile', {
-            userId: userId,
-            userName: user.name,
-            email: user.email,
-            errorMessage: null,
-            phoneNumber: user.phoneNumber,
-            successMessage: "Profile updated successfully",
-            profileImage: user.image
-        });
+        res.redirect('/profile?passwordUpdate= profile updated successfully');
 
     } catch (error) {
         console.error("Error updating profile:", error);
@@ -246,43 +222,28 @@ const editprofile = async (req, res) => {
     }
 };
 
+const deleteProfileImage = async (req, res) => {
+    try {
+        // Find the user by userId and remove the profile image
+        const userId = req.params.userId;
+        const user = await User.findById(userId);
 
-
-    // const productData = req.body;
-
-    // try {
-    //     const { ProductName, Price, description, Category } = productData;
-    //     const imageUrls = [];
-
-      
-
-    //     // console.log("imageUrls:", imageUrls);
-
-    //     const newProduct = {
-    //         productName: ProductName,
-    //         productPrice: Price,
-    //         description: description,
-    //         category: Category,
-           
-    //     };
-
-    //     let product = await Products.findOne();
         
-    //     if (!product) {
-    //         return res.status(400).send('Product not found');
-    //     }
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
 
-    //     product.products.push(newProduct);
-    //     await product.save();
+        // Remove the profile image field from the user document
+        user.image = undefined;
+        req.session.profileImage = ''
+        await user.save();
 
-    //     res.redirect('/product-list');
-        
-    // } catch (error) {
-    //     console.log(error);
-    //     res.status(500).send('Internal Server Error');
-    // }
-
-
+        return res.sendStatus(200); // Respond with success status
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
 
 
 
@@ -330,10 +291,10 @@ const getproductdetails = async (req, res) => {
 }
 const addToCart = async (req, res) => {
     const productId = req.params.id;
-           
+          
     // Check if the user is authenticated
     if (!req.session.userId) {
-        return res.redirect('/login');
+        return res.json({  message: 'Pls Login' });
     }
 
     const userId = req.session.userId;
@@ -429,8 +390,9 @@ const cartpage = async (req, res) => {
 
 const deletecartproduct = async (req, res) => {
     try {
-        const productId = req.params.productId; // Access productId from req.params
+        const productId = req.params.productId;
         
+
         const user = await User.findByIdAndUpdate(
             req.session.userId,
             { $pull: { 'cart.products': { productId: productId } } },
@@ -438,10 +400,9 @@ const deletecartproduct = async (req, res) => {
         );
 
         if (!user) {
-            return res.status(404).send('User not found');
+            return res.status(404).json({ error: 'User not found' });
         }
 
-        // Recalculate the total price of all products in the cart after deletion
         const totalPrice = user.cart.products.reduce((total, product) => {
             return total + (product.productPrice * product.quantity);
         }, 0);
@@ -449,12 +410,72 @@ const deletecartproduct = async (req, res) => {
         user.cart.total = totalPrice;
            
         await user.save();
+        
+        // Sending back the updated user data
+        return res.json({ totalPrice });
 
-        res.render('user/cart', { usercartdata: user.cart.products, totalPrice: totalPrice });
     } catch (error) {
-        // Handle error
         console.error(error);
-        res.status(500).send('Internal Server Error'); 
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+const quantityminus = async (req, res) => {
+    try {
+        const productId = req.params.productId;
+
+        
+        // Find the user by productId and update the quantity
+        const user = await User.findOneAndUpdate(
+            { "cart.products.productId": productId },
+            { $inc: { "cart.products.$.quantity": -1 } }, // Decrease quantity by 1
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ error: 'User or product not found' });
+        }
+
+        const totalPrice = user.cart.products.reduce((total, product) => {
+            return total + (product.productPrice * product.quantity);
+        }, 0);
+ 
+        user.cart.total = totalPrice;
+           
+        await user.save();
+        return res.json({ user });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+const quantityplus = async (req, res) => {
+    try {
+        const productId = req.params.productId;
+
+        // Find the user by productId and update the quantity
+        const user = await User.findOneAndUpdate(
+            { "cart.products.productId": productId },
+            { $inc: { "cart.products.$.quantity": 1 } }, // Decrease quantity by 1
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ error: 'User or product not found' });
+        }
+
+        const totalPrice = user.cart.products.reduce((total, product) => {
+            return total + (product.productPrice * product.quantity);
+        }, 0);
+ 
+        user.cart.total = totalPrice;
+           
+        await user.save();
+        return res.json({ user });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 }
 
@@ -462,8 +483,6 @@ const latestproduct = async (req, res) => {
     try {
         const category = req.body.category;
 
-        console.log(category);
-        console.log("hi");
 
         const data = await Products.findOne({ 'products.category': category }).sort({ createdAt: -1 }).limit(4);
 
@@ -516,15 +535,13 @@ const whishlistget = async (req, res) => {
 
 const wishlist = async (req, res) => {
     const productId = req.params.id;
-    const userId = req.session.userId;
-
-   
-
-    if (!userId) {
-        return res.redirect('/login'); // Redirect if user is not logged in
-    }
-
+    
     try {
+
+        if ( !req.session.userId) {
+           
+            return res.json({  message: 'Pls Login' });
+        }
         // Find the product by ID
         const product = await Products.findOne({ 'products._id': productId });
 
@@ -535,7 +552,7 @@ const wishlist = async (req, res) => {
         }
 
         // Find the user by ID
-        const user = await User.findById(userId);
+        const user = await User.findById(req.session.userId);
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -570,12 +587,36 @@ const wishlist = async (req, res) => {
 };
 
 
+const removewishlist = async (req, res) => {
+    const productId = req.params.id;
+    console.log(productId);
+    // Implement your logic to remove the product from the wishlist
+    // Here, you might want to query the user document and remove the product from the wishlist array
+    // Then, save the updated user document
 
+    // Example:
+   await User.findOneAndUpdate(
+        { _id: req.session.userId },
+        { $pull: { wishlist: productId } },
+        { new: true },
+        (err, user) => {
+            if (err) {
+                return res.status(500).json({ error: 'Internal Server Error' });
+            }
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+            res.json({ message: 'Product removed from wishlist successfully' });
+        }
+    );
+
+    res.json('ok');
+}
 
 const productveiw = async (req, res) => {
     try {
         const productId = req.params.id;
-        console.log(productId);
+       
         const product = await Products.findOne({ 'products._id': productId });
 
        
@@ -660,14 +701,18 @@ module.exports={
     logout,
     editpassword,
     editprofile,
+    deleteProfileImage,
     shoppage,
     getproductdetails ,
     addToCart,
     cartpage,
     deletecartproduct,
+    quantityminus,
+    quantityplus,
     latestproduct,
     wishlist,
     whishlistget,
+    removewishlist,
     productveiw,
     checkoutpage,
     succesGoogleLogin,
