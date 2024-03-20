@@ -22,6 +22,8 @@ router.post('/product-add', upload.array('image', 2), admincontroller.AddProduct
 router.get('/product-edit/:id', admincontroller.productedit);
 router.post('/product-edit/:id', upload.array('image', 2), admincontroller.updateProduct);
 router.get('/product-delete/:id', admincontroller.deleteproduct);
+router.get('/product-disable/:id',admincontroller.productdisable)
+
 router.get('/admin-logout', adminMiddleware, admincontroller.adminlogout);
 
 module.exports = router;

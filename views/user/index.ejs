@@ -9,6 +9,7 @@
         <meta content="" name="description">
 
         <!-- Google Web Fonts -->
+        <link rel="icon" href="https://cdn4.vectorstock.com/i/1000x1000/84/88/organic-icon-green-color-vector-3238488.jpg">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet"> 
@@ -69,7 +70,8 @@
                     <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
                         <div class="navbar-nav mx-auto">
                             <a href="/" class="nav-item nav-link active">Home</a>
-                            <a href="/shop" class="nav-item nav-link">Shop</a>
+                            
+                            <a href="/shop/<%= totalCartCount ? totalCartCount : '0' %>" class="nav-item nav-link">Shop</a>
                             <!-- <a href="shop-detail.html" class="nav-item nav-link">Shop Detail</a> -->
                             <!-- <div class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
@@ -80,13 +82,17 @@
                                     <a href="404.html" class="dropdown-item">404 Page</a>
                                 </div>
                             </div> -->
-                            <a href="contact.html" class="nav-item nav-link">Contact</a>
+                            <a href="/contact" class="nav-item nav-link">Contact</a>
                         </div>
                         <div class="d-flex m-3 me-0">
                            <a href="/whishlist" class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" ><i class="fas fa-heart heart-icon ok"></i></a>
                             <a href="/cart" class="position-relative me-4 my-auto">
                                 <i class="fa fa-shopping-bag fa-2x"></i>
-                                <!-- <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">3</span> -->
+                                <% if (totalCartCount) { %>
+                                    <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">
+                                        <%= totalCartCount %>
+                                    </span>
+                                <% } %>
                             </a>
                             <a href="/profile" class="my-auto">
                                 <i class="fas fa-user fa-2x"></i>
@@ -345,7 +351,7 @@
                 
                     // // Function to add the product to the wishlist
                     function toggleWishlist(productId) {
-                        const icon = document.getElementById('heartIcon')
+                       
                         //    if(icon.style.color!=="red"){
                         //        icon.style.color ="red"
                         //   }else{
@@ -354,13 +360,20 @@
                    
                         axios.post(`/wishlist/${productId}`)
                            .then(function (response) {
-                            console.log(response.data);
+                           
                             if(response.data.message){
                                    // Show wishlist status message from response
                                   showWishlistStatusMessage(response.data.message);
                                  // Optionally, update UI based on response
                             }
-                               // Handle error
+                            if(response.data.color){
+                                   console.log(response.data.color);
+                                   const icon = document.getElementById('heartIcon')
+                                   icon.style.color = response.data.color
+                            }else{
+                                const icon = document.getElementById('heartIcon')
+                                   icon.style.color = ""
+                            }
                     
                 
                })
@@ -510,7 +523,7 @@
         <!-- Vesitable Shop Start-->
         <div class="container-fluid vesitable py-5">
             <div class="container py-5">
-                <% if (wishlist.length > 0) { %>
+                <% if (wishlist.length > 1) { %>
                 <h1 class="mb-0">Favorite Products</h1>
                 <div class="owl-carousel vegetable-carousel justify-content-center">
     
@@ -532,7 +545,7 @@
                         <% }); %>
                     <% } else { %>
                         <div class="text-center mt-5">
-                            <p>No wishlist items available.</p>
+                            <p></p>
                         </div>
                     <% } %>
                 </div>

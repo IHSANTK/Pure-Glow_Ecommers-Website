@@ -368,6 +368,33 @@ const deleteproduct = async (req,res)=>{
         res.status(500).json({ error: "Internal server error" });
     }
 }
+const productdisable = async (req, res) => {
+    try {
+        let productId = req.params.id;
+
+        console.log(productId);
+
+        let product = await Products.findOne({ products: { $elemMatch: { _id: productId } } });
+
+        if (product) {
+            const productIndex = product.products.findIndex(p => p._id.toString() === productId);
+            console.log(productIndex);
+            if (productIndex !== -1) {
+                // Toggle the disable property
+                product.products[productIndex].disable = !product.products[productIndex].disable;
+                await product.save(); // Save the changes
+                res.status(200).json({ message: "Product disabled status updated successfully" });
+            } else {
+                res.status(404).json({ message: "Product not found in array" });
+            }
+        } else {
+            res.status(404).json({ message: "Product not found" });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
 
 const adminlogout = (req, res) => {
     delete req.session.adminId;
@@ -394,6 +421,7 @@ module.exports={
     productedit,
     updateProduct,
     deleteproduct,
+    productdisable,
     adminlogout,
     
 }

@@ -9,6 +9,7 @@
         <meta content="" name="description">
 
         <!-- Google Web Fonts -->
+        <link rel="icon" href="https://cdn4.vectorstock.com/i/1000x1000/84/88/organic-icon-green-color-vector-3238488.jpg">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet"> 
@@ -85,14 +86,18 @@
                                 <a href="#" class="nav-link ">shop</a>
                                 
                             </div>
-                            <a href="contact.html" class="nav-item nav-link">Contact</a>
+                            <a href="/contact" class="nav-item nav-link">Contact</a>
                         </div>
                         <div class="d-flex m-3 me-0">
                             <a href="/whishlist" class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" ><i class="fas fa-heart heart-icon ok"></i></a>
                             <a href="/cart" class="position-relative me-4 my-auto">
                                 <i class="fa fa-shopping-bag fa-2x"></i>
-                                <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">3</span>
-                            </a>
+                              
+                                <% if (cartcount) { %>
+                                    <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">
+                                        <%= cartcount %>
+                                    </span>
+                                <% } %>                            </a>
                             <a href="/profile" class="my-auto">
                                 <i class="fas fa-user fa-2x"></i>
                             </a>
@@ -177,7 +182,7 @@
                                     </div>
                                 </div>
                             </div>
-                        
+                            
                             <div class="col-lg-9">
                                 <div class="row g-4 justify-content-center" id="productsContainer">
                                     <% if (categor && categor.length > 0) { %>
@@ -186,15 +191,19 @@
                                             <div class="col-md-6 col-lg-6 col-xl-4">
                                                 <div class="rounded position-relative fruite-item">
                                                     <div class="fruite-img">
-                                                       
-                                                        <a href="/productveiw/<%= product._id %>"><img src="<%= product.image[0] %>" class="img-fluid w-100 rounded-top" alt=""></a>                                                        
+                                                        <a href="/productveiw/<%= product._id %>">
+                                                            <img src="<%= product.image[0] %>" class="img-fluid w-100 rounded-top" alt="">
+                                                        </a>                                                        
                                                         <div class="heart-icon position-absolute top-0 end-0">
-                                                            
-                                                                <button type="submit" class="btn p-0 heart-icon position-absolute top-0 end-0" onclick="toggleWishlist('<%= product._id %>')">
-                                                                    <i id="heartIcon" class="fa fa-heart me-3 mt-2 heart-icon <%= product.isInWishlist ? 'text-danger' : '' %>" ></i>
-                                                                </button>
-                                                            
+                                                            <button type="submit" class="btn p-0 heart-icon position-absolute top-0 end-0" onclick="toggleWishlist('<%= product._id %>')">
+                                                                <i id="heartIcon" class="fa fa-heart me-3 mt-2 heart-icon <%= product.isInWishlist ? 'text-danger' : '' %>" ></i>
+                                                            </button>
                                                         </div>
+                                                    </div>
+                                                    <div class="disabled-overlay position-absolute top-50 ms-5 mt-4 " > <!-- Centering the message -->
+                                                        <% if (product.disable) { %>
+                                                            <h5 class="disabled-message text-danger "> Not available now</h5>
+                                                        <% } %>
                                                     </div>
                                                     <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">
                                                         <%= product.category %>
@@ -204,7 +213,7 @@
                                                         <p><%= product.description %></p>
                                                         <div class="d-flex justify-content-between flex-lg-wrap">
                                                             <p class="text-dark fs-5 fw-bold mb-0">₹<%= product.productPrice %></p>
-                                                             <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn" onclick="addtoCart(`<%= product._id %>`)">
+                                                            <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn" onclick="addtoCart('<%= product._id %>')">
                                                                 <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
                                                             </button>
                                                         </div>
@@ -215,7 +224,6 @@
                                     <% } %>
                                 </div>
                             </div>
-                        </div>
                         
                         <!-- Wishlist Status Modal -->
                         <div class="modal fade" id="wishlistModal" tabindex="-1" aria-labelledby="wishlistModalLabel" aria-hidden="true">

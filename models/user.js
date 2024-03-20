@@ -18,13 +18,15 @@ const userSchema = new mongoose.Schema({
         }],
         total: String
     },
-    wishlist:[{productId:{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-                image: [String],
-                productName: String,
-                productPrice: String,
-         }]
+    wishlist: [{
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+        image: [String],
+        productName: String,
+        productPrice: String,
+        color: { type: String, default: 'red' } // Set default color to red
+    }]
 });
 
 const User = mongoose.model('User', userSchema);
 
-module.exports = User
+module.exports = User;

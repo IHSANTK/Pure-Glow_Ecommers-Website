@@ -727,11 +727,9 @@
                                                 <div class="product">
                                                     <div class="product-image">
                                                         <!-- Iterate over the array of image URLs for the current product -->
-                                                        
-                                                            <div class="product-item">
-                                                                <img src="<%= product.image[0] %>" alt="<%= product.productName %>" class="img-fluid w-100">
-                                                            </div>
-                                                       
+                                                        <div class="product-item">
+                                                            <img src="<%= product.image[0] %>" alt="<%= product.productName %>" class="img-fluid w-100">
+                                                        </div>
                                                         <a class="add-wishlist" href="#">
                                                             <i class="bi bi-heart text-danger"></i>
                                                         </a>
@@ -742,9 +740,16 @@
                                                         <span class="d-block fw-bold fs-5 text-secondary">₹ <%= product.productPrice %></span>
                                                         <p class="text-muted"> <%= product.description %></p>
                                                         <!-- <form method="get" action=""> -->
-                                                        <a href="/product-edit/<%=product._id %>" class="btn btn-primary mt-3">Edit</a>
-                                                        <a href="/product-delete/<%=product._id %>" class="btn btn-primary mt-3">Delete</a>
-                                                        <a href="/product-disable/<%=product._id %>" class="btn btn-primary mt-3">Disable</a>
+                                                      
+                                                        <a href="/product-edit/<%= product._id %>" class="btn btn-primary mt-3">Edit</a>
+                                                        <a href="/product-delete/<%= product._id %>" class="btn btn-primary mt-3">Delete</a>
+                                                          <% if (product.disable) { %>
+                                                            <!-- If product is disabled, show enable button -->
+                                                            <a href="/product-disable/<%= product._id %>" class="btn btn-success mt-3">Enable</a>
+                                                        <% } else { %>
+                                                            <!-- If product is not disabled, show disable button -->
+                                                            <a href="/product-disable/<%= product._id %>" class="btn btn-danger  mt-3">Disable</a>
+                                                        <% } %>
                                                         <!-- </form> -->
                                                     </div>
                                                 </div>

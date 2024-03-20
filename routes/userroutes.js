@@ -23,13 +23,15 @@ router.post('/signup',preventBack, userController.getsignupdata);
 
 router.get('/logout',preventBack, userController.logout);
 
+router.get('/contact',userController.contactpage);
+
 // router.get('/change-password/:id',preventBack,userController.changepassword)
 // router.get('/edit-profile/:id',preventBack,userController.editprofileget)
 router.post('/edit-profile/:id',upload.array('profileImage', 1),userController.editprofile)
 router.delete('/delete-profile-image/:userId', userController.deleteProfileImage);
 
 router.post('/edit-password/:id',userController.editpassword)
-router.get('/shop',preventBack,userController.shoppage)
+router.get('/shop/:count',preventBack,userController.shoppage)
 
 
 router.get('/getshopproduct/:category', preventBack, userController.getproductdetails);

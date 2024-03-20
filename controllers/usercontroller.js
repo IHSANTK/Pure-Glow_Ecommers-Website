@@ -27,15 +27,18 @@ const Homepage = async (req, res) => {
            
                 const user = await User.findById(req.session.userId);
     
-                if (user) {
+                if (user) {  
+                    userWishlist = user.wishlist; 
+
+                    totalCartCount = user.cart.products.length;
                    
-                    userWishlist = user.wishlist;
-                    
                 }   
+        }else{
+            totalCartCount = "";
         }
 
         // Render the homepage with the latest product from each category and user's wishlist
-        res.render('user/index', { uniqueCategories, categor: latestProducts, wishlist: userWishlist }); // Replace 'user/index' with your actual template file path
+        res.render('user/index', { uniqueCategories, categor: latestProducts, wishlist: userWishlist,totalCartCount }); // Replace 'user/index' with your actual template file path
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ error: "Internal server error" });
@@ -244,10 +247,15 @@ const deleteProfileImage = async (req, res) => {
     }
 }
 
+const contactpage = (req,res)=>{
 
+    res.render('user/contact')
+}
 
 
 const shoppage = async (req, res) => {
+    cartcount = req.params.count;
+   
     try {
         const data = await Products.findOne();
 
@@ -257,8 +265,9 @@ const shoppage = async (req, res) => {
 
         const uniqueCategories = [...new Set(data.products.map(product => product.category))];
         // console.log(uniqueCategories);
+    
 
-        res.render('user/shop', { categor: data.products, uniqueCategories });
+        res.render('user/shop', { categor: data.products, uniqueCategories,cartcount });
 
     } catch (error) {
         console.error("Error:", error);
@@ -519,6 +528,7 @@ const whishlistget = async (req, res) => {
             productName: item.productName,
             productPrice: item.productPrice,
             image: item.image,
+            color:item.color
         }));
        
 
@@ -536,15 +546,12 @@ const wishlist = async (req, res) => {
     const productId = req.params.id;
     
     try {
-
-        if ( !req.session.userId) {
-           
-            return res.json({  message: 'Pls Login' });
+        if (!req.session.userId) {
+            return res.json({ message: 'Please Login' });
         }
+        
         // Find the product by ID
         const product = await Products.findOne({ 'products._id': productId });
-
-        // Log the product to check if it's null or exists
 
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
@@ -561,7 +568,6 @@ const wishlist = async (req, res) => {
         const existingProductIndex = user.wishlist.findIndex(item => item.productId == productId);
 
         const productData = product.products.find(prod => prod._id == productId);
-       
         
         if (existingProductIndex !== -1) {
             // If the product exists, remove it from the wishlist
@@ -575,16 +581,23 @@ const wishlist = async (req, res) => {
                 productName: productData.productName,
                 productPrice: productData.productPrice,
                 image: productData.image[0], // Assuming image is an array and you want the first image
+                color: 'red' // Set the color to 'red' by default
             });
+
+            // Save the user data
             await user.save();
-            res.json({  message: 'Product added to wishlist' });
+
+            // Access the added product from the wishlist
+            const addedProduct = user.wishlist.find(item => item.productId == productId);
+            let color =  addedProduct.color;
+
+            res.json({  message: 'Product added to wishlist', color });
         }
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ success: false, error: 'Internal Server Error' }); // Handle internal server errors
     }
 };
-
 
 const removewishlist = async (req, res) => {
     const productId = req.params.id;
@@ -641,14 +654,14 @@ const checkoutfromcart = async(req,res)=>{
 
     try{
 
-    console.log("hi");
+   
     let user = await User.findOne()
 
-    let cartdats = user.cart.products;   
+    let cartdatas = user.cart.products;   
     let cartTotal = user.cart.total;  
 
-    console.log(cartTotal);
-    res.render('user/checkout', { products: cartdats,cartTotal });
+  
+    res.render('user/checkout', { products: cartdatas,cartTotal });
  } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error');
@@ -742,6 +755,7 @@ module.exports={
     deleteProfileImage,
     shoppage,
     getproductdetails ,
+    contactpage,
     addToCart,
     cartpage,
     deletecartproduct,

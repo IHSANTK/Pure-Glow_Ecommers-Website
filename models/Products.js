@@ -27,6 +27,10 @@ const productcheama = new mongoose.Schema({
       type: [String],
       required: true
   },
+  disable:{
+     type: Boolean, 
+     default: false 
+  },
 
 });
 
