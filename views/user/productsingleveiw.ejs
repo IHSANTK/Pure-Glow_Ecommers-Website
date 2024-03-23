@@ -29,6 +29,13 @@
 
         <!-- Template Stylesheet -->
         <link href="/css/style.css" rel="stylesheet">
+        <style>
+            .custom-btn {
+                width: 150px; /* Adjust width as needed */
+                height: 40px; /* Adjust height as needed */
+            }
+        </style>
+        
     </head>
 
     <body>
@@ -56,16 +63,21 @@
                     <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
                         <div class="navbar-nav mx-auto">
                             <a href="/" class="nav-item nav-link">Home</a>
-                            <a href="/shop" class="nav-item nav-link">Shop</a>
+                            <a href="/shop/<%= totalCartCount ? totalCartCount : '0' %>" class="nav-item nav-link">Shop</a>
                             
-                            <a href="/views/" class="nav-item nav-link">Contact</a>
+                            <a href="/contact" class="nav-item nav-link">Contact</a>
                         </div>
                         <div class="d-flex m-3 me-0">
-                            <button class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" data-bs-toggle="modal" data-bs-target="#searchModal"><i class="fas fa-search text-primary"></i></button>
+                            <a href="/whishlist" class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" ><i class="fas fa-heart heart-icon ok"></i></a>
+
                             <a href="/cart" class="position-relative me-4 my-auto">
                                 <i class="fa fa-shopping-bag fa-2x"></i>
-                                <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">3</span>
-                            </a>
+                              
+                                <% if (cartcount) { %>
+                                    <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">
+                                        <%= cartcount %>
+                                    </span>
+                                <% } %>                            </a>
                             <a href="/profile" class="my-auto">
                                 <i class="fas fa-user fa-2x"></i>
                             </a>
@@ -117,17 +129,17 @@
                             <div class="col-lg-6 d-flex flex-column justify-content-between">
                                 <div>
                                     <% if (product.disable) { %>
-                                        <div class="disabled-message text-danger mb-3"><strong>Product not available now</strong> </div>
+                                        <div class="disabled-message text-danger mb-3"><strong>Product not available now</strong></div>
                                     <% } %>
                                     <h4 class="fw-bold mb-3 mt-3"><%= product.productName %></h4>
                                     <!-- Container for inline images -->
-                                    
-                                        <!-- Display additional product images inline -->
-                                        <div class="me-2 d-flex">
-                                            <img src="<%= product.image[0] %>" class="img-fluid rounded w-25 h-auto small-image" alt="Image" onclick="changeMainImage(this)">
-                                            <img src="<%= product.image[1] %>" class="img-fluid rounded w-25 h-auto small-image" alt="Image" onclick="changeMainImage(this)">
-                                        </div>
-                                    
+            
+                                    <!-- Display additional product images inline -->
+                                    <div class="me-2 d-flex">
+                                        <img src="<%= product.image[0] %>" class="img-fluid rounded w-25 h-auto small-image" alt="Image" onclick="changeMainImage(this)">
+                                        <img src="<%= product.image[1] %>" class="img-fluid rounded w-25 h-auto small-image" alt="Image" onclick="changeMainImage(this)">
+                                    </div>
+            
                                     <p class="fw-bold mb-3 mt-3"><%= product.description %></p>
                                     <h6 class="mb-3"><%= product.category %></h6>
                                     <h5 class="fw-bold mb-2">₹<%= product.productPrice %></h5>
@@ -136,88 +148,74 @@
                                         <!-- Quantity input -->
                                     </div>
                                 </div>
-                                <div class="d-flex ">
-                                    <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn mb-3" onclick="addtoCart('<%= product._id %>')">
+                                <div class="d-flex">
+                                    <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn custom-btn" onclick="addtoCart('<%= product._id %>')">
                                         <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
                                     </button>
-                                    <form action="/checkout/<%=product._id %>" method="post">
-                                        <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary ms-3  mb-3">
-                                            Buy Now
-                                        </button>
-                                    </form>
+                                
+                                    <% if (!product.disable) { %>
+                                        <form action="/checkout/<%=product._id %>" method="post">
+                                            <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary ms-3 mb-3 custom-btn" <% if (product.disable) { %> disabled <% } %>>
+                                                Buy Now
+                                            </button>
+                                        </form>
+                                    <% } %>
                                 </div>
+                                
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <script>
-            function changeMainImage(image) {
-                var mainImage = document.getElementById("mainImage");
-                mainImage.src = image.src;
-            }
-        </script>
-        <div class="modal fade" id="wishlistModal" tabindex="-1" aria-labelledby="wishlistModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content   " style="background-color: rgb(228, 186, 131); width: 300px; margin-left: 21%; height: 55px;">
-                    <!-- <div class="modal-header"> -->
-                        <!-- <h5 class="modal-title" id="wishlistModalLabel">Wishlist Status</h5> -->
-                        <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div> -->
-                    <div class="modal-body  " id="wishlistModalBody" style="margin: auto; color: rgb(27, 24, 24);">
-                        <!-- Wishlist status message will be displayed here -->
+            
+            <!-- Modal HTML Structure -->
+            <div class="modal fade" id="wishlistModal" tabindex="-1" aria-labelledby="wishlistModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content" style="background-color: rgb(5, 5, 4); width: 60%; margin-left: 21%;height: 55px; ">
+                        <div class="modal-body" id="wishlistModalBody" style="margin: auto; color: rgb(255, 255, 255);">
+                            <!-- Wishlist status message will be displayed here -->
+                        </div>
                     </div>
-                    <!-- <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div> -->
                 </div>
             </div>
-        </div>
-        <script>
-             function showWishlistStatusMessage(message) {
-        const wishlistModalBody = document.getElementById('wishlistModalBody');
-        wishlistModalBody.innerHTML = `<p>${message}</p>`;
-        $('#wishlistModal').modal('show');
-    }
-     
-    function addtoCart(productId){
-                    
+            </div>
+            
+            <!-- Add your JavaScript code -->
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery -->
+            <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+            
+            <script>
+                function changeMainImage(image) {
+                    var mainImage = document.getElementById("mainImage");
+                    mainImage.src = image.src;
+                }
+            
+                function showWishlistStatusMessage(message) {
+                    const wishlistModalBody = document.getElementById('wishlistModalBody');
+                    wishlistModalBody.innerHTML = `<p>${message}</p>`;
+                    $('#wishlistModal').modal('show');
+                    setTimeout(function() {
+                        $('#wishlistModal').modal('hide');
+                    }, 2000);
+                }
+            
+                function addtoCart(productId) {
                     console.log(productId);
-                                axios.post(`/cart/${productId}`)
-                                   .then(function (response) {
-                                        console.log(response.data.message);
-                       
-                                           // Show wishlist status message from response
-                                          showWishlistStatusMessage(response.data.message);
-                                         // Optionally, update UI based on response
-                       })
-                                    .catch(function (error) {
-                                  console.error('Error:', error);
-                       });
-                 }
-
-                // function chekoutpage(productId){
- 
-                //     console.log(productId);
-                //                 axios.post(`/checkout/${productId}`)
-                //                    .then(function (response) {
-                //                         console.log(response.data.message);
-                       
-                //                            // Show wishlist status message from response
-                                         
-                //                          // Optionally, update UI based on response
-                //        })
-                //                     .catch(function (error) {
-                //                   console.error('Error:', error);
-                //        });
-
-
-                // }
-</script>
-
-        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+                    axios.post(`/cart/${productId}`)
+                        .then(function(response) {
+                            console.log(response.data.message);
+                            // Show wishlist status message from response
+                            showWishlistStatusMessage(response.data.message);
+                            // Optionally, update UI based on response
+                        })
+                        .catch(function(error) {
+                            console.error('Error:', error);
+                        });
+                }
+            </script>
+                    
+                    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+                    
 
         
                             <!-- <div class="col-lg-12">

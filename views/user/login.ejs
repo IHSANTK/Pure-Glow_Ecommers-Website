@@ -27,14 +27,16 @@
             </div>
             <form action="/login" method="post">
               <div class="form-group mt-2"> <!-- Adjusted margin-top -->
-                <label for="email"style="font-weight: 500;">Enter Your Email</label>
+                <label for="email" style="font-weight: 500;">Enter Your Email</label>
                 <input type="email" class="form-control" id="email" name="email" required>
               </div>
               <div class="form-group mt-2"> <!-- Adjusted margin-top -->
-                <label for="password"style="font-weight: 500;">Enter Password</label>
+                <label for="password" style="font-weight: 500;">Enter Password</label>
                 <input type="password" class="form-control" id="password" name="password" required>
               </div>
               <button type="submit" class="btn btn-primary btn-block mt-3">Login</button> <!-- Adjusted margin-top -->
+              <button type="button" class="btn btn-secondary btn-block mt-3" data-toggle="modal" data-target="#otpModal">Login with OTP</button>
+              
             </form>
             <p class="text-center mt-3">Don't have an account? <a href="/signup">Sign up</a></p>
           </div>
@@ -42,9 +44,114 @@
       </div>
     </div>
   </div>
-  
+
+  <!-- OTP Modal -->
+  <div class="modal fade" id="otpModal" tabindex="-1" role="dialog" aria-labelledby="otpModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="otpModalLabel">Enter Your Email</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="otpEmail">Email</label>
+            <input type="email" class="form-control" id="otpEmail" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="getOTP">Get OTP</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OTP Verification Modal -->
+  <div class="modal fade" id="otpVerifyModal" tabindex="-1" role="dialog" aria-labelledby="otpVerifyModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="otpVerifyModalLabel">Verify OTP</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="otp">OTP</label>
+            <input type="text" class="form-control" id="otp" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="verifyOTP">Verify OTP</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Bootstrap JS -->
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const getOTPButton = document.getElementById('getOTP');
+    const verifyOTPButton = document.getElementById('verifyOTP');
+
+    getOTPButton.addEventListener('click', function() {
+      const email = document.getElementById('otpEmail').value;
+      console.log(email);
+      axios.post('/login-otp', { email: email })
+        .then(function(response) {
+          if (response.status === 200) {
+            alert('OTP sent successfully. Check your email.');
+            // Open the OTP verification modal
+            $('#otpVerifyModal').modal('show');
+          } else {
+            alert('Error sending OTP: ' + response.data.message);
+          }
+        })
+        .catch(function(error) {
+          if (error.response) {
+            alert('Error sending OTP: ' + error.response.data.message);
+          } else {
+            alert('Error sending OTP: ' + error.message);
+          }
+        });
+    });
+
+    // Add event listener for verifying OTP
+    verifyOTPButton.addEventListener('click', function() {
+      const otp = document.getElementById('otp').value;
+      const email = document.getElementById('otpEmail').value;
+      axios.post('/verify-otp', { email: email, otp: otp })
+        .then(function(response) {
+          if (response.status === 200) {
+            alert('OTP verified successfully. Redirecting...');
+            // Redirect user to the homepage or any other desired page
+            window.location.href = '/';
+          } else {
+            alert('Error verifying OTP: ' + response.data.message);
+          }
+        })
+        .catch(function(error) {
+          if (error.response) {
+            alert('Error verifying OTP: ' + error.response.data.message);
+          } else {
+            alert('Error verifying OTP: ' + error.message);
+          }
+        });
+    });
+  });
+</script>
+
 </body>
 </html>

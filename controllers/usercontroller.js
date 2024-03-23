@@ -5,6 +5,7 @@ const Products = require('../models/Products');
 const passport = require('passport');
 const cloudinary = require('../config/cloudinary')
 const upload = require('../config/multer.js');
+const otpService = require('../services/otpService');
 
 const Homepage = async (req, res) => {
     try {
@@ -46,23 +47,24 @@ const Homepage = async (req, res) => {
 }
 
 let userprofilepage = async (req, res) => {
-    let message = req.query.passwordUpdate; // Retrieve the password update message from query parameters
+    let message = req.query.passwordUpdate;
   
+    // Ensure that the user is logged in and the session contains user information
     if (req.session.userId) {
-        res.render('user/profile', { 
-            userName: req.session.userName,
-            email: req.session.userEmail, 
-            phoneNumber: req.session.phoneNumber,
-            profileImage: req.session.profileImage,
-            userId: req.session.userId,
-            errorMessage: req.errorMessage,
-            successMessage: message, // Pass the password update message to the template
-            wishlist: req.session.wishlist
-        });
+      res.render('user/profile', {
+        userName: req.session.userName,
+        email: req.session.userEmail,
+        phoneNumber: req.session.phoneNumber,
+        profileImage: req.session.profileImage,
+        userId: req.session.userId,
+        errorMessage: req.errorMessage,
+        successMessage: message,
+        wishlist: req.session.wishlist
+      });
     } else {
-        res.redirect('/login');
+      res.redirect('/login');
     }
-}
+  }
 
 // Login page route
 let loginpage = (req, res) => {
@@ -74,23 +76,41 @@ let loginpage = (req, res) => {
 };
 
 // Handle user login
-let dataslogin =  async (req, res) => {
+let dataslogin = async (req, res) => {
     const { email, password } = req.body;
-    const user = await User.findOne({ email }).populate('wishlist');
-
-    if (user && bcrypt.compareSync(password, user.password)) {
-        req.session.userId = user._id;
-        req.session.userName = user.name;
-        req.session.userEmail = user.email;
-        req.session.phoneNumber = user.phoneNumber;
-        req.session.profileImage = user.image,
-        req.session.wishlist = user.wishlist.map(product => product._id.toString()); // Store wishlist data in session as array of product ids
-        res.redirect('/');
-    } else {
-        res.render('user/login', { errorMessage: 'Invalid email or password. Please sign up.' });
+    
+  
+    try {
+      let user;
+  
+      // Check if the login is with email/password or Google OAuth
+      if (req.session.user) {
+        // If user session exists (logged in with Google), use that user
+        user = req.session.user;
+      } else {
+        // If not, find the user by email and compare passwords
+        user = await User.findOne({ email }).populate('wishlist');
+        
+        // If user doesn't exist or password doesn't match, render login page with error message
+        if (!user || !bcrypt.compareSync(password, user.password)) {
+          return res.render('user/login', { errorMessage: 'Invalid email or password. Please sign up.' });
+        }
+      }
+  
+      // Set session data
+      req.session.userId = user._id;
+      req.session.userName = user.name;
+      req.session.userEmail = user.email;
+      req.session.phoneNumber = user.phoneNumber;
+      req.session.profileImage = user.image;
+      req.session.wishlist = user.wishlist.map(product => product._id.toString()); // Store wishlist data in session as array of product ids
+      
+      res.redirect('/');
+    } catch (error) {
+      console.error('Error logging in:', error);
+      res.render('user/login', { errorMessage: 'Something went wrong. Please try again.' });
     }
-}
-
+  }
 
 const blockpage =(req,res)=>{
 
@@ -156,7 +176,7 @@ const editpassword = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-
+        
         const isPasswordMatch = await bcrypt.compare(currentPassword, user.password);
 
         if (!isPasswordMatch) {
@@ -165,7 +185,7 @@ const editpassword = async (req, res) => {
 
         if (newPassword !== confirmPassword) {
             return res.redirect('/profile?passwordUpdate=false'); // Password update failed
-        }
+        } 
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
@@ -559,6 +579,7 @@ const wishlist = async (req, res) => {
 
         // Find the user by ID
         const user = await User.findById(req.session.userId);
+        console.log(user);
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -568,12 +589,16 @@ const wishlist = async (req, res) => {
         const existingProductIndex = user.wishlist.findIndex(item => item.productId == productId);
 
         const productData = product.products.find(prod => prod._id == productId);
+
+    
         
         if (existingProductIndex !== -1) {
             // If the product exists, remove it from the wishlist
             user.wishlist.splice(existingProductIndex, 1);
             await user.save();
-            res.json({  message: 'Product removed from wishlist' });
+            let color = false
+            console.log(color);
+            res.json({  message: 'Product removed from wishlist',color });
         } else {
             // If the product doesn't exist, add it to the wishlist
             user.wishlist.push({
@@ -581,7 +606,7 @@ const wishlist = async (req, res) => {
                 productName: productData.productName,
                 productPrice: productData.productPrice,
                 image: productData.image[0], // Assuming image is an array and you want the first image
-                color: 'red' // Set the color to 'red' by default
+               
             });
 
             // Save the user data
@@ -589,8 +614,9 @@ const wishlist = async (req, res) => {
 
             // Access the added product from the wishlist
             const addedProduct = user.wishlist.find(item => item.productId == productId);
-            let color =  addedProduct.color;
-
+            // let color =  addedProduct.color;
+            let color = true     
+            console.log(color);
             res.json({  message: 'Product added to wishlist', color });
         }
     } catch (error) {
@@ -598,6 +624,7 @@ const wishlist = async (req, res) => {
         res.status(500).json({ success: false, error: 'Internal Server Error' }); // Handle internal server errors
     }
 };
+
 
 const removewishlist = async (req, res) => {
     const productId = req.params.id;
@@ -642,7 +669,7 @@ const productveiw = async (req, res) => {
             return res.status(404).send('Product not found');
         }
 
-        res.render('user/productsingleveiw', { product: exactProduct });
+        res.render('user/productsingleveiw', { product: exactProduct,cartcount:req.cartcount,totalCartCount:req.totalCartCount });
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ error: "Internal server error" });
@@ -699,43 +726,94 @@ const checkoutpage = async (req, res) => {
 
 
 
-const succesGoogleLogin = async (req, res) => {
+
+async function sendOTP(req, res) {
+    const { email } = req.body;
+   
+    const otp = otpService.generateOTP();
+    otpService.otpMap.set(email, otp.toString());
+    try {
+      await otpService.sendOTP(email, otp);
+      res.sendStatus(200);
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      res.status(500).json({ message: error.message });
+    }
+  }
+  
+  // Define the function to verify OTP
+  async function loginWithOTP(req, res) {
+    try {
+      const { email, otp } = req.body;
+      const user = await User.findOne({ email });
+     
+      if (!user) {
+        return res.render('user/login', { errorMessage: 'Invalid email or OTP. Please sign up or try again.' });
+      }
+      
+
+      const isOTPValid = otpService.verifyOTP(email, otp);
+      if (!isOTPValid) {
+        return res.render('user/login', { errorMessage: 'Invalid email or OTP. Please sign up or try again.' });
+      }
+  
+      // Set user information in session upon successful verification
+
+  
+
+      req.session.userId = user._id;
+      req.session.userName = user.name;
+      req.session.userEmail = user.email;
+      req.session.phoneNumber = user.phoneNumber;
+      req.session.profileImage = user.image;
+      req.session.wishlist = user.wishlist.map(product => product._id.toString());
+  
+      res.redirect('/');
+    } catch (error) {
+      console.error('Error logging in with OTP:', error);
+      res.render('user/login', { errorMessage: 'Something went wrong. Please try again.' });
+    }
+  }
+
+
+
+
+async function succesGoogleLogin(req, res) {
     try {
       if (!req.user) {
         return res.redirect('/failure');
       }
   
       console.log('Google Login Email:', req.user.email);
+      console.log('Google Profile:', req.user.profile);
+  
+      // Find the user by email
       let user = await User.findOne({ email: req.user.email });
   
       if (!user) {
+        // If user doesn't exist, create a new user
         user = new User({
           name: req.user.displayName,
-          email: req.user.email
+          email: req.user.email,
+          image: req.user.profile.photos[0].value // Save profile image URL
         });
         await user.save();
         console.log('User Data Saved.');
-        req.session.user = user; // Store user data in session
-        return res.redirect('/profile');
-      } else {
-        if (user.blocked) {
-          console.log('User is blocked');
-          return res.render('users/error404', { errormessage : 'Your Account has been restricted by the Admin' });
-        }
-  
-        console.log('Login with Google');
-        req.session.user = user; // Store user data in session
-        return res.redirect('/');
       }
+  
+      req.session.user = user; // Store user data in session
+      return res.redirect('/');
     } catch (error) {
       console.error('Error in Google authentication:', error);
       return res.redirect('/failure');
     }
-  };
+  }
   
-  const failureGooglelogin = (req, res) => {
+  // Failure route handler after Google login
+  function failureGooglelogin(req, res) {
     res.send('Error');
-  };
+  }
+
   let googleAuth = passport.authenticate('google', { scope: ['profile', 'email'] });
 
 
@@ -768,14 +846,10 @@ module.exports={
     productveiw,
     checkoutpage,
     checkoutfromcart,
+    loginWithOTP,
+    sendOTP,
     succesGoogleLogin,
     failureGooglelogin,
     googleAuth,
 
 }
-
-
-
-
-
-

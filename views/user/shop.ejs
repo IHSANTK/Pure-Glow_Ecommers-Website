@@ -194,11 +194,11 @@
                                                         <a href="/productveiw/<%= product._id %>">
                                                             <img src="<%= product.image[0] %>" class="img-fluid w-100 rounded-top" alt="">
                                                         </a>                                                        
-                                                        <div class="heart-icon position-absolute top-0 end-0">
-                                                            <button type="submit" class="btn p-0 heart-icon position-absolute top-0 end-0" onclick="toggleWishlist('<%= product._id %>')">
-                                                                <i id="heartIcon" class="fa fa-heart me-3 mt-2 heart-icon <%= product.isInWishlist ? 'text-danger' : '' %>" ></i>
-                                                            </button>
-                                                        </div>
+                                                        <button type="submit" class="btn p-0 heart-icon position-absolute top-0 end-0" onclick="toggleWishlist('<%= product._id %>')">
+                                                            <div class="wishicon">
+                                                                <i id="heartIcon_<%= product._id %>" class="fa fa-heart me-3 mt-2 heart-icon text-dark"></i>
+                                                            </div>
+                                                        </button>
                                                     </div>
                                                     <div class="disabled-overlay position-absolute top-50 ms-5 mt-4 " > <!-- Centering the message -->
                                                         <% if (product.disable) { %>
@@ -228,17 +228,10 @@
                         <!-- Wishlist Status Modal -->
                         <div class="modal fade" id="wishlistModal" tabindex="-1" aria-labelledby="wishlistModalLabel" aria-hidden="true">
                             <div class="modal-dialog">
-                                <div class="modal-content   " style="background-color: rgb(228, 186, 131); width: 300px; margin-left: 21%; height: 55px;">
-                                    <!-- <div class="modal-header"> -->
-                                        <!-- <h5 class="modal-title" id="wishlistModalLabel">Wishlist Status</h5> -->
-                                        <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div> -->
-                                    <div class="modal-body  " id="wishlistModalBody" style="margin: auto; color: rgb(27, 24, 24);">
+                                <div class="modal-content" style="background-color: rgb(5, 5, 4); width: 60%; margin-left: 21%;height: 55px; ">
+                                    <div class="modal-body" id="wishlistModalBody" style="margin: auto; color: rgb(255, 255, 255);">
                                         <!-- Wishlist status message will be displayed here -->
                                     </div>
-                                    <!-- <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    </div> -->
                                 </div>
                             </div>
                         </div>
@@ -262,11 +255,11 @@
                                     <a href="/productview/${product._id}">
                                         <a href="/productveiw/${product._id}"><img src="${product.image[0]}" class="img-fluid w-100 rounded-top" alt="${product.image}"></a>
                                     </a> 
-                                    <div class="heart-icon position-absolute top-0 end-0">
-                                        <button type="submit" class="btn p-0 heart-icon position-absolute top-0 end-0" onclick="toggleWishlist('${product._id}')">
-                                              <i id="heartIcon" class="fa fa-heart me-3 mt-2 heart-icon${product._id}.isInWishlist ? 'text-danger' : '' %>" ></i>
-                                       </button>
-                                    </div>
+                                    <button type="submit" class="btn p-0 heart-icon position-absolute top-0 end-0" onclick="toggleWishlist('${product._id}')">
+                                            <div class="wishicon">
+                                                <i id="heartIcon_${product._id}" class="fa fa-heart me-3 mt-2 heart-icon text-dark"></i>
+                                            </div>
+                                     </button>
                                 </div>
                                 <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">
                                     ${product.category}
@@ -297,18 +290,21 @@
         console.log(productId);
 
         const icon = document.getElementById('heartIcon')
-        if(icon.style.color!=="red"){
-            icon.style.color ="red"
-        }else{
-            icon.style.color ="white"
-        }
+       
         axios.post(`/wishlist/${productId}`)
             .then(function (response) {
                 console.log(response.data.message);
                
                     // Show wishlist status message from response
                     showWishlistStatusMessage(response.data.message);
-
+                    const heartIcon = document.querySelector(`#heartIcon_${productId}`);
+                                if (response.data.color === true) {
+                                    heartIcon.classList.remove('text-dark');
+                                    heartIcon.classList.add('text-danger'); // Change to red color
+                                } else {
+                                    heartIcon.classList.remove('text-danger'); // Change to normal color
+                                    heartIcon.classList.add('text-dark');
+                                }
                     // if()
                     // Optionally, update UI based on response
                 
@@ -325,6 +321,9 @@
         const wishlistModalBody = document.getElementById('wishlistModalBody');
         wishlistModalBody.innerHTML = `<p>${message}</p>`;
         $('#wishlistModal').modal('show');
+            setTimeout(function() {
+            $('#wishlistModal').modal('hide');
+      }, 1000); // 2000 milliseconds = 2 seconds
     }
      
     function addtoCart(productId){

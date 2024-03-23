@@ -17,6 +17,9 @@ router.get('/block',preventBack,userController.blockpage)
 
 router.post('/login',preventBack, userController.dataslogin);
 
+router.post('/login-otp', preventBack, userController.sendOTP); // Add route for sending OTP
+router.post('/verify-otp', preventBack,userController.loginWithOTP);
+
 router.get('/signup',preventBack, userController.signuppage);
 
 router.post('/signup',preventBack, userController.getsignupdata);
@@ -54,6 +57,8 @@ router.get('/whishlist',userController.whishlistget);
 
 router.post('/wishlist/:id', userController.wishlist);
 
+
+
 router.post('/removewishlist/:id', userController.removewishlist);
 
 router.get('/productveiw/:id',userController.productveiw);
@@ -64,11 +69,17 @@ router.post('/checkout/:id',preventBack,userController.checkoutpage);
 
 router.get('/auth/google', userController.googleAuth);
 
+router.get('/auth/google',passport.authenticate('google',{scope:['email','profile']}))
 router.get('/auth/google/callback',
- passport.authenticate('google',{successRedirect: '/', failureRedirect:'/failure'})
-);
-
-router.get('/success', userController.succesGoogleLogin);
-router.get('/failure', userController.failureGooglelogin);
+ passport.authenticate('google',{successRedirect:
+                                '/success',
+                                failureRedirect:'/failure'
+                            }
+                        )
+)
+// success
+router.get('/success',userController.succesGoogleLogin)
+// failure
+router.get('/failure',userController.failureGooglelogin)
 
 module.exports = router;

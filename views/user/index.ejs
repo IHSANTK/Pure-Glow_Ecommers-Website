@@ -277,7 +277,9 @@
                                         <a href="/productveiw/<%= product._id %>"><img src="<%= product.image[0] %>" class="img-fluid w-100 rounded-top" alt=""></a>
                                         <!-- Heart icon -->
                                         <button type="submit" class="btn p-0 heart-icon position-absolute top-0 end-0" onclick="toggleWishlist('<%= product._id %>')">
-                                            <i id="heartIcon" class="fa fa-heart me-3 mt-2 heart-icon <%= product.isInWishlist ? 'text-danger' : '' %>" ></i>
+                                            <div class="wishicon">
+                                                <i id="heartIcon_<%= product._id %>" class="fa fa-heart me-3 mt-2 heart-icon text-dark"></i>
+                                            </div>
                                         </button>
                                         <!-- End Heart icon -->
                                     </div>
@@ -287,12 +289,9 @@
                                         <p><%= product.description %></p>
                                         <div class="d-flex justify-content-between flex-lg-wrap">
                                             <p class="text-dark fs-5 fw-bold mb-0 mt-1">₹<%= product.productPrice %></p>
-                                            <!-- <form id="addToCartForm<%= product._id %>" action="/cart/<%= product._id %>" method="post"> -->
-                                                <!-- Add any necessary hidden input fields for additional data -->
-                                                <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn" onclick="addtoCart(`<%= product._id %>`)">
-                                                    <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
-                                                </button>
-                                            <!-- </form> -->
+                                            <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn" onclick="addtoCart('<%= product._id %>')">
+                                                <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -304,109 +303,61 @@
                 <!---modal-->
                 <div class="modal fade" id="wishlistModal" tabindex="-1" aria-labelledby="wishlistModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
-                        <div class="modal-content   " style="background-color: rgb(228, 186, 131); width: 60%; margin-left: 21%;height: 55px; ">
-                            <!-- <div class="modal-header"> -->
-                                <!-- <h5 class="modal-title" id="wishlistModalLabel">Wishlist Status</h5> -->
-                                <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div> -->
-                            <div class="modal-body  " id="wishlistModalBody" style="margin: auto; color: rgb(27, 24, 24);">
+                        <div class="modal-content" style="background-color: rgb(5, 5, 4); width: 60%; margin-left: 21%;height: 55px; ">
+                            <div class="modal-body" id="wishlistModalBody" style="margin: auto; color: rgb(255, 255, 255);">
                                 <!-- Wishlist status message will be displayed here -->
                             </div>
-                            <!-- <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            </div> -->
                         </div>
                     </div>
                 </div>
                 <script>
-                    // Function to toggle the wishlist status
-                    // function toggleWishlist(productId) {
-                    //     const heartIcon = document.getElementById(`heartIcon_${productId}`);
-                    //     const isInWishlist = heartIcon.classList.contains('text-danger');
-                
-                    //     // Toggle the heart icon color
-                    //     if (isInWishlist) {
-                    //         removeFromWishlist(productId);
-                    //         heartIcon.classList.remove('text-danger');
-                    //         // Remove from local storage
-                    //         localStorage.removeItem(productId);
-                    //     } else {
-                    //         addToWishlist(productId);
-                    //         heartIcon.classList.add('text-danger');
-                    //         // Add to local storage
-                    //         localStorage.setItem(productId, 'true');
-                    //     }
-                    // }
-                
-                    // // Function to set the initial state of heart icons on page load
-                    // function setInitialHeartIconState() {
-                    //     const productIds = document.querySelectorAll('[id^="heartIcon_"]');
-                    //     productIds.forEach(productId => {
-                    //         const isInWishlist = localStorage.getItem(productId.id.split('_')[1]);
-                    //         if (isInWishlist === 'true') {
-                    //             productId.classList.add('text-danger');
-                    //         }
-                    //     });
-                    // }
-                
-                    // // Function to add the product to the wishlist
+                    // Function to toggle the product in the wishlist
                     function toggleWishlist(productId) {
-                       
-                        //    if(icon.style.color!=="red"){
-                        //        icon.style.color ="red"
-                        //   }else{
-                        //        icon.style.color ="white"
-                        //  }
-                   
                         axios.post(`/wishlist/${productId}`)
-                           .then(function (response) {
-                           
-                            if(response.data.message){
-                                   // Show wishlist status message from response
-                                  showWishlistStatusMessage(response.data.message);
-                                 // Optionally, update UI based on response
-                            }
-                            if(response.data.color){
-                                   console.log(response.data.color);
-                                   const icon = document.getElementById('heartIcon')
-                                   icon.style.color = response.data.color
-                            }else{
-                                const icon = document.getElementById('heartIcon')
-                                   icon.style.color = ""
-                            }
-                    
-                
-               })
+                            .then(function (response) {
+                                console.log(response.data);
+                                // Show wishlist status message
+                                showWishlistStatusMessage(response.data.message);
+            
+                                // Update heart icon color based on response
+                                const heartIcon = document.querySelector(`#heartIcon_${productId}`);
+                                if (response.data.color === true) {
+                                    heartIcon.classList.remove('text-dark');
+                                    heartIcon.classList.add('text-danger'); // Change to red color
+                                } else {
+                                    heartIcon.classList.remove('text-danger'); // Change to normal color
+                                    heartIcon.classList.add('text-dark');
+                                }
+                            })
                             .catch(function (error) {
-                          console.error('Error:', error);
-               });
-         }  
-          function showWishlistStatusMessage(message) {
-               const wishlistModalBody = document.getElementById('wishlistModalBody');
-                wishlistModalBody.innerHTML = `<p>${message}</p>`;
-                $('#wishlistModal').modal('show');
-         }       
-               
-         
-         function addtoCart(productId){
-                    
-            console.log(productId);
+                                console.error('Error:', error);
+                            });
+                    }
+            
+                    // Function to display wishlist status message
+                    function showWishlistStatusMessage(message) {
+                        const wishlistModalBody = document.getElementById('wishlistModalBody');
+                        wishlistModalBody.innerHTML = `<p>${message}</p>`;
+                        $('#wishlistModal').modal('show');
+                        setTimeout(function() {
+                            $('#wishlistModal').modal('hide');
+                        }, 1000); // 2000 milliseconds = 2 seconds
+                    }
+            
+                    // Function to add product to cart
+                    function addtoCart(productId) {
                         axios.post(`/cart/${productId}`)
-                           .then(function (response) {
+                            .then(function (response) {
                                 console.log(response.data.message);
-                           if(response.data.message){
-                                   // Show wishlist status message from response
-                                  showWishlistStatusMessage(response.data.message);
-                           }
-                                 // Optionally, update UI based on response
-
-               })
+                                if (response.data.message) {
+                                    // Show cart status message from response
+                                    showWishlistStatusMessage(response.data.message);
+                                }
+                            })
                             .catch(function (error) {
-                          console.error('Error:', error);
-               });
-
-
-         }
+                                console.error('Error:', error);
+                            });
+                    }
                 </script>
 
                 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -447,9 +398,11 @@
                                             <div class="fruite-img position-relative">
                                                 <a href="/productveiw/${product._id}"><img src="${product.image[0]}" class="img-fluid w-100 rounded-top" alt=""></a>
                                                 <!-- Heart icon -->
-                                        <button type="submit" class="btn p-0 heart-icon position-absolute top-0 end-0" onclick="toggleWishlist('${product._id}')">
-                                            <i id="heartIcon" class="fa fa-heart me-3 mt-2 heart-icon ${product._id}.isInWishlist ? 'text-danger' : '' %>" ></i>
-                                        </button>
+                                      \ <button type="submit" class="btn p-0 heart-icon position-absolute top-0 end-0" onclick="toggleWishlist('${product._id}')">
+                                            <div class="wishicon">
+                                                <i id="heartIcon_${product._id}" class="fa fa-heart me-3 mt-2 heart-icon text-dark"></i>
+                                            </div>
+                                        </button
                                                 <!-- End Heart icon -->
                                             </div>
                                             <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">${product.category}</div>
@@ -498,7 +451,7 @@
                             <h1 class="display-3 text-white">New Organic products</h1>
                             <p class="fw-normal display-3 text-dark mb-4">in Our Store</p>
                             <!-- <p class="mb-4 text-dark">The generated Lorem Ipsum is therefore always free from repetition injected humour, or non-characteristic words etc.</p> -->
-                            <a href="/shop" class="banner-btn btn border-2 border-white rounded-pill text-dark py-3 px-5">BUY</a>
+                            <a href="/shop/<%= totalCartCount ? totalCartCount : '0' %>" class="banner-btn btn border-2 border-white rounded-pill text-dark py-3 px-5">BUY</a>
                         </div>
                     </div>
                     <!-- <div class="col-lg-6">
