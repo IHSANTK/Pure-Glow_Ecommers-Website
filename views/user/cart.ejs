@@ -167,9 +167,15 @@
                                         <td>
                                             <div class="input-group">
                                                 <!-- Minus button -->
-                                                <button class="btn btn-sm btn-plus rounded-circle bg-light border mt-4" style="width:30px ; height: 30px;" onclick="quantityminus(`<%= product.productId %>`)">
-                                                    <i class="fa fa-minus"></i>
-                                                </button>
+                                                <% if (product.quantity > 1) { %>
+                                                    <button class="btn btn-sm btn-plus rounded-circle bg-light border mt-4" style="width:30px; height:30px;" onclick="quantityminus('<%= product.productId %>')">
+                                                        <i class="fa fa-minus"></i>
+                                                    </button>
+                                                <% } else { %>
+                                                    <button class="btn btn-sm btn-plus rounded-circle bg-light border mt-4" style="width:30px; height:30px;">
+                                                        <i class="fa fa-minus"></i>
+                                                    </button>
+                                                <% } %>
                                                 <!-- Quantity value -->
                                                 <p class="mb-0 mt-4 mx-2"><%= product.quantity %></p>
                                                 <!-- Plus button -->
@@ -182,7 +188,7 @@
                                             <!-- Delete button form -->
                                            
                                                 <button  class="btn btn-md rounded-circle bg-light border mt-4" onclick="deleteFromcart(`<%= product.productId %>`)">
-                                                    <i class="fa fa-times text-danger"></i>
+                                                     <i class="fa fa-times text-danger"></i>
                                                 </button>
                                             
                                         </td>
@@ -209,17 +215,18 @@
                             }
                         
                             function quantityminus(productId) {
-                                axios.post(`/quantityminus/${productId}`)
-                                    .then(function (response) {
+                                     axios.post(`/quantityminus/${productId}`)
+                                   .then(function (response) {
                                         console.log(response.data);
-                                        // Handle success response, if needed
-                                        location.reload(); // Reload the page after updating quantity
-                                    })
-                                    .catch(function (error) {
-                                        console.error('Error decreasing quantity:', error);
-                                        // Handle error, if needed
-                                    });
-                            }
+                                            
+                                                   location.reload(); // Reload the page after updating quantity
+                           
+                     })
+                                             .catch(function (error) {
+                                                console.error('Error decreasing quantity:', error);
+                                         
+                     });
+                                     }
                             
                             function quantityplus(productId) {
                                 axios.post(`/quantityplus/${productId}`)

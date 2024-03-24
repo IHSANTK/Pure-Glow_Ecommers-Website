@@ -10,15 +10,15 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon"> <!-- Favicon-->
     
     <!-- project css file  -->
-    <link rel="stylesheet" href="assets/css/ebazar.style.min.css">
+    <link rel="stylesheet" href="/assets/css/ebazar.style.min.css">
 </head>
 <body>
     <div id="ebazar-layout" class="theme-blue">
         
         <!-- sidebar -->
-        <div class="sidebar px-4 py-4 py-md-4 me-0">
+        <div class="sidebar px-4 py-4 py-md-4 me-0 ">
             <div class="d-flex flex-column h-100">
-                <a href="index.html" class="mb-0 brand-icon">
+                <a href="/admin" class="mb-0 brand-icon">
                     <span class="logo-icon">
                         <i class="bi bi-bag-check-fill fs-4"></i>
                     </span>
@@ -26,12 +26,12 @@
                 </a>
                 <!-- Menu: main ul -->
                 <ul class="menu-list flex-grow-1 mt-3">
-                    <li><a class="m-link" href="index.html"><i class="icofont-home fs-5"></i> <span>Dashboard</span></a></li>
+                    <li><a class="m-link" href="/admin"><i class="icofont-home fs-5"></i> <span>Dashboard</span></a></li>
                     <li class="collapsed">
-                        <a class="m-link active" data-bs-toggle="collapse" data-bs-target="#menu-product" href="#">
-                            <i class="icofont-truck-loaded fs-5"></i> <span>Products</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
+                        <a class="m-link active" data-bs-toggle="collapse" data-bs-target="#menu-product" href="/product-list">
+                            <i class="icofont-truck-loaded fs-5"></i> <span>Products</span></a>
                             <!-- Menu: Sub menu ul -->
-                            <ul class="sub-menu collapse show" id="menu-product">
+                            <!-- <ul class="sub-menu collapse show" id="menu-product">
                                 <li><a class="ms-link" href="product-grid.html">Product Grid</a></li>
                                 <li><a class="ms-link" href="product-list.html">Product List</a></li>
                                 <li><a class="ms-link" href="product-edit.html">Product Edit</a></li>
@@ -39,52 +39,52 @@
                                 <li><a class="ms-link" href="product-add.html">Product Add</a></li>
                                 <li><a class="ms-link" href="product-cart.html">Shopping Cart</a></li>
                                 <li><a class="ms-link" href="checkout.html">Checkout</a></li>
-                            </ul>
+                            </ul> -->
                     </li>
                     <li class="collapsed">
-                        <a class="m-link" data-bs-toggle="collapse" data-bs-target="#categories" href="#">
-                            <i class="icofont-chart-flow fs-5"></i> <span>Categories</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
+                        <a class="m-link" data-bs-toggle="collapse" data-bs-target="#categories" href="/categorie-list">
+                            <i class="icofont-chart-flow fs-5"></i> <span>Categories</span> </a>
                             <!-- Menu: Sub menu ul -->
-                            <ul class="sub-menu collapse" id="categories">
+                            <!-- <ul class="sub-menu collapse" id="categories">
                                 <li><a class="ms-link" href="categorie-list.html">Categories List</a></li>
                                 <li><a class="ms-link" href="categories-edit.html">Categories Edit</a></li>
                                 <li><a class="ms-link" href="categories-add.html">Categories Add</a></li>
-                            </ul>
+                            </ul> -->
                     </li>
-                    <li class="collapsed">
+                    <!-- <li class="collapsed">
                         <a class="m-link" data-bs-toggle="collapse" data-bs-target="#menu-order" href="#">
-                        <i class="icofont-notepad fs-5"></i> <span>Orders</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
+                        <i class="icofont-notepad fs-5"></i> <span>Orders</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a> -->
                         <!-- Menu: Sub menu ul -->
-                        <ul class="sub-menu collapse" id="menu-order">
+                        <!-- <ul class="sub-menu collapse" id="menu-order">
                             <li><a class="ms-link" href="order-list.html">Orders List</a></li>
                             <li><a class="ms-link" href="order-details.html">Order Details</a></li>
                             <li><a class="ms-link" href="order-invoices.html">Order Invoices</a></li>
                         </ul>
-                    </li>
+                    </li> -->
                     <li class="collapsed">
-                        <a class="m-link" data-bs-toggle="collapse" data-bs-target="#customers-info" href="#">
-                        <i class="icofont-funky-man fs-5"></i> <span>Customers</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
+                        <a class="m-link" data-bs-toggle="collapse" data-bs-target="#customers-info" href="/userlist">
+                        <i class="icofont-funky-man fs-5"></i> <span>Customers</span> </a>
                         <!-- Menu: Sub menu ul -->
-                        <ul class="sub-menu collapse" id="customers-info">
+                        <!-- <ul class="sub-menu collapse" id="customers-info">
                             <li><a class="ms-link" href="customers.html">Customers List</a></li>
                             <li><a class="ms-link" href="customer-detail.html">Customers Details</a></li>
-                        </ul>
+                        </ul> -->
                     </li>
-                    <li class="collapsed">
+                    <!-- <li class="collapsed">
                         <a class="m-link" data-bs-toggle="collapse" data-bs-target="#menu-sale" href="#">
-                        <i class="icofont-sale-discount fs-5"></i> <span>Sales Promotion</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
+                        <i class="icofont-sale-discount fs-5"></i> <span>Sales Promotion</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a> -->
                         <!-- Menu: Sub menu ul -->
-                        <ul class="sub-menu collapse" id="menu-sale">
+                        <!-- <ul class="sub-menu collapse" id="menu-sale">
                             <li><a class="ms-link" href="coupons-list.html">Coupons List</a></li>
                             <li><a class="ms-link" href="coupon-add.html">Coupons Add</a></li>
                             <li><a class="ms-link" href="coupon-edit.html">Coupons Edit</a></li>
                         </ul>
-                    </li>
-                    <li class="collapsed">
+                    </li> -->
+                    <!-- <li class="collapsed">
                         <a class="m-link" data-bs-toggle="collapse" data-bs-target="#menu-inventory" href="#">
-                        <i class="icofont-chart-histogram fs-5"></i> <span>Inventory</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
+                        <i class="icofont-chart-histogram fs-5"></i> <span>Inventory</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a> -->
                         <!-- Menu: Sub menu ul -->
-                        <ul class="sub-menu collapse" id="menu-inventory">
+                        <!-- <ul class="sub-menu collapse" id="menu-inventory">
                             <li><a class="ms-link" href="inventory-info.html">Stock List</a></li>
                             <li><a class="ms-link" href="purchase.html">Purchase</a></li>
                             <li><a class="ms-link" href="supplier.html">Supplier</a></li>
@@ -94,31 +94,31 @@
                     </li>
                     <li class="collapsed">
                         <a class="m-link" data-bs-toggle="collapse" data-bs-target="#menu-Componentsone" href="#"><i
-                                class="icofont-ui-calculator"></i> <span>Accounts</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
+                                class="icofont-ui-calculator"></i> <span>Accounts</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a> -->
                         <!-- Menu: Sub menu ul -->
-                        <ul class="sub-menu collapse" id="menu-Componentsone">
+                        <!-- <ul class="sub-menu collapse" id="menu-Componentsone">
                             <li><a class="ms-link" href="invoices.html">Invoices </a></li>
                             <li><a class="ms-link" href="expenses.html">Expenses </a></li>
                             <li><a class="ms-link" href="salaryslip.html">Salary Slip </a></li>
                             <li><a class="ms-link" href="create-invoice.html">Create Invoice </a></li>
                         </ul>
-                    </li>
-                    <li class="collapsed">
+                    </li> -->
+                    <!-- <li class="collapsed">
                         <a class="m-link" data-bs-toggle="collapse" data-bs-target="#app" href="#">
-                        <i class="icofont-code-alt fs-5"></i> <span>App</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
+                        <i class="icofont-code-alt fs-5"></i> <span>App</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a> -->
                         <!-- Menu: Sub menu ul -->
-                        <ul class="sub-menu collapse" id="app">
+                        <!-- <ul class="sub-menu collapse" id="app">
                             <li><a class="ms-link" href="calendar.html">Calandar</a></li>
                             <li><a class="ms-link" href="chat.html"> Chat App</a></li>
                         </ul>
-                    </li>
-                    <li><a class="m-link" href="store-locator.html"><i class="icofont-focus fs-5"></i> <span>Store Locator</span></a></li>
+                    </li> -->
+                    <!-- <li><a class="m-link" href="store-locator.html"><i class="icofont-focus fs-5"></i> <span>Store Locator</span></a></li>
                     <li><a class="m-link" href="ui-elements/ui-alerts.html"><i class="icofont-paint fs-5"></i> <span>UI Components</span></a></li>
                     <li class="collapsed">
                         <a class="m-link" data-bs-toggle="collapse" data-bs-target="#page" href="#">
-                        <i class="icofont-page fs-5"></i> <span>Other Pages</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
+                        <i class="icofont-page fs-5"></i> <span>Other Pages</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a> -->
                         <!-- Menu: Sub menu ul -->
-                        <ul class="sub-menu collapse" id="page">
+                        <!-- <ul class="sub-menu collapse" id="page">
                             <li><a class="ms-link" href="admin-profile.html">Profile Page</a></li>
                             <li><a class="ms-link" href="purchase-plan.html">Price Plan Example</a></li>
                             <li><a class="ms-link" href="charts.html">Charts Example</a></li>
@@ -129,11 +129,11 @@
                             <li><a class="ms-link" href="todo-list.html">Todo List</a></li>
                         </ul>
                     </li>
-                </ul>
+                </ul> -->
                 <!-- Menu: menu collepce btn -->
-                <button type="button" class="btn btn-link sidebar-mini-btn text-light">
+                <!-- <button type="button" class="btn btn-link sidebar-mini-btn text-light">
                     <span class="ms-2"><i class="icofont-bubble-right"></i></span>
-                </button>
+                </button> -->
             </div>
         </div>    
 
@@ -141,12 +141,12 @@
         <div class="main px-lg-4 px-md-4"> 
 
             <!-- Body: Header -->
-            <div class="header">
+            <!-- <div class="header">
                 <nav class="navbar py-4">
-                    <div class="container-xxl">
+                    <div class="container-xxl"> -->
         
                         <!-- header rightbar icon -->
-                        <div class="h-right d-flex align-items-center mr-5 mr-lg-0 order-1">
+                        <!-- <div class="h-right d-flex align-items-center mr-5 mr-lg-0 order-1">
                             <div class="d-flex">
                                 <a class="nav-link text-primary collapsed" href="help.html" title="Get Help">
                                     <i class="icofont-info-square fs-5"></i>
@@ -289,15 +289,15 @@
                             <div class="setting ms-2">
                                 <a href="#" data-bs-toggle="modal" data-bs-target="#Settingmodal"><i class="icofont-gear-alt fs-5"></i></a>
                             </div>
-                        </div>
+                        </div> -->
         
                         <!-- menu toggler -->
-                        <button class="navbar-toggler p-0 border-0 menu-toggle order-3" type="button" data-bs-toggle="collapse" data-bs-target="#mainHeader">
+                        <!-- <button class="navbar-toggler p-0 border-0 menu-toggle order-3" type="button" data-bs-toggle="collapse" data-bs-target="#mainHeader">
                             <span class="fa fa-bars"></span>
-                        </button>
+                        </button> -->
         
                         <!-- main menu Search-->
-                        <div class="order-0 col-lg-4 col-md-4 col-sm-12 col-12 mb-3 mb-md-0 ">
+                        <!-- <div class="order-0 col-lg-4 col-md-4 col-sm-12 col-12 mb-3 mb-md-0 ">
                             <div class="input-group flex-nowrap input-group-lg">
                                 <input type="search" class="form-control" placeholder="Search" aria-label="search" aria-describedby="addon-wrapping">
                                 <button type="button" class="input-group-text" id="addon-wrapping"><i class="fa fa-search"></i></button>
@@ -307,7 +307,7 @@
         
                     </div>
                 </nav>
-            </div>
+            </div> -->
 
             <!-- Body: Body -->
             <div class="body d-flex py-3">
@@ -321,129 +321,65 @@
                         </div>
                     </div> <!-- Row end  -->  
 
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-12">
-                            <div class="card">
+                    <div class="row g-3 mb-3 ">
+                        <div class="col-md-12 ">
+                            <div class="card " style="background-color: rgb(231, 231, 231);">
                                 <div class="card-body">
                                     <div class="product-details">
                                         <div class="row align-items-center">
                                             <div class="col-lg-6">
                                                 <div class="product-details-image mt-50">
-                                                    <div class="product-thumb-image">
-                                                        <div class="product-thumb-image-active nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                                                            <a class="single-thumb" id="v-pills-one-tab" data-bs-toggle="pill" href="#v-pills-one" role="button" aria-controls="v-pills-one" >
-                                                                <img src="assets/images/product/thunb-1.jpg" alt="">
-                                                            </a>
-                                                            <a class="single-thumb" id="v-pills-two-tab" data-bs-toggle="pill" href="#v-pills-two" role="button" aria-controls="v-pills-two">
-                                                                <img src="assets/images/product/thunb-2.jpg" alt="">
-                                                            </a>
-                                                            <a class="single-thumb active" aria-current="page" id="v-pills-three-tab" data-bs-toggle="pill" role="button" href="#v-pills-three"  aria-controls="v-pills-three">
-                                                                <img src="assets/images/product/thunb-3.jpg" alt="">
-                                                            </a>
-                                                            <a class="single-thumb" id="v-pills-four-tab" data-bs-toggle="pill" href="#v-pills-four" role="button" aria-controls="v-pills-four">
-                                                                <img src="assets/images/product/thunb-4.jpg" alt="">
-                                                            </a>
-                                                            <a class="single-thumb" id="v-pills-five-tab" data-bs-toggle="pill" href="#v-pills-five"  role="button" aria-controls="v-pills-five">
-                                                                <img src="assets/images/product/thunb-5.jpg" alt="">
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                    <div class="product-image">
-                                                        <div class="product-image-active tab-content" id="v-pills-tabContent">
-                                                            <a class="single-image tab-pane fade" id="v-pills-one" role="tabpanel" aria-labelledby="v-pills-one-tab">
-                                                                <img src="assets/images/product/productslide-1.jpg" alt="">
-                                                            </a>
-                                                            <a class="single-image tab-pane fade" id="v-pills-two" role="tabpanel" aria-labelledby="v-pills-two-tab">
-                                                                <img src="assets/images/product/productslide-2.jpg" alt="">
-                                                            </a>
-                                                            <a class="single-image tab-pane fade active show" id="v-pills-three" role="tabpanel" aria-labelledby="v-pills-three-tab">
-                                                                <img src="assets/images/product/productslide-3.jpg" alt="">
-                                                            </a>
-                                                            <a class="single-image tab-pane fade" id="v-pills-four" role="tabpanel" aria-labelledby="v-pills-four-tab">
-                                                                <img src="assets/images/product/productslide-5.jpg" alt="">
-                                                            </a>
-                                                            <a class="single-image tab-pane fade " id="v-pills-five" role="tabpanel" aria-labelledby="v-pills-five-tab">
-                                                                <img src="assets/images/product/productslide-5.jpg" alt="">
-                                                            </a>
-                                                        </div>
-                                                    </div>
+                                                    <img id="bigImage" src="<%= product.image[0] %>" style="width: 100%; height: auto;">
                                                 </div>
                                             </div>
                                             <div class="col-lg-6">
                                                 <div class="product-details-content mt-45">
-                                                    <h2 class="fw-bold fs-4">Oculus VR</h2>
-                                                    <div class="my-3">
-                                                        <i class="fa fa-star text-warning"></i>
-                                                        <i class="fa fa-star text-warning"></i>
-                                                        <i class="fa fa-star text-warning"></i>
-                                                        <i class="fa fa-star text-warning"></i>
-                                                        <i class="fa fa-star text-warning"></i>
-                                                        <span class="text-muted ms-3">(449 customer review)</span>
-                                                    </div>
+                                                    <h2 class="fw-bold fs-4"><%= product.productName %></h2>
                                                     <div class="product-items flex-wrap">
                                                         <h6 class="item-title fw-bold">Select Your Oculus</h6>
                                                         <div class="items-wrapper" id="select-item-1">
                                                             <div class="single-item active">
                                                                 <div class="items-image">
-                                                                    <img src="assets/images/product/product-items-1.jpg" alt="product">
+                                                                    <img src="<%= product.image[0] %>" onclick="changeBigImage(this)">
                                                                 </div>
                                                                 <p class="text">Oculus Go</p>
                                                             </div>
                                                             <div class="single-item">
                                                                 <div class="items-image">
-                                                                    <img src="assets/images/product/product-items-2.jpg" alt="product">
+                                                                    <img src="<%= product.image[1] %>" onclick="changeBigImage(this)">
                                                                 </div>
                                                                 <p class="text">Oculus Quest</p>
                                                             </div>
-                                                            <div class="single-item">
-                                                                <div class="items-image">
-                                                                    <img src="assets/images/product/product-items-3.jpg" alt="product">
-                                                                </div>
-                                                                <p class="text">Oculus Rift S</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="product-select-wrapper flex-wrap">
-                                                        <div class="select-item">
-                                                            <h6 class="select-title fw-bold">Select Color</h6>
-                                                            <ul class="color-select" id="select-color-1">
-                                                                <li style="background-color: #EFEFEF;" class="active"></li>
-                                                                <li style="background-color: #FAE5EC;"></li>
-                                                                <li style="background-color: #4C4C4C;"></li>
-                                                            </ul>
+                                                            <!-- Add more small images with unique identifiers and onclick handlers -->
                                                         </div>
                                                     </div>
                                                     <div class="product-price">
                                                         <h6 class="price-title fw-bold">Price</h6>
-                                                        <p class="sale-price">$ 149 USD</p>
-                                                        <p class="regular-price text-danger">$ 179 USD</p>
+                                                        <p class="sale-price">₹<%= product.productPrice %></p>
                                                     </div>
-                                                    <p>Lorem Ipsum is simply dummy text of the printing and
-                                                        typesetting industry. Lorem Ipsum has been the industry's standard
-                                                        dummy text ever since the 1500s, when an unknown printer took a
-                                                        galley of type and scrambled it to make a type specimen book.</p>
+                                                    <p><%= product.description %></p>
                                                     <div class="product-btn mb-5">
                                                         <div class="d-flex flex-wrap">
-                                                            <div class="mt-2 mt-sm-0  me-1">
-                                                                <div class="input-group">
-                                                                    <input type="number" class="form-control" placeholder="1" min="1" max="5">
-                                                                    <span class="input-group-text"><i class="fa fa-sort"></i></span>
-                                                                </div>
-                                                            </div>
-                                                            <button class="btn btn-primary mx-1 mt-2  mt-sm-0"><i class="fa fa-heart me-1"></i> Addto Wishlist</button>
-                                                            <button class="btn btn-primary mx-1 mt-2 mt-sm-0 w-sm-100"><i class="fa fa-shopping-cart me-1"></i> Add to Cart</button>
+                                                            <div class="mt-2 mt-sm-0  me-1"></div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div> 
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div> <!-- Row end  -->  
+                    </div> <!-- Row end  -->
+                    
+                    <script>
+                        function changeBigImage(image) {
+                            var mainImage = document.getElementById("bigImage");
+                            mainImage.src = image.src;
+                        }
+                    </script> 
 
-                    <div class="row g-3 mb-3">
+                    <!-- <div class="row g-3 mb-3">
                         <div class="col-md-12">
                             <div class="card">
                                 <div class="card-body">
@@ -621,9 +557,9 @@
                                                                     <h6 class="">Top-Oculus VR</h6>
                                                                     <p> A good fit for many households, this Oculus VR has a movable deli drawer and door shelves that can accommodate gallon containers.Though its low price means fewer features, this pick is quiet and an energy-saving option, resulting in a lower energy bill.</p>
                                                                 </div>
-                                                            </div>
+                                                            </div> -->
                                                         </li> <!-- .Card End -->
-                                                        <li class="card mb-2">
+                                                        <!-- <li class="card mb-2">
                                                             <div class="card-body p-lg-4 p-3">
                                                                 <div class="d-flex mb-3 pb-3 border-bottom flex-wrap">
                                                                     <img class="avatar rounded" src="assets/images/xs/avatar2.svg" alt="">
@@ -645,9 +581,9 @@
                                                                     <h6 class="">Oculus VR Full 3D</h6>
                                                                     <p>I purchased this Oculus from elsewhere, on last Dipawali. As this Oculus contains in-built DDB( means you need not to install a separate set-top box), there is less number of wire hanging around the set and single remote required. Great full HD picture quality. Sound quality of the set is far better than most of the sets of the so called big brands.</p>
                                                                 </div>
-                                                            </div>
+                                                            </div> -->
                                                         </li> <!-- .Card End -->
-                                                        <li class="card mb-2">
+                                                        <!-- <li class="card mb-2">
                                                             <div class="card-body p-lg-4 p-3">
                                                                 <div class="d-flex mb-3 pb-3 border-bottom flex-wrap">
                                                                     <img class="avatar rounded" src="assets/images/xs/avatar3.svg" alt="">
@@ -681,9 +617,9 @@
                                                                         <textarea class="form-control" placeholder="Replay"></textarea>
                                                                     </div>
                                                                 </div>
-                                                            </div>
+                                                            </div> -->
                                                         </li> <!-- .Card End -->
-                                                    </ul>
+                                                    <!-- </ul>
                                                     <nav aria-label="...">
                                                         <ul class="pagination justify-content-end">
                                                         <li class="page-item disabled">
@@ -699,9 +635,9 @@
                                                         </li>
                                                         </ul>
                                                     </nav>
-                                                </div>
+                                                </div> -->
                                             </div><!-- Row End -->
-                                        </div>
+                                        <!-- </div>
                                     </div>
                                     <div class="tab-pane fade" id="descriptions">
                                         <div class="card-body">
@@ -724,7 +660,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div><!-- Row end  -->  
 
                 </div>

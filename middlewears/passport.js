@@ -5,7 +5,7 @@ const User = require('../models/user');
 
 const opts = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-opts.secretOrKey = 'pureglow_gwt'; // Replace 'your_secret_key' with your own secret key
+opts.secretOrKey = 'pureglow_gwt'; 
 
 passport.use(new JwtStrategy(opts, async (jwt_payload, done) => {
     try {

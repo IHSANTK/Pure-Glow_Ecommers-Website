@@ -288,7 +288,7 @@ let productlist = async (req, res) => {
   const updateProduct = async (req, res) => {
     try {
         const productId = req.params.id;
-        const { ProductName, Price, description, category } = req.body;
+        const { ProductName, Price, description, category, existingImage1, existingImage2 } = req.body;
         let updatedImages = [];
 
         // Check if new images are uploaded
@@ -300,43 +300,29 @@ let productlist = async (req, res) => {
             }
         }
 
-        // If new images are uploaded, update the product's images
-        if (updatedImages.length > 0) {
-            const product = await Products.findOneAndUpdate(
-                { 'products._id': productId },
-                {
-                    $set: {
-                        'products.$.productName': ProductName,
-                        'products.$.productPrice': Price,
-                        'products.$.description': description,
-                        'products.$.category': category,
-                        'products.$.image': updatedImages  // Replace existing images with updated ones
-                    }
-                },
-                { new: true }
-            );
+        // If no new images uploaded, use existing images
+        if (updatedImages.length === 0) {
+            // Push existing images to the updatedImages array
+            updatedImages.push(existingImage1, existingImage2);
+        }
+console.log(updatedImages);
+        // Update product details including images
+        const product = await Products.findOneAndUpdate(
+            { 'products._id': productId },
+            {
+                $set: {
+                    'products.$.productName': ProductName,
+                    'products.$.productPrice': Price,
+                    'products.$.description': description,
+                    'products.$.category': category,
+                    'products.$.image': updatedImages
+                }
+            },
+            { new: true }
+        );
 
-            if (!product) {
-                return res.status(404).json({ error: "Product not found" });
-            }
-        } else {
-            // If no new images are uploaded, only update other product details
-            const product = await Products.findOneAndUpdate(
-                { 'products._id': productId },
-                {
-                    $set: {
-                        'products.$.productName': ProductName,
-                        'products.$.productPrice': Price,
-                        'products.$.description': description,
-                        'products.$.category': category
-                    }
-                },
-                { new: true }
-            );
-
-            if (!product) {
-                return res.status(404).json({ error: "Product not found" });
-            }
+        if (!product) {
+            return res.status(404).json({ error: "Product not found" });
         }
 
         res.redirect('/product-list');
@@ -372,8 +358,6 @@ const productdisable = async (req, res) => {
     try {
         let productId = req.params.id;
 
-        console.log(productId);
-
         let product = await Products.findOne({ products: { $elemMatch: { _id: productId } } });
 
         if (product) {
@@ -395,6 +379,33 @@ const productdisable = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 }
+const adminprofile =(req,res)=>{
+       
+ res.render('admin/admin-profile')
+  
+
+}
+const productdetiel = async (req, res) => {
+    try {
+        let productId = req.params.id;
+        let product = await Products.findOne({ 'products._id': productId });
+
+        if (!product) {
+            return res.status(404).send('Product not found');
+        }
+        const data= product.products.find(product => product._id == productId);
+
+        console.log(data);
+        res.render('admin/product-detail', { product:data});
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+}
+
+
+
+
 
 const adminlogout = (req, res) => {
     delete req.session.adminId;
@@ -422,6 +433,8 @@ module.exports={
     updateProduct,
     deleteproduct,
     productdisable,
+    adminprofile,
+    productdetiel,
     adminlogout,
     
 }

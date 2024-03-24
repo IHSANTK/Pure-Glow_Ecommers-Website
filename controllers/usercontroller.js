@@ -59,7 +59,7 @@ let userprofilepage = async (req, res) => {
         userId: req.session.userId,
         errorMessage: req.errorMessage,
         successMessage: message,
-        wishlist: req.session.wishlist
+        
       });
     } else {
       res.redirect('/login');
@@ -103,7 +103,7 @@ let dataslogin = async (req, res) => {
       req.session.userEmail = user.email;
       req.session.phoneNumber = user.phoneNumber;
       req.session.profileImage = user.image;
-      req.session.wishlist = user.wishlist.map(product => product._id.toString()); // Store wishlist data in session as array of product ids
+     
       
       res.redirect('/');
     } catch (error) {
@@ -192,7 +192,7 @@ const editpassword = async (req, res) => {
         user.password = hashedPassword;
         await user.save();
 
-        // Redirect to the profile page with a query parameter indicating successful password update
+        
         res.redirect('/profile?passwordUpdate= password update sccesfully');
 
     } catch (error) {
@@ -212,7 +212,7 @@ const editprofile = async (req, res) => {
         if (req.files && req.files.length > 0) {
             // Upload the file to Cloudinary
             const result = await cloudinary.uploader.upload(req.files[0].path);
-            imageUrl = result.secure_url; // Get the uploaded image URL
+            imageUrl = result.secure_url; 
         }
 
         // Update user data including the image URL
@@ -235,7 +235,7 @@ const editprofile = async (req, res) => {
         req.session.phoneNumber = phoneNumber;
         req.session.profileImage = imageUrl; // Update the profile image in the session
 
-        // Render the profile view with updated data
+       
         res.redirect('/profile?passwordUpdate= profile updated successfully');
 
     } catch (error) {
@@ -246,6 +246,8 @@ const editprofile = async (req, res) => {
 
 const deleteProfileImage = async (req, res) => {
     try {
+
+       
         // Find the user by userId and remove the profile image
         const userId = req.params.userId;
         const user = await User.findById(userId);
@@ -579,7 +581,7 @@ const wishlist = async (req, res) => {
 
         // Find the user by ID
         const user = await User.findById(req.session.userId);
-        console.log(user);
+       
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -616,7 +618,7 @@ const wishlist = async (req, res) => {
             const addedProduct = user.wishlist.find(item => item.productId == productId);
             // let color =  addedProduct.color;
             let color = true     
-            console.log(color);
+           
             res.json({  message: 'Product added to wishlist', color });
         }
     } catch (error) {
@@ -664,12 +666,25 @@ const productveiw = async (req, res) => {
 
         // Find the exact product within the products array
         const exactProduct = product.products.find(p => p._id == productId);
-
+  
         if (!exactProduct) {
             return res.status(404).send('Product not found');
         }
+        if (req.session.userId) {
+           
+                const user = await User.findById(req.session.userId);
+    
+                if (user) {  
+                  
 
-        res.render('user/productsingleveiw', { product: exactProduct,cartcount:req.cartcount,totalCartCount:req.totalCartCount });
+                    totalCartCount = user.cart.products.length;
+                   
+                }   
+        }else{
+            totalCartCount = "";
+        }
+
+        res.render('user/productsingleveiw', { product:exactProduct,cartcount:totalCartCount,totalCartCount:req.totalCartCount });
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ error: "Internal server error" });
