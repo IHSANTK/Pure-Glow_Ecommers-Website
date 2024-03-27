@@ -671,3 +671,17 @@
     //     </div>
     // </div> -->
 
+
+
+    // function sample(a) {
+      
+    //     let b = a.toString().split('').sort((a,b)=>b-a).join('');
+    
+    //    return b
+    // }
+    
+    // let a = 42145;
+   
+    // console.log( sample(a));
+
+    

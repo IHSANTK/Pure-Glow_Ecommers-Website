@@ -14,7 +14,8 @@ const userSchema = new mongoose.Schema({
             image: [String],
             productName: String,
             productPrice: String,
-            quantity: { type: Number, default: 1 }
+            quantity: { type: Number, default: 1 },
+            disable:Boolean
         }],
         total: String
     },
@@ -23,8 +24,17 @@ const userSchema = new mongoose.Schema({
         image: [String],
         productName: String,
         productPrice: String,
-        color: { type: String, default: 'red' } // Set default color to red
-    }]
+        color: { type: Boolean, default: false } // Set default color to red
+    }],
+    address: [{
+        name: String,
+        number:  Number,
+        pincode:Number,
+        area:String,
+        city:String,
+        state:String,
+         // Set default color to red
+    }],
 });
 
 const User = mongoose.model('User', userSchema);

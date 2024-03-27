@@ -7,9 +7,13 @@
   <!-- Bootstrap CSS -->
   <link rel="icon" href="https://cdn4.vectorstock.com/i/1000x1000/84/88/organic-icon-green-color-vector-3238488.jpg">
 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <!-- Bootstrap Icons CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   
   <style>
@@ -108,18 +112,33 @@
           <div class="profile-buttons p-4" style="height: calc(70vh - 70px);">
             <a href="#" class="profile-btn" data-target="edit-profile"><i class="fas fa-edit"></i> Edit Profile</a>
             <a href="#" class="profile-btn mt-3" data-target="change-password"><i class="fas fa-key"></i> Change Password</a>
-            <!-- <a href="#" class="profile-btn mt-3" data-target="manage-payment"><i class="fas fa-credit-card"></i> Manage Payment</a> -->
+  
             <a href="#" class="profile-btn mt-3" data-target="manage-address"><i class="fas fa-map-marker-alt"></i> Manage Address</a>
-            <a href="/whishlist" class="profile-btn mt-3" ><i class="fas fa-heart"></i> Wish List</a>
-            <a href="/logout" class="profile-btn ms-5 mt-4"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <a href="#" class="profile-btn mt-3" data-target="orders"><i class="fas fa-credit-card"></i> My Orders</a>
+           <a href="/logout" class="profile-btn ms-5 mt-4"><i class="fas fa-sign-out-alt"></i> Logout</a>
           </div>
         </div>
       </div>
 
+
+      <div id="orders" class="profile-edit col-lg-5 col-sm-12 mt-3  p-3" style="display: none; background-color: rgb(255, 232, 201); color:rgb(36, 36, 36)">
+        <h3 class="text-center"><strong> Orders</strong></h3>
+        <!--Add your order display logic here -->
+        <!-- Example: -->
+        <div class="order">
+            <p>Order ID: 123456</p>
+            <p>Product: Example Product</p>
+            <p>Quantity</p>
+            <p>Price: $50.00</p>
+            <p>Status</p>
+            <p>Order Date</p>
+            <p>Expected Date</p>
+        </div>
+     </div>
       <div class="col-8 right-content">
         <div class="profile-top col-6" style="background-color: rgb(224, 224, 224); padding: 10%; margin-left: 15%; border-radius: 10px;">
             <% if (profileImage) { %>
-                <img src="<%= profileImage %>" alt="Profile Image" style="width: 100px; height: 100px; border-radius: 50%;">
+                <img src="<%= profileImage %>" alt="Profile Image" style="width: 80px; height: 80px; border-radius: 50%;">
             <% } else { %>
                 <span class="profile-avatar" style="width: 100px; height: 100px; border-radius: 50%;"><i class="fas fa-user"></i></span>
             <% } %>
@@ -131,18 +150,27 @@
         <div id="edit-profile" class="profile-edit col-lg-5 col-sm-12 mt-3">
           <form action="/edit-profile/<%= userId %>" method="POST" onsubmit="return validateForm()" enctype="multipart/form-data">
               <div class="form-group">
+                <% if (profileImage) { %>
                   <label for="profileImage">
-                      <i class="fas fa-user " style="cursor: pointer;margin-right: 20px;"></i>Edit Profile 
+                    <!-- <i class="bi bi-pencil-square"></i> -->
+                      <img src="<%= profileImage %>" alt="Profile Image" style="cursor: pointer; width: 60px; height: 60px; border-radius: 50%;">
+
                   </label>
+              <% } else { %>
+                  <label for="profileImage">
+                      <img src="https://cdn4.iconfinder.com/data/icons/social-communication/142/add_user-512.png" alt="Default Avatar" style="cursor: pointer;width: 70px; height: 70px; border-radius: 50%;">
+                      Add Profile
+                  </label>
+              <% } %>
                   <input type="file" class="form-control-file d-none" id="profileImage" name="profileImage">
                   <span id="imageError" style="color: red;"></span> <!-- Error message for image -->
                   <% if (profileImage) { %>
                       <!-- Display the existing profile image as a preview -->
-                      <img src="<%= profileImage %>" alt="Profile Image" style="width: 100px; height: 100px; border-radius: 50%;">
+                      <!-- <img src="<%= profileImage %>" alt="Profile Image" style="width: 60px; height: 60px; border-radius: 50%;"> -->
                       <!-- Delete button for profile image -->
-                      <button type="button" class="btn btn-danger btn-sm delete-profile-image">
-                        <i class="bi bi-trash3"></i>delete
-                      </button>
+                      <button type="button" class="btn btn-sm delete-profile-image">
+                        <i class="bi bi-trash3" style="font-size: 20px;"></i>
+                    </button>
                   <% } %>
               </div>
               <!-- Rest of the form -->
@@ -224,39 +252,122 @@
       });
     </script>
       
-      <div id="manage-address" class="profile-edit col-lg-5 col-sm-12">
-        <h3 class="text-center">Manage Address</h3>
-        <!-- Add Address button -->
-        <button id="addAddressBtn" class="btn btn-primary mb-3">Add Address</button>
-        <!-- Address form for adding/editing -->
-        <form id="addressForm">
-          <div class="form-group">
-            <label for="addressLine">Address Line</label>
-            <input type="text" class="form-control" id="addressLine" name="addressLine">
-          </div>
-          <div class="form-group">
-            <label for="city">City</label>
-            <input type="text" class="form-control" id="city" name="city">
-          </div>
-          <div class="form-group">
-            <label for="state">State</label>
-            <input type="text" class="form-control" id="state" name="state">
-          </div>
-          <div class="form-group">
-            <label for="zipCode">Pincode</label>
-            <input type="text" class="form-control" id="zipCode" name="zipCode">
-          </div>
-          <button type="submit" class="btn btn-primary">Save Address</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
 
-  <!-- Bootstrap JS -->
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  <!-- jQuery -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      <div class="container">
+        <div class="row justify-content-center">
+          <div id="manage-address" class="profile-edit col-lg-5 col-sm-12">
+            <h3 class="text-center">Manage Address</h3>
+            <!-- Add Address button -->
+            <button id="addAddressBtn" class="btn btn-primary mb-3" data-toggle="modal" data-target="#addAddressModal">Add Address</button>
+            <div style="background-color: antiquewhite; padding: 15px; border-radius: 10px; color: black; ">
+              <% addrress.forEach(function(address) { %>
+                <button type="button" class="btn btn-sm delete-address" onclick=" addressdelete('<%= address._id %>')">
+                  <i class="bi bi-trash3" style="font-size: 20px;"></i>
+                 
+                </button>
+                <h5><%= address.name %>, <%= address.number %></h5>
+                <p>
+                  <%= address.area %>,
+                  <%= address.city %>,
+                  <%= address.state %>,
+                  <%= address.pincode %>
+                </p>
+                <h5></h5>
+                <hr>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <!-- Add Address Modal -->
+      <div class="modal fade" id="addAddressModal" tabindex="-1" role="dialog" aria-labelledby="addAddressModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addAddressModalLabel">Add Address</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <!-- Address form -->
+              <form id="addressForm" action="/manageaddress" method="POST">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="addressLine" name="name" placeholder="Name">
+                </div>
+                <div class="form-group">
+                  <input type="number" class="form-control" name="number" placeholder="Phone number">
+                </div>
+                <div class="form-group">
+                  <input type="number" class="form-control" name="pincode" placeholder="Pincode">
+                </div>
+                <div class="form-group">
+                  <input type="text" class="form-control" name="area" placeholder="Area">
+                </div>
+                <div class="form-group">
+                  <input type="text" class="form-control" name="city" placeholder="City">
+                </div>
+                <div class="form-group">
+                  <input type="text" class="form-control" name="state" placeholder="State">
+                </div>
+                <button type="submit" class="btn btn-primary">Save Address</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="modal fade" id="wishlistModal" tabindex="-1" aria-labelledby="wishlistModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: rgb(5, 5, 4); width: 60%; margin-left: 21%;height: 55px; ">
+                <div class="modal-body" id="wishlistModalBody" style="margin: auto; color: rgb(255, 255, 255);">
+                    <!-- Wishlist status message will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+      <script>
+
+    function addressdelete(addressId){
+
+      console.log(addressId);
+
+     axios.post(`/addressdelete/${addressId}`)
+          .then(function (response) {
+          let  message =response.data.message
+           console.log(message);
+          
+           showWishlistStatusMessage( message);
+           setTimeout(function() {
+            location.reload();
+         }, 2000);
+
+        })
+            .catch(function (error) {
+                 console.error('Error:', error);
+        });
+   }
+        
+        function showWishlistStatusMessage(message) {
+        const wishlistModalBody = document.getElementById('wishlistModalBody');
+        wishlistModalBody.innerHTML = `<p>${message}</p>`;
+        $('#wishlistModal').modal('show');
+            setTimeout(function() {
+            $('#wishlistModal').modal('hide');
+      }, 2000); // 2000 milliseconds = 2 seconds
+    }
+ 
+      </script>
+    
+      <!-- jQuery -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      <!-- Bootstrap JS -->
+      <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
 
   <script>
     $(document).ready(function(){
@@ -302,6 +413,18 @@
                 $("#confirmError").text("");
             }
         });
+        $(".profile-btn").click(function(e){
+        var target = $(this).data("target");
+        if (target === "orders") {
+            // Show the orders section when "My Orders" button is clicked
+            $("#orders").show();
+        } else {
+            // Hide the orders section for other buttons
+            $("#orders").hide();
+        }
+        // Rest of your code...
+    });
+
     });
 </script>
 </body>

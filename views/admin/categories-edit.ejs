@@ -397,14 +397,17 @@
                                 </div> -->
                                 <div class="p-3 col-8"style="background-color: rgb(165, 168, 168);">
                                 <div class="card-body col-6">
-                                    <form action="/categories-edit/<%= category.id %>" method="post">
+                                    <form id="editCategoryForm" action="/categories-edit/<%= category.id %>" method="post">
                                         <div class="row g-3 align-items-center">
                                             <div class="col-md-12">
                                                 <label class="form-label">Name</label>
                                                 <!-- Add a name attribute to the input field -->
-                                                <input type="text" class="form-control" name="newName" value="<%= category.categoryName %>">
+                                                <input type="text" class="form-control" id="newName" name="newName" value="<%= category.categoryName %>">
+                                                <div id="nameError" class="text-danger"></div>
                                             </div>
                                         </div>
+                                        <button type="submit" class="btn btn-primary py-2 px-5 text-uppercase btn-set-task w-sm-100 mt-3">Save</button>
+                                    
                                         <br>
                                         <!-- <div class="card">
                                             <div class="card-header py-3 bg-transparent border-bottom-0">
@@ -415,9 +418,26 @@
                                                 <input type="file" id="dropify-event" data-default-file="assets/images/product/Cropimg.jpg">
                                             </div>
                                         </div> -->
-                                        <button type="submit" class="btn btn-primary py-2 px-5 text-uppercase btn-set-task w-sm-100 mt-3">Save</button>
                                     </form>
                                 </div>
+                                <script>
+                                    document.getElementById('editCategoryForm').addEventListener('submit', function(event) {
+                                        // Fetch the new category name input value
+                                        const newName = document.getElementById('newName').value.trim();
+                                
+                                        // Get the error message element
+                                        const nameError = document.getElementById('nameError');
+                                
+                                        // Reset previous error messages
+                                        nameError.textContent = '';
+                                
+                                        // Perform validation
+                                        if (!newName) {
+                                            nameError.textContent = 'Name cannot be empty';
+                                            event.preventDefault(); // Prevent the form from submitting
+                                        }
+                                    });
+                                </script>
                                     
                                             <!-- <div class="col-md-6">
                                                 <label class="form-label">Page Title</label>

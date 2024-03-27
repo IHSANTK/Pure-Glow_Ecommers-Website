@@ -152,17 +152,10 @@
 <!---modal-->
 <div class="modal fade" id="wishlistModal" tabindex="-1" aria-labelledby="wishlistModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content   " style="background-color: rgb(228, 186, 131); width: 300px; margin-left: 21%; height: 55px;">
-            <!-- <div class="modal-header"> -->
-                <!-- <h5 class="modal-title" id="wishlistModalLabel">Wishlist Status</h5> -->
-                <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div> -->
-            <div class="modal-body  " id="wishlistModalBody" style="margin: auto; color: rgb(27, 24, 24);">
+        <div class="modal-content" style="background-color: rgb(5, 5, 4); width: 60%; margin-left: 21%;height: 55px; ">
+            <div class="modal-body" id="wishlistModalBody" style="margin: auto; color: rgb(255, 255, 255);">
                 <!-- Wishlist status message will be displayed here -->
             </div>
-            <!-- <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div> -->
         </div>
     </div>
 </div>
@@ -174,6 +167,7 @@
         axios.post(`/removewishlist/${productId}`)
             .then(function (response) {
                 console.log(response.data);
+                
               
                 showWishlistStatusMessage(response.data.message);
                 

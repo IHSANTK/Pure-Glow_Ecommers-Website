@@ -2,30 +2,31 @@ const admincontroller = require('../controllers/admincontroller');
 const express = require('express');
 const router = express.Router();
 const upload = require('../config/multer');
-const adminMiddleware = require('../middlewears/adminMiddleware'); // Corrected typo
+const authenticateJWT = require('../middlewears/adminauthenticateJWT'); // Corrected typo
 const preventBack = require("../middlewears/preventback");
+const  adminMiddleware = require('../middlewears/adminMiddleware')
 
-router.get('/admin',preventBack, adminMiddleware, admincontroller.admindashbord);
-router.get('/adminlogin',preventBack, adminMiddleware,admincontroller.loginpage);
-router.post('/admin',preventBack, adminMiddleware, admincontroller.logindatas);
-router.post('/toggleBlock', adminMiddleware, admincontroller.blockuser);
-router.get('/userlist', adminMiddleware, admincontroller.userslist);
-router.get('/categorie-list', adminMiddleware, admincontroller.categorilist);
-router.get('/categories-add', adminMiddleware, admincontroller.categoriesadd);
-router.post('/categories-add', adminMiddleware, admincontroller.updatecategory);
-router.get('/categories-edit/:id', admincontroller.categorieedit);
-router.post('/categories-edit/:id', admincontroller.categorieeditdatas);
-router.post('/categories-delete/:id', admincontroller.deletecategorie);
-router.get('/product-list', adminMiddleware, admincontroller.productlist);
-router.get('/product-add', admincontroller.productadd);
-router.post('/product-add', upload.array('image', 2), admincontroller.AddProductlist);
-router.get('/product-edit/:id', admincontroller.productedit);
-router.post('/product-edit/:id', upload.array('image', 2), admincontroller.updateProduct);
-router.get('/product-delete/:id', admincontroller.deleteproduct);
-router.post('/product-disable/:id',admincontroller.productdisable);
-router.get('/admin-profile',admincontroller.adminprofile);
-router.get('/productdetiel/:id',admincontroller.productdetiel)
+router.get('/admin', preventBack,adminMiddleware, authenticateJWT, admincontroller.admindashbord);
+router.get('/adminlogin', preventBack,adminMiddleware, admincontroller.loginpage);
+router.post('/admin', preventBack, admincontroller.logindatas);
+router.post('/toggleBlock', authenticateJWT, admincontroller.blockuser);
+router.get('/userlist', authenticateJWT,adminMiddleware, admincontroller.userslist);
+router.get('/categorie-list', authenticateJWT,adminMiddleware, admincontroller.categorilist);
+router.get('/categories-add', authenticateJWT,adminMiddleware, admincontroller.categoriesadd);
+router.post('/categories-add', authenticateJWT,adminMiddleware ,admincontroller.updatecategory);
+router.get('/categories-edit/:id', authenticateJWT,adminMiddleware, admincontroller.categorieedit);
+router.post('/categories-edit/:id', authenticateJWT,adminMiddleware, admincontroller.categorieeditdatas);
+router.post('/categories-delete/:id', authenticateJWT,adminMiddleware, admincontroller.deletecategorie);
+router.get('/product-list', authenticateJWT,adminMiddleware, admincontroller.productlist);
+router.get('/product-add',adminMiddleware, admincontroller.productadd);
+router.post('/product-add',adminMiddleware, upload.array('image', 2), admincontroller.AddProductlist);
+router.get('/product-edit/:id',adminMiddleware, authenticateJWT, admincontroller.productedit);
+router.post('/product-edit/:id',adminMiddleware, authenticateJWT, upload.array('image', 2), admincontroller.updateProduct);
+router.get('/product-delete/:id',adminMiddleware, authenticateJWT, admincontroller.deleteproduct);
+router.post('/product-disable/:id',adminMiddleware, authenticateJWT, admincontroller.productdisable);
+router.get('/admin-profile',adminMiddleware, authenticateJWT, admincontroller.adminprofile);
+router.get('/productdetiel/:id',adminMiddleware, authenticateJWT, admincontroller.productdetiel);
 
-router.get('/admin-logout', adminMiddleware, admincontroller.adminlogout);
+router.get('/admin-logout',adminMiddleware, authenticateJWT, admincontroller.adminlogout);
 
 module.exports = router;

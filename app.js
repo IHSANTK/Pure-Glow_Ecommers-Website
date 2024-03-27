@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cookieparser = require('cookie-parser')
 const session = require('express-session');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
@@ -22,6 +23,7 @@ app.use(session({ secret: 'mysecretkey', resave: true, saveUninitialized: true }
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyParser.json());
+app.use(cookieparser());
 
 passport.serializeUser((user, done) => {
     done(null, user._id);

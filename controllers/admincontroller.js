@@ -1,5 +1,6 @@
 
 const User = require('../models/user');
+const jwt = require('jsonwebtoken');
 const Products = require('../models/Products');
 const Admin = require('../models/admin');
 const multer =  require('multer')
@@ -9,24 +10,38 @@ require('dotenv').config()
 
 
 
-
-const loginpage =(req,res)=>{
-
-    if (req.session.adminId ) {
-        res.redirect('/admin');
-    } else {
-        res.render('admin/login');
+const loginpage = (req, res) => {
+    const token = req.cookies.admin_jwt;
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            if (decoded && decoded.id) {
+                // Token is valid, redirect to admin dashboard
+                return res.redirect('/admin');
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
     }
- 
-}
+    // If no token or invalid token, render login page
+    res.render('admin/login');
+};
+
 const admindashbord = async (req, res) => {
-    if (req.session.adminId) {
-        res.render('admin/index');
-    } else {
-        res.redirect('/adminlogin');
+    const token = req.cookies.admin_jwt;
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            if (decoded && decoded.id) {
+               
+                return res.render('admin/index');
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
     }
-    
-
+    // If no token or invalid token, redirect to admin login
+    res.redirect('/adminlogin');
 };
 
 const logindatas = async (req, res) => {
@@ -34,8 +49,8 @@ const logindatas = async (req, res) => {
     const admin = await Admin.findOne({ email });
 
     if (admin && admin.password === password) {
-        req.session.adminId = admin._id;
-        req.session.adminEmail = admin.email; // Store admin email in session
+        const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET);
+        res.cookie('admin_jwt', token, { httpOnly: true });
         res.redirect('/admin');
     } else {
         res.redirect('/adminlogin');
@@ -59,7 +74,7 @@ let blockuser = async (req, res) => {
 
 let userslist = async (req, res) => {
 
-    if (req.session.adminId) {
+   
     try {
         const data = await User.find();
         res.render('admin/customers', { data });
@@ -68,7 +83,7 @@ let userslist = async (req, res) => {
         res.status(500).send('Error retrieving users');
     }
 
-    } 
+    
  
 }
 
@@ -77,15 +92,14 @@ let renderindexblock =(req, res) => {
 }
 
 let categorilist = async(req,res)=>{
-    
- if (req.session.adminId) {
+
     let products = await Products.find();
     if(!products ){
         res.status(400).send('Admin not found');
     }
     let data= products[0].categories.map(category => category);
     res.render('admin/categorie-list',{data});
-   }
+   
 }
 
 let categoriesadd= async(req,res)=>{
@@ -184,7 +198,7 @@ let deletecategorie = async (req, res) => {
     }
 };
 let productlist = async (req, res) => {
-    if (req.session.adminId) {
+  
         try {
             let product = await Products.findOne();
             let products = product.products;
@@ -209,7 +223,7 @@ let productlist = async (req, res) => {
             console.log(error);
             res.status(500).send('Internal Server Error');
         }
-    }
+    
 };
 
  
@@ -408,10 +422,9 @@ const productdetiel = async (req, res) => {
 
 
 const adminlogout = (req, res) => {
-    delete req.session.adminId;
-    delete req.session.adminEmail;
+    res.clearCookie('admin_jwt'); // Clear the JWT token stored in cookies
     res.redirect('/adminlogin');
-}
+};
 
 module.exports={
     loginpage,

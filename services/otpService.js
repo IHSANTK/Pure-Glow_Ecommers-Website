@@ -34,7 +34,7 @@ const otpService = {
     },
 
     verifyOTP: function (email, otp) {
-        const storedOTP = this.otpMap.get(email);
+        const storedOTP = this.otpMap.get(email); 
         return storedOTP === otp;
     }
 };

@@ -404,16 +404,16 @@
                                     <h6 class="mb-0 fw-bold ">Basic information</h6>
                                 </div> -->
                                 <div class="card-body" style="background-color: rgb(170, 177, 177);">
-                                    <form action="/categories-add" method="post">
+                                    <form id="categoryForm" action="/categories-add" method="post">
                                         <div class="row g-3 align-items-center">
                                             <div class="col-md-6">
                                                 <label class="form-label">Name</label>
                                                 <!-- Add the name attribute to the input field -->
-                                                <input type="text" class="form-control border border-3" name="name">
+                                                <input type="text" class="form-control border border-3" id="categoryName" name="name">
+                                                <div id="nameError" class="text-danger"></div>
                                                 <button type="submit" class="btn btn-primary py-2 px-5 text-uppercase btn-set-task w-sm-100 mt-3">Save</button>
                                             </div>
                                         </div>
-                                        <br><br>
                                         <!-- <div class="card col-8 ">
                                             <div class="card-header py-3 bg-transparent border-bottom-0">
                                                 <h6 class="m-0 fw-bold">Categories Image Upload</h6>
@@ -426,6 +426,24 @@
                                     </form>
                                 </div>
                             </div>
+                            <script>
+                                document.getElementById('categoryForm').addEventListener('submit', function(event) {
+                                    // Fetch the category name input value
+                                    const categoryName = document.getElementById('categoryName').value.trim();
+                            
+                                    // Get the error message element
+                                    const nameError = document.getElementById('nameError');
+                            
+                                    // Reset previous error messages
+                                    nameError.textContent = '';
+                            
+                                    // Perform validation
+                                    if (!categoryName) {
+                                        nameError.textContent = 'Pls enter category Name';
+                                        event.preventDefault(); // Prevent the form from submitting
+                                    }
+                                });
+                            </script>
                             <!-- <div class="card">
                                 <div class="card-header py-3 bg-transparent border-bottom-0">
                                     <h6 class="m-0 fw-bold">Cropped Images</h6>
