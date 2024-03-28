@@ -1,5 +1,53 @@
 const mongoose = require('mongoose');
 
+
+
+
+
+  const addressSchema = new mongoose.Schema(
+    {
+      name: { type: String },
+      phone: { type: Number },
+      address: { type: String },
+      city: { type: String },
+      district: { type: String },
+      state: { type: String },
+      pincode:{ type: Number },
+      email: { type: String },
+    },
+    { _id: true }
+  );
+
+
+
+  const orderSchema = new mongoose.Schema(
+    {
+      orderId: { type: String,  unique: true },
+      products: [
+        {
+          productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+          name:{type:String},
+          qty:{type:Number},
+          price:{type:Number,required:true},    
+          image:[String],
+          orderStatus: {
+            type: String,
+            default: "Pending",
+          },
+          cancelReason: { type: String }, // New field for cancellation reason
+        },
+      ],
+      totalAmount: { type: Number },
+      orderDate: { type: Date, default: Date.now },
+      expectedDeliveryDate: { type: String },
+      shippingAddress: { type: addressSchema },
+      paymentMethod: { type: String, require: true },
+    },
+    { _id: false }
+  );
+
+
+
 const userSchema = new mongoose.Schema({
     googleId: String,
     name: String,
@@ -26,16 +74,12 @@ const userSchema = new mongoose.Schema({
         productPrice: String,
         color: { type: Boolean, default: false } // Set default color to red
     }],
-    address: [{
-        name: String,
-        number:  Number,
-        pincode:Number,
-        area:String,
-        city:String,
-        state:String,
-         // Set default color to red
-    }],
+
+    orders: [orderSchema],
+    address:[addressSchema]
+ 
 });
+
 
 const User = mongoose.model('User', userSchema);
 

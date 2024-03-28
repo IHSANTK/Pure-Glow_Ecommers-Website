@@ -70,9 +70,13 @@ router.post('/checkout/:id',preventBack,userController.checkoutpage);
 
 router.post('/manageaddress', userController.manageaddress);
 
-router.post('/addressdelete/:id',userController. addressdelete)
+router.post('/addressdelete/:id',userController. addressdelete);
 
-router.post('/placeholder',userController.placeholder)
+router.post('/placeholder',userController.placeholder);
+
+router.get('/orders',userController.ordermanage);
+
+router.post('/cancellreson/:id',userController.cancellreson);
 
 
 

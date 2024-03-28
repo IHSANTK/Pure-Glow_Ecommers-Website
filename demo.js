@@ -684,4 +684,11 @@
    
     // console.log( sample(a));
 
-    
+    function tribbinocci(a,b){
+
+
+        console.log(a,b);
+
+    }
+
+    tribbinocci([1,2,3],10);

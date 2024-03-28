@@ -155,11 +155,14 @@
 
                                     <h5><%= address.name %>, <%= address.number %></h5>
                                     <p>
-                                        <%= address.area %>,
-                                        <%= address.city %>,
-                                        <%= address.state %>,
-                                        <%= address.pincode %>
+                                      <%= address.address %>,
+                                      <%= address.city %>,
+                                      <%= address.district %>,
+                                      <%= address.state %>,
+                                      <%= address.pincode %>
                                     </p>
+                                    <h6><i class="bi bi-telephone" style="margin-right: 10px;"></i><%= address.phone %></h6>
+                                    <h6><i class="bi bi-envelope "  style="margin-right: 10px;"></i><%= address.email %></h6>
                                 </div>
                             <% }); %>
                         </div>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Pure Glow</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+
+    <!-- Google Web Fonts -->
+    <link rel="icon" href="https://cdn4.vectorstock.com/i/1000x1000/84/88/organic-icon-green-color-vector-3238488.jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet">
+
+    <!-- Icon Font Stylesheet -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="/lib/lightbox/css/lightbox.min.css" rel="stylesheet">
+    <link href="/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Navbar start -->
+    <div class="container-fluid fixed-top">
+        <div class="container topbar bg-primary d-none d-lg-block">
+        </div>
+        <div class="container px-0">
+            <nav class="navbar navbar-light bg-white navbar-expand-xl">
+                <a href="index.html" class="navbar-brand">
+                    <h1 class="text-primary display-6">Pure Glow</h1>
+                </a>
+                <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                    <span class="fa fa-bars text-primary"></span>
+                </button>
+                <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
+                    <div class="navbar-nav mx-auto">
+                        <a href="/" class="nav-item nav-link">Home</a>
+                        <a href="" class="nav-item nav-link">Shop</a>
+                        <a href="/contact" class="nav-item nav-link">Contact</a>
+                    </div>
+                    <div class="d-flex m-3 me-0">
+                        <a href="/whishlist" class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4"><i class="fas fa-heart heart-icon ok"></i></a>
+                        <a href="#" class="position-relative me-4 my-auto">
+                            <i class="fa fa-shopping-bag fa-2x"></i>
+                            <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;"></span>
+                        </a>
+                        <a href="/profile" class="my-auto">
+                            <i class="fas fa-user fa-2x"></i>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <!-- Navbar End -->
+
+    <div style="margin-top: 150px">
+        <% products.forEach(product => { %>
+        <div>
+            <img src="<%= product.image[0] %>" alt="">
+            <h2><%= product.name %></h2>
+            <p>Quantity: <%= product.qty %></p>
+            <p>Price: <%= product.price %></p>
+            <p>Order Status: <%= product.orderStatus %></p>
+
+            <% if (product.cancelReason) { %>
+            <p>Cancel Reason: <%= product.cancelReason %></p>
+            <% } %>
+
+            <!-- Format orderDate -->
+            <p>Order Date: <%= new Date(userOrders[0].orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
+
+            <!-- Calculate expected delivery date -->
+            <% 
+                        const orderDate = new Date(userOrders[0].orderDate);
+                        const expectedDeliveryDate = new Date(orderDate);
+                        expectedDeliveryDate.setDate(orderDate.getDate() + 4); // Adding 4 days
+                    %>
+            <p>Expected Delivery Date: <%= expectedDeliveryDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
+
+            <!-- Print payment method -->
+            <p>Payment Method: <%= userOrders[0].paymentMethod %></p>
+
+
+            <h5> <%= userOrders[0].shippingAddress.name %></h5>
+            <p> <%= userOrders[0].shippingAddress.address %> 
+                <%= userOrders[0].shippingAddress.city %>
+                <%= userOrders[0].shippingAddress.district %> <br>
+                <%= userOrders[0].shippingAddress.state %>
+                <%= userOrders[0].shippingAddress.pincode %></p>
+
+            <h6><i class="bi bi-telephone" style="margin-right: 10px;"></i> <%= userOrders[0].shippingAddress.phone %></h6>
+            <h6><i class="bi bi-envelope " style="margin-right: 10px;"></i><%= userOrders[0].shippingAddress.email %></h6>
+            <!-- Dropdown for cancel reasons -->
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="cancelDropdown" data-toggle="dropdown" aria-expanded="false">
+                    Cancel
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="cancelDropdown">
+                    <li><a class="dropdown-item" href="#">Reason 1</a></li>
+                    <li><a class="dropdown-item" href="#">Reason 2</a></li>
+                    <li><a class="dropdown-item" href="#">Reason 3</a></li>
+                    <!-- Add more reasons as needed -->
+                </ul>
+            </div>
+            <form action="/cancellreson/<%=product.productId %>" method="post">
+                <button type="submit" class="btn btn-danger mt-2">Cancel</button>
+            </form>
+        </div>
+        <% }); %>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
+    <!-- Your other scripts -->
+</body>
+
+</html>

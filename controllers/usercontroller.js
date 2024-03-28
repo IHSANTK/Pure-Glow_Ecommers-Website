@@ -933,34 +933,53 @@ const checkoutpage = async (req, res) => {
 
 
 const manageaddress = async (req, res) => {
-    const { name, number, pincode, area, city, state } = req.body;
-  
-
+    const { name,number, pincode, address, city, district, state, email } = req.body;
+console.log(number);
     try {
-        // Find the user (you may want to add some conditions to find the correct user)
-        const user = await User.findOne();
+        const token = req.cookies.user_jwt;
+      
+        if (!token) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        // Verify the JWT token to get user ID
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded || !decoded.id) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        // Find the user by ID obtained from the decoded JWT token
+        const user = await User.findById(decoded.id);
+
+        // If user is not found, handle the situation
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
 
         // Push the new address to the user's address array
-       let address = user.address.push({
+        user.address.push({
             name: name,
-            number: number,
+            phone: number,
             pincode: pincode,
-            area: area,
+            address: address,
             city: city,
+            district: district,
             state: state,
+            email: email
         });
 
         // Save the changes
         await user.save();
 
-
-        res.redirect('/profile?passwordUpdate= address added');
-
+        res.redirect('/profile?addressUpdate=address added');
     } catch (error) {
         console.error('Error adding address:', error);
         res.status(500).send('Internal Server Error');
     }
 };
+
+
+
 const addressdelete = async (req, res) => {
     try {
         const addressId = req.params.id;
@@ -986,23 +1005,174 @@ const addressdelete = async (req, res) => {
 };
 
 
-const placeholder = (req, res) => {
-
+const placeholder = async (req, res) => {
     const { selectedAddressId, selectedPaymentMethod, productIds } = req.body;
 
-    console.log("Selected Address ID:", selectedAddressId);
-    console.log("Selected Payment Method:", selectedPaymentMethod);
-    console.log("Product IDs:", productIds);
+    try {
+        const token = req.cookies.user_jwt;
 
-    // Further processing logic here
+        if (!token) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        // Verify the JWT token to get user ID
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded || !decoded.id) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        // Find the exact user matching the decoded user ID
+        const user = await User.findById(decoded.id);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Find the address matching the selected address ID within the user's addresses
+        const exactAddress = user.address.find(addr => addr._id.toString() === selectedAddressId);
+
+        if (!exactAddress) {
+            return res.status(404).json({ error: 'Address not found' });
+        }
+
+        // Find only the products whose IDs match the provided productIds within the 'products' array field
+        const products = await Products.find();
+
+        if (!products || products.length === 0) {
+            return res.status(404).json({ error: 'Products not found' });
+        }
+
+        let exactProducts = [];
+
+        if (productIds.length === 1) {
+            const product = products.find(product => product.products.some(p => p._id.toString() === productIds[0]));
+            exactProducts = product.products.filter(p => p._id.toString() === productIds[0]);
+        } else {
+            // Assuming user.cart.products is where the user's cart items are stored
+            exactProducts = user.cart.products.filter(product => !product.disable);
+        }
+
+        // Calculate total amount based on the found products
+        const totalAmount = exactProducts.reduce((total, product) => {
+            return total + (product.productPrice * product.quantity);
+        }, 0);
+
+        // Ensure totalAmount is a number, if it's NaN set it to 0
+        const sanitizedTotalAmount = isNaN(totalAmount) ? 0 : totalAmount;
+
+        // Create new order object
+        const newOrder = {
+            products: exactProducts.map(product => ({
+                productId: product._id,
+                name:product.productName,
+                qty: product.quantity,
+                price: product.productPrice,
+                image:product.image,
+                orderStatus: "Pending",
+                cancelReason: null
+            })),
+            totalAmount: sanitizedTotalAmount,
+            orderDate: new Date(),
+            shippingAddress: exactAddress,
+            paymentMethod: selectedPaymentMethod
+        };
+
+        // Add the new order to the user's orders array
+        user.orders.push(newOrder);
+
+        // Save the updated user document
+        await user.save();
+
+        console.log("Product IDs:", selectedAddressId);
+        console.log("Product IDs:", selectedPaymentMethod);
+        console.log("Product IDs:", productIds);
+        console.log("Products:", exactProducts);
+        console.log(exactAddress);
+
+        // Further processing logic here
+
+        res.status(200).json({ products: exactProducts, exactAddress });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).send('Internal Server Error');
+    }
 }
 
 
+const ordermanage = async (req, res) => {
+    const token = req.cookies.user_jwt;
+
+    if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Verify the JWT token to get user ID
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded || !decoded.id) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const user = await User.findById(decoded.id);
+
+    // Extracting products from each order
+    const userProducts = user.orders.map(order => order.products).flat();
 
 
+    const userOrders = user.orders.map(order => {
+        return {
+            products: order.products,
+            totalAmount: order.totalAmount,
+            orderDate: order.orderDate,
+            expectedDeliveryDate: order.expectedDeliveryDate,
+            shippingAddress: order.shippingAddress,
+            paymentMethod: order.paymentMethod
+        };
+    });
 
+    
 
+    // const ordersdata =user.orders;
 
+    
+    // `flat()` method is used to flatten the array of arrays into a single array
+
+    res.render('user/orders', { products:userProducts,userOrders});
+}
+
+const cancellreson = async (req, res) => {
+    let productId = req.params.id;
+    const token = req.cookies.user_jwt;
+ 
+    if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+ 
+    // Verify the JWT token to get user ID
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded || !decoded.id) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const user = await User.findById(decoded.id);
+ 
+    let foundProduct = null;
+ 
+    // Iterate over each order and its products to find the product with the matching productId
+    user.orders.forEach(order => {
+        order.products.forEach(product => {
+            if (product.productId.toString() === productId) {
+                foundProduct = product;
+                return; // Exit the loop once the product is found
+            }
+        });
+    });
+ 
+    if (!foundProduct) {
+        return res.status(404).json({ error: 'Product not found' });
+    }
+ 
+    console.log(foundProduct);
+ 
+    // You can do further operations with the found product here
+ }
 
 
 
@@ -1132,6 +1302,8 @@ module.exports={
     manageaddress,
     addressdelete,
     placeholder,
+    ordermanage,
+    cancellreson,
     loginWithOTP, 
     sendOTP,
     succesGoogleLogin,
