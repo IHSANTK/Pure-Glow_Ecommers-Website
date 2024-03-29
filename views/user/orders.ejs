@@ -78,14 +78,14 @@
             <p>Quantity: <%= product.qty %></p>
             <p>Price: <%= product.price %></p>
             <p>Order Status: <%= product.orderStatus %></p>
-
+    
             <% if (product.cancelReason) { %>
             <p>Cancel Reason: <%= product.cancelReason %></p>
             <% } %>
-
+    
             <!-- Format orderDate -->
             <p>Order Date: <%= new Date(userOrders[0].orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
-
+    
             <!-- Calculate expected delivery date -->
             <% 
                         const orderDate = new Date(userOrders[0].orderDate);
@@ -93,38 +93,63 @@
                         expectedDeliveryDate.setDate(orderDate.getDate() + 4); // Adding 4 days
                     %>
             <p>Expected Delivery Date: <%= expectedDeliveryDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
-
+    
             <!-- Print payment method -->
             <p>Payment Method: <%= userOrders[0].paymentMethod %></p>
-
-
+    
+    
             <h5> <%= userOrders[0].shippingAddress.name %></h5>
             <p> <%= userOrders[0].shippingAddress.address %> 
                 <%= userOrders[0].shippingAddress.city %>
                 <%= userOrders[0].shippingAddress.district %> <br>
                 <%= userOrders[0].shippingAddress.state %>
                 <%= userOrders[0].shippingAddress.pincode %></p>
-
+    
             <h6><i class="bi bi-telephone" style="margin-right: 10px;"></i> <%= userOrders[0].shippingAddress.phone %></h6>
             <h6><i class="bi bi-envelope " style="margin-right: 10px;"></i><%= userOrders[0].shippingAddress.email %></h6>
             <!-- Dropdown for cancel reasons -->
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="cancelDropdown" data-toggle="dropdown" aria-expanded="false">
-                    Cancel
+            <!-- <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" onclick="submitCancellationReason(event)" type="button" id="cancelDropdown" data-toggle="dropdown" aria-expanded="false">
+                    Cancelrson
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="cancelDropdown">
-                    <li><a class="dropdown-item" href="#">Reason 1</a></li>
-                    <li><a class="dropdown-item" href="#">Reason 2</a></li>
-                    <li><a class="dropdown-item" href="#">Reason 3</a></li>
+                    <li><a class="dropdown-item" href="#" data-reason="Reason 1">Reason 1</a></li>
+                    <li><a class="dropdown-item" href="#" data-reason="Reason 2">Reason 2</a></li>
+                    <li><a class="dropdown-item" href="#" data-reason="Reason 3">Reason 3</a></li> -->
                     <!-- Add more reasons as needed -->
-                </ul>
-            </div>
-            <form action="/cancellreson/<%=product.productId %>" method="post">
-                <button type="submit" class="btn btn-danger mt-2">Cancel</button>
+                <!-- </ul>
+            </div> -->
+            <form action="/cancellreson/<%=product.productId %>" method="post" onsubmit="return submitCancellationReason(this)">
+                <div class="mb-3">
+                    <label for="cancelReasonSelect" class="form-label">Select Cancel Reason</label>
+                    <select class="form-select" id="cancelReasonSelect" name="cancelReason">
+                        <option selected disabled>Select a reason</option>
+                        <option value="Reason 1">Reason 1</option>
+                        <option value="Reason 2">Reason 2</option>
+                        <option value="Reason 3">Reason 3</option>
+                        <!-- Add more reasons as needed -->
+                    </select>
+                    <button type="submit" class="btn btn-danger">Cancel</button>
+                </div>
+               
             </form>
         </div>
         <% }); %>
     </div>
+    
+    <script>
+        function submitCancellationReason(form) {
+        var reasonSelect = form.querySelector('#cancelReasonSelect');
+        var selectedReason = reasonSelect.value;
+        
+        if (selectedReason === "") {
+            alert("Please select a reason.");
+            return false; // Prevent form submission if no reason selected
+        }
+        
+        return true; // Allow form submission if reason selected
+    }
+    </script>
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>

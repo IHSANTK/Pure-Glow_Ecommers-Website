@@ -1139,40 +1139,55 @@ const ordermanage = async (req, res) => {
 }
 
 const cancellreson = async (req, res) => {
-    let productId = req.params.id;
-    const token = req.cookies.user_jwt;
- 
-    if (!token) {
-        return res.status(401).json({ error: 'Unauthorized' });
-    }
- 
-    // Verify the JWT token to get user ID
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded || !decoded.id) {
-        return res.status(401).json({ error: 'Unauthorized' });
-    }
-    const user = await User.findById(decoded.id);
- 
-    let foundProduct = null;
- 
-    // Iterate over each order and its products to find the product with the matching productId
-    user.orders.forEach(order => {
-        order.products.forEach(product => {
-            if (product.productId.toString() === productId) {
-                foundProduct = product;
-                return; // Exit the loop once the product is found
-            }
+    try {
+        const productId = req.params.id;
+        const token = req.cookies.user_jwt;
+
+        if (!token) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        // Verify the JWT token to get user ID
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded || !decoded.id) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        const user = await User.findById(decoded.id);
+
+        let foundProduct = null;
+        const { cancelReason } = req.body;
+
+        // Iterate over each order and its products to find the product with the matching productId
+        user.orders.forEach(order => {
+            order.products.forEach(product => {
+                if (product.productId.toString() === productId) {
+                    foundProduct = product;
+                    product.orderStatus = "cancel"                    
+                    product.cancelReason = cancelReason
+                    return; // Exit the loop once the product is found
+                }
+            });
         });
-    });
- 
-    if (!foundProduct) {
-        return res.status(404).json({ error: 'Product not found' });
+
+        if (!foundProduct) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        // Access selected cancellation reason from request body
+
+        console.log(foundProduct);
+        console.log(cancelReason);
+
+        await user.save();
+        // You can do further operations with the found product and cancel reason here
+
+        res.status(200).json({ message: 'Cancellation reason received successfully' });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).send('Internal Server Error');
     }
- 
-    console.log(foundProduct);
- 
-    // You can do further operations with the found product here
- }
+}
 
 
 

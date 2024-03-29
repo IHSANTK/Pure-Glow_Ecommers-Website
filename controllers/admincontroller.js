@@ -417,7 +417,10 @@ const productdetiel = async (req, res) => {
     }
 }
 
+const orderslist =(req,res)=>{
 
+    res.render('admin/order-list')
+}
 
 
 
@@ -448,6 +451,7 @@ module.exports={
     productdisable,
     adminprofile,
     productdetiel,
+    orderslist,
     adminlogout,
     
 }
