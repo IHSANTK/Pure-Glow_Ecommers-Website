@@ -27,7 +27,9 @@ router.post('/product-disable/:id',adminMiddleware, authenticateJWT, admincontro
 router.get('/admin-profile',adminMiddleware, authenticateJWT, admincontroller.adminprofile);
 router.get('/productdetiel/:id',adminMiddleware, authenticateJWT, admincontroller.productdetiel);
 
-router.get('/orederslist',adminMiddleware, authenticateJWT, admincontroller.orderslist)
+router.get('/orederslist',adminMiddleware, authenticateJWT, admincontroller.orderslist);
+
+router.post('/orederstatus', adminMiddleware, authenticateJWT,admincontroller.orederstatus);
 
 router.get('/admin-logout',adminMiddleware, authenticateJWT, admincontroller.adminlogout);
 

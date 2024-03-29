@@ -32,58 +32,65 @@
 
     <!-- Template Stylesheet -->
     <link href="/css/style.css" rel="stylesheet">
+    <style>
+        .order-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-top: 50px;
+        }
+
+        .order-details {
+            margin-left: 20px;
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .product-image {
+            margin-right: 20px;
+        }
+
+        .address-info {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .cancel-form {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 
-<body>
+<body style="background-color: aliceblue;">
 
-    <!-- Navbar start -->
-    <div class="container-fluid fixed-top">
-        <div class="container topbar bg-primary d-none d-lg-block">
-        </div>
-        <div class="container px-0">
-            <nav class="navbar navbar-light bg-white navbar-expand-xl">
-                <a href="index.html" class="navbar-brand">
-                    <h1 class="text-primary display-6">Pure Glow</h1>
-                </a>
-                <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                    <span class="fa fa-bars text-primary"></span>
-                </button>
-                <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
-                    <div class="navbar-nav mx-auto">
-                        <a href="/" class="nav-item nav-link">Home</a>
-                        <a href="" class="nav-item nav-link">Shop</a>
-                        <a href="/contact" class="nav-item nav-link">Contact</a>
-                    </div>
-                    <div class="d-flex m-3 me-0">
-                        <a href="/whishlist" class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4"><i class="fas fa-heart heart-icon ok"></i></a>
-                        <a href="#" class="position-relative me-4 my-auto">
-                            <i class="fa fa-shopping-bag fa-2x"></i>
-                            <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;"></span>
-                        </a>
-                        <a href="/profile" class="my-auto">
-                            <i class="fas fa-user fa-2x"></i>
-                        </a>
-                    </div>
-                </div>
-            </nav>
-        </div>
-    </div>
-    <!-- Navbar End -->
-
-    <div style="margin-top: 150px">
-        <% products.forEach(product => { %>
-        <div>
-            <img src="<%= product.image[0] %>" alt="">
-            <h2><%= product.name %></h2>
-            <p>Quantity: <%= product.qty %></p>
-            <p>Price: <%= product.price %></p>
-            <p>Order Status: <%= product.orderStatus %></p>
-    
-            <% if (product.cancelReason) { %>
-            <p>Cancel Reason: <%= product.cancelReason %></p>
-            <% } %>
-    
-            <!-- Format orderDate -->
+   
+<h2 style="margin-left: 10%; margin-top: 2%;">My Orders</h2>
+    <div class="container" style="margin-top: 30px;">
+        <div class="order-container">
+            <% products.forEach(product => { %>
+                <div class="order" style="background-color: rgb(224, 236, 177); padding: 10px; border-radius: 10px;margin-top: 15px;">
+                    <div class="product-info">
+                        <div class="product-image">
+                            <a href="/productveiw/<%= product.productId %>">
+                            <img src="<%= product.image[0] %>" alt="Product Image" style="max-width: 100px;">
+                            </a>
+                        </div>
+                        <div class="order-details">
+                            <h2><%= product.name %></h2>
+                            <p>Quantity: <%= product.qty %></p>
+                            <p>Price: <%= product.price %></p>
+                           
+                            <% if (product.cancelReason) { %>
+                                <p>Cancel Reason: <%= product.cancelReason %></p>
+                            <% } %>
+                                 <!-- Format orderDate -->
             <p>Order Date: <%= new Date(userOrders[0].orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
     
             <!-- Calculate expected delivery date -->
@@ -93,50 +100,47 @@
                         expectedDeliveryDate.setDate(orderDate.getDate() + 4); // Adding 4 days
                     %>
             <p>Expected Delivery Date: <%= expectedDeliveryDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
-    
-            <!-- Print payment method -->
+
             <p>Payment Method: <%= userOrders[0].paymentMethod %></p>
-    
-    
-            <h5> <%= userOrders[0].shippingAddress.name %></h5>
-            <p> <%= userOrders[0].shippingAddress.address %> 
-                <%= userOrders[0].shippingAddress.city %>
-                <%= userOrders[0].shippingAddress.district %> <br>
-                <%= userOrders[0].shippingAddress.state %>
-                <%= userOrders[0].shippingAddress.pincode %></p>
-    
-            <h6><i class="bi bi-telephone" style="margin-right: 10px;"></i> <%= userOrders[0].shippingAddress.phone %></h6>
-            <h6><i class="bi bi-envelope " style="margin-right: 10px;"></i><%= userOrders[0].shippingAddress.email %></h6>
-            <!-- Dropdown for cancel reasons -->
-            <!-- <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" onclick="submitCancellationReason(event)" type="button" id="cancelDropdown" data-toggle="dropdown" aria-expanded="false">
-                    Cancelrson
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="cancelDropdown">
-                    <li><a class="dropdown-item" href="#" data-reason="Reason 1">Reason 1</a></li>
-                    <li><a class="dropdown-item" href="#" data-reason="Reason 2">Reason 2</a></li>
-                    <li><a class="dropdown-item" href="#" data-reason="Reason 3">Reason 3</a></li> -->
-                    <!-- Add more reasons as needed -->
-                <!-- </ul>
-            </div> -->
-            <form action="/cancellreson/<%=product.productId %>" method="post" onsubmit="return submitCancellationReason(this)">
-                <div class="mb-3">
-                    <label for="cancelReasonSelect" class="form-label">Select Cancel Reason</label>
-                    <select class="form-select" id="cancelReasonSelect" name="cancelReason">
-                        <option selected disabled>Select a reason</option>
-                        <option value="Reason 1">Reason 1</option>
-                        <option value="Reason 2">Reason 2</option>
-                        <option value="Reason 3">Reason 3</option>
-                        <!-- Add more reasons as needed -->
-                    </select>
-                    <button type="submit" class="btn btn-danger">Cancel</button>
+            <% if (product.orderStatus=== 'cancel') { %>
+                 <p style="color: red;">Order Status: <%= product.orderStatus %></p>
+                 <% }else{ %>
+                    <p >Order Status: <%= product.orderStatus %></p>
+                    <% }%>
+                        </div>
+                    </div>
+                    <div class="address-info">
+                        <h5><i class="fas fa-map-marker-alt"></i> <%= userOrders[0].shippingAddress.name %></h5>
+                        <p><%= userOrders[0].shippingAddress.address %>, 
+                            <%= userOrders[0].shippingAddress.city %>,
+                            <%= userOrders[0].shippingAddress.district %> <br>
+                            <%= userOrders[0].shippingAddress.state %>
+                            <%= userOrders[0].shippingAddress.pincode %></p>
+                        <h6><i class="fas fa-phone-alt"></i> <%= userOrders[0].shippingAddress.phone %></h6>
+                        <!-- <h6><i class="fas fa-envelope"></i> <%= userOrders[0].shippingAddress.email %></h6> -->
+                    </div>
+                    <form class="cancel-form" action="/cancellreson/<%=product.productId %>" method="post" onsubmit="return submitCancellationReason(this)">
+                        <div class="form-group">
+                            <label for="cancelReasonSelect">Cancel Product</label>
+                            <select class="form-control" id="cancelReasonSelect" name="cancelReason">
+                                <option selected disabled>Select a reason</option>
+                                <option value="size Not Match">size Not Match</option>
+                                <option value="Change My Mind">Change My Mind</option>
+                                <option value="Product Damages">Product Damages</option>
+                                <!-- Add more reasons as needed -->
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Cancel</button>
+                    </form>
                 </div>
-               
-            </form>
+            <% }); %>
         </div>
-        <% }); %>
     </div>
-    
+
+    <!-- Add Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         function submitCancellationReason(form) {
         var reasonSelect = form.querySelector('#cancelReasonSelect');

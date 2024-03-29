@@ -27,7 +27,7 @@ const mongoose = require('mongoose');
         {
           productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
           name:{type:String},
-          qty:{type:Number},
+          qty:{type:Number, default:1},
           price:{type:Number,required:true},    
           image:[String],
           orderStatus: {
@@ -43,7 +43,7 @@ const mongoose = require('mongoose');
       shippingAddress: { type: addressSchema },
       paymentMethod: { type: String, require: true },
     },
-    { _id: false }
+    { _id: true }
   );
 
 

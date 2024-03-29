@@ -410,19 +410,87 @@ const productdetiel = async (req, res) => {
         const data= product.products.find(product => product._id == productId);
 
         console.log(data);
-        res.render('admin/product-detail', { product:data});
+        res.render('admin/product-detail', { product:data}); 
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
 }
 
-const orderslist =(req,res)=>{
+const orderslist = async (req, res) => {  
+    try {
+        const usersWithOrders = await User.aggregate([
+            {
+                $match: {
+                    orders: { $exists: true, $ne: null } // Filter users with non-empty orders
+                }
+            },
+            {
+                $unwind: "$orders" // Deconstruct the orders array
+            },
+            {
+                $project: {
+                    _id: "$orders._id", // Exclude the default MongoDB ID field
+                    userId: "$_id", // Include the userId for reference
+                    paymentMethod: "$orders.paymentMethod",
+                    orderDate: "$orders.orderDate",
+                    shippingAddress: "$orders.shippingAddress",
+                    products: "$orders.products"
+                }
+            }
+        ]);
 
-    res.render('admin/order-list')
+        // console.log(usersWithOrders);
+
+        res.render('admin/order-list', { orders: usersWithOrders }); // Pass orders as a variable to the template
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).send('Internal Server Error');
+    }
 }
 
+const orederstatus = async (req, res) => {
+    try {
+        console.log("hi");
 
+        // Extract order ID, product ID, and new status from request parameters and body
+        const { orderId, productId, newStatus } = req.body;
+          console.log("orderid",orderId, "productid", productId , newStatus );
+
+        // Find the user based on the order ID
+        const user = await User.findOne();
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Find the order within the user's orders array based on order ID
+        const order = user.orders.find(order => order._id.toString() === orderId);
+
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+ 
+        // Find the product within the order based on product ID
+        const product = order.products.find(product => product._id.toString() === productId);
+
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found in order' });
+        }
+
+        // Update the order status for the specific product
+        product.orderStatus = newStatus;
+
+        // Save the updated user document
+          await user.save();
+
+       res.redirect('/orederslist');
+       
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
 
 const adminlogout = (req, res) => {
     res.clearCookie('admin_jwt'); // Clear the JWT token stored in cookies
@@ -440,7 +508,7 @@ module.exports={
     categoriesadd,
     updatecategory,
     categorieedit,
-    categorieeditdatas,
+    categorieeditdatas, 
     deletecategorie,
     productlist,
     productadd,
@@ -452,6 +520,7 @@ module.exports={
     adminprofile,
     productdetiel,
     orderslist,
+    orederstatus,
     adminlogout,
     
 }

@@ -868,7 +868,18 @@ const productveiw = async (req, res) => {
 const checkoutfromcart = async (req, res) => {
     try {
         // Find the user
-        let user = await User.findOne();
+        const token = req.cookies.user_jwt;
+      
+        if (!token) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        // Verify the JWT token to get user ID
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded || !decoded.id) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        const user = await User.findById(decoded.id);
        
 
         let address = user.address;
@@ -880,16 +891,22 @@ const checkoutfromcart = async (req, res) => {
 
         let cart = user.cart;
 
+        let productId = []
+       
+
         let cartTotalNonDisabled = cart.products.reduce((total, product) => {
             if (!product.disable) {
+                productId=product.productId
                 return total + parseFloat(product.productPrice);
                 
             } else {
                 return total;
             }
-        }, 0);
+        }, 0); 
+        
 
-        console.log(cartTotalNonDisabled);
+        console.log(productId);
+        // console.log(cartTotalNonDisabled);
 
         // Get the total number of products in the cart
         let totalCartCount = cart.products.length;
@@ -906,9 +923,21 @@ const checkoutfromcart = async (req, res) => {
 const checkoutpage = async (req, res) => {
     try {
         const productId = req.params.id;
+        const token = req.cookies.user_jwt;
+      
+        if (!token) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        // Verify the JWT token to get user ID
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded || !decoded.id) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        const user = await User.findById(decoded.id);
 
         const product = await Products.findOne({ 'products._id': productId });
-        const user = await User.findOne();
+        
 
         let address = user.address;
 
@@ -1131,9 +1160,6 @@ const ordermanage = async (req, res) => {
     
 
     // const ordersdata =user.orders;
-
-    
-    // `flat()` method is used to flatten the array of arrays into a single array
 
     res.render('user/orders', { products:userProducts,userOrders});
 }

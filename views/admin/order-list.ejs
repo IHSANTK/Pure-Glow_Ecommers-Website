@@ -12,6 +12,7 @@
     <!-- plugin css file  -->
     <link rel="stylesheet" href="assets/plugin/datatables/responsive.dataTables.min.css">
     <link rel="stylesheet" href="assets/plugin/datatables/dataTables.bootstrap5.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <!-- project css file  -->
     <link rel="stylesheet" href="assets/css/ebazar.style.min.css">
@@ -22,27 +23,27 @@
         <!-- sidebar -->
         <div class="sidebar px-4 py-4 py-md-4 me-0">
             <div class="d-flex flex-column h-100">
-                <a href="index.html" class="mb-0 brand-icon">
+                <a href="/admin" class="mb-0 brand-icon">
                     <span class="logo-icon">
                         <i class="bi bi-bag-check-fill fs-4"></i>
                     </span>
                     <span class="logo-text">eBazar</span>
                 </a>
                 <!-- Menu: main ul -->
-                <ul class="menu-list flex-grow-1 mt-3">
-                    <li><a class="m-link" href="index.html"><i class="icofont-home fs-5"></i> <span>Dashboard</span></a></li>
+                <ul class="menu-list flex-grow-1 mt-5">
+                    <li><a class="m-link active" href="/admin"><i class="icofont-home fs-5"></i> <span>Dashboard</span></a></li>
                     <li class="collapsed">
                         <a class="m-link" data-bs-toggle="collapse" data-bs-target="#menu-product" href="#">
                             <i class="icofont-truck-loaded fs-5"></i> <span>Products</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
                             <!-- Menu: Sub menu ul -->
                             <ul class="sub-menu collapse" id="menu-product">
-                                <li><a class="ms-link" href="product-grid.html">Product Grid</a></li>
-                                <li><a class="ms-link" href="product-list.html">Product List</a></li>
-                                <li><a class="ms-link" href="product-edit.html">Product Edit</a></li>
+                                <!-- <li><a class="ms-link" href="product-grid.html">Product Grid</a></li> -->
+                                <li><a class="ms-link" href="/product-list">Product List</a></li>
+                                <!-- <li><a class="ms-link" href="product-edit.html">Product Edit</a></li>
                                 <li><a class="ms-link" href="product-detail.html">Product Details</a></li>
                                 <li><a class="ms-link" href="product-add.html">Product Add</a></li>
                                 <li><a class="ms-link" href="product-cart.html">Shopping Cart</a></li>
-                                <li><a class="ms-link" href="checkout.html">Checkout</a></li>
+                                <li><a class="ms-link" href="checkout.html">Checkout</a></li> -->
                             </ul>
                     </li>
                     <li class="collapsed">
@@ -50,17 +51,17 @@
                             <i class="icofont-chart-flow fs-5"></i> <span>Categories</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
                             <!-- Menu: Sub menu ul -->
                             <ul class="sub-menu collapse" id="categories">
-                                <li><a class="ms-link" href="categorie-list.html">Categories List</a></li>
-                                <li><a class="ms-link" href="categories-edit.html">Categories Edit</a></li>
-                                <li><a class="ms-link" href="categories-add.html">Categories Add</a></li>
+                                <li><a class="ms-link" href="/categorie-list">Categories List</a></li>
+                                <!-- <li><a class="ms-link" href="categories-edit.html">Categories Edit</a></li>
+                                <li><a class="ms-link" href="categories-add.html">Categories Add</a></li> -->
                             </ul>
                     </li>
                     <li class="collapsed">
-                        <a class="m-link active" data-bs-toggle="collapse" data-bs-target="#menu-order" href="#">
+                        <a class="m-link" data-bs-toggle="collapse" data-bs-target="#menu-order" href="#">
                         <i class="icofont-notepad fs-5"></i> <span>Orders</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
-                        <!-- Menu: Sub menu ul -->
-                        <ul class="sub-menu collapse show" id="menu-order">
-                            <li><a class="ms-link active" href="order-list.html">Orders List</a></li>
+                      
+                        <ul class="sub-menu collapse" id="menu-order">
+                            <li><a class="ms-link" href="/orederslist">Orders List</a></li>
                             <li><a class="ms-link" href="order-details.html">Order Details</a></li>
                             <li><a class="ms-link" href="order-invoices.html">Order Invoices</a></li>
                         </ul>
@@ -70,59 +71,61 @@
                         <i class="icofont-funky-man fs-5"></i> <span>Customers</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
                         <!-- Menu: Sub menu ul -->
                         <ul class="sub-menu collapse" id="customers-info">
-                            <li><a class="ms-link" href="customers.html">Customers List</a></li>
-                            <li><a class="ms-link" href="customer-detail.html">Customers Details</a></li>
+                            <li><a class="ms-link" href="/userlist">Customers List</a></li>
+                            
                         </ul>
                     </li>
-                    <li class="collapsed">
+                    <!-- <li><a class="m-link active" href="/orderslist"><i class="icofont-home fs-5"></i> <span>Orders</span></a></li> -->
+
+                    <!-- <li class="collapsed">
                         <a class="m-link" data-bs-toggle="collapse" data-bs-target="#menu-sale" href="#">
-                        <i class="icofont-sale-discount fs-5"></i> <span>Sales Promotion</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
+                        <i class="icofont-sale-discount fs-5"></i> <span>Sales Promotion</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a> -->
                         <!-- Menu: Sub menu ul -->
-                        <ul class="sub-menu collapse" id="menu-sale">
+                        <!-- <ul class="sub-menu collapse" id="menu-sale">
                             <li><a class="ms-link" href="coupons-list.html">Coupons List</a></li>
                             <li><a class="ms-link" href="coupon-add.html">Coupons Add</a></li>
                             <li><a class="ms-link" href="coupon-edit.html">Coupons Edit</a></li>
                         </ul>
-                    </li>
-                    <li class="collapsed">
-                        <a class="m-link" data-bs-toggle="collapse" data-bs-target="#menu-inventory" href="#">
-                        <i class="icofont-chart-histogram fs-5"></i> <span>Inventory</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
+                    </li> -->
+                    <!-- <li class="collapsed">
+                        <a class="m-link" data-bs-toggle="collapse" data-bs-target="#menu-inventory" href="#"> -->
+                        <!-- <i class="icofont-chart-histogram fs-5"></i> <span>Inventory</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a> -->
                         <!-- Menu: Sub menu ul -->
-                        <ul class="sub-menu collapse" id="menu-inventory">
+                        <!-- <ul class="sub-menu collapse" id="menu-inventory">
                             <li><a class="ms-link" href="inventory-info.html">Stock List</a></li>
                             <li><a class="ms-link" href="purchase.html">Purchase</a></li>
                             <li><a class="ms-link" href="supplier.html">Supplier</a></li>
                             <li><a class="ms-link" href="returns.html">Returns</a></li>
                             <li><a class="ms-link" href="department.html">Department</a></li>
                         </ul>
-                    </li>
-                    <li class="collapsed">
+                    </li> -->
+                    <!-- <li class="collapsed">
                         <a class="m-link" data-bs-toggle="collapse" data-bs-target="#menu-Componentsone" href="#"><i
-                                class="icofont-ui-calculator"></i> <span>Accounts</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
+                                class="icofont-ui-calculator"></i> <span>Accounts</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a> -->
                         <!-- Menu: Sub menu ul -->
-                        <ul class="sub-menu collapse" id="menu-Componentsone">
+                        <!-- <ul class="sub-menu collapse" id="menu-Componentsone">
                             <li><a class="ms-link" href="invoices.html">Invoices </a></li>
                             <li><a class="ms-link" href="expenses.html">Expenses </a></li>
                             <li><a class="ms-link" href="salaryslip.html">Salary Slip </a></li>
                             <li><a class="ms-link" href="create-invoice.html">Create Invoice </a></li>
-                        </ul>
-                    </li>
-                    <li class="collapsed">
+                        </ul> -->
+                    <!-- </li> -->
+                    <!-- <li class="collapsed">
                         <a class="m-link" data-bs-toggle="collapse" data-bs-target="#app" href="#">
-                        <i class="icofont-code-alt fs-5"></i> <span>App</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
+                        <i class="icofont-code-alt fs-5"></i> <span>App</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a> -->
                         <!-- Menu: Sub menu ul -->
-                        <ul class="sub-menu collapse" id="app">
+                        <!-- <ul class="sub-menu collapse" id="app">
                             <li><a class="ms-link" href="calendar.html">Calandar</a></li>
                             <li><a class="ms-link" href="chat.html"> Chat App</a></li>
                         </ul>
-                    </li>
-                    <li><a class="m-link" href="store-locator.html"><i class="icofont-focus fs-5"></i> <span>Store Locator</span></a></li>
-                    <li><a class="m-link" href="ui-elements/ui-alerts.html"><i class="icofont-paint fs-5"></i> <span>UI Components</span></a></li>
-                    <li class="collapsed">
+                    </li> -->
+                    <!-- <li><a class="m-link" href="store-locator.html"><i class="icofont-focus fs-5"></i> <span>Store Locator</span></a></li> -->
+                    <!-- <li><a class="m-link" href="ui-elements/ui-alerts.html"><i class="icofont-paint fs-5"></i> <span>UI Components</span></a></li> -->
+                    <!-- <li class="collapsed">
                         <a class="m-link" data-bs-toggle="collapse" data-bs-target="#page" href="#">
-                        <i class="icofont-page fs-5"></i> <span>Other Pages</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
+                        <i class="icofont-page fs-5"></i> <span>Other Pages</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a> -->
                         <!-- Menu: Sub menu ul -->
-                        <ul class="sub-menu collapse" id="page">
+                        <!-- <ul class="sub-menu collapse" id="page">
                             <li><a class="ms-link" href="admin-profile.html">Profile Page</a></li>
                             <li><a class="ms-link" href="purchase-plan.html">Price Plan Example</a></li>
                             <li><a class="ms-link" href="charts.html">Charts Example</a></li>
@@ -132,31 +135,31 @@
                             <li><a class="ms-link" href="contact.html">Contact Us</a></li>
                             <li><a class="ms-link" href="todo-list.html">Todo List</a></li>
                         </ul>
-                    </li>
+                    </li> -->
                 </ul>
                 <!-- Menu: menu collepce btn -->
                 <button type="button" class="btn btn-link sidebar-mini-btn text-light">
                     <span class="ms-2"><i class="icofont-bubble-right"></i></span>
                 </button>
             </div>
-        </div>       
+        </div>
 
         <!-- main body area -->
-        <div class="main px-lg-4 px-md-4"> 
+        <div class="main px-lg-4 px-md-4">
 
             <!-- Body: Header -->
             <div class="header">
                 <nav class="navbar py-4">
                     <div class="container-xxl">
-        
+
                         <!-- header rightbar icon -->
                         <div class="h-right d-flex align-items-center mr-5 mr-lg-0 order-1">
-                            <div class="d-flex">
+                            <!-- <div class="d-flex">
                                 <a class="nav-link text-primary collapsed" href="help.html" title="Get Help">
                                     <i class="icofont-info-square fs-5"></i>
                                 </a>
-                            </div>
-                            <div class="dropdown zindex-popover">
+                            </div> -->
+                            <!-- <div class="dropdown zindex-popover">
                                 <a class="nav-link dropdown-toggle pulse" href="#" role="button" data-bs-toggle="dropdown">
                                     <img src="assets/images/flag/GB.png" alt="">
                                 </a>
@@ -181,8 +184,7 @@
                                         </ul>
                                     </div>
                                 </div>
-                            </div>
-                            
+                            </div> -->
                             <div class="dropdown notifications">
                                 <a class="nav-link dropdown-toggle pulse" href="#" role="button" data-bs-toggle="dropdown">
                                     <i class="icofont-alarm fs-5"></i>
@@ -262,7 +264,7 @@
                             </div>
                             <div class="dropdown user-profile ml-2 ml-sm-3 d-flex align-items-center zindex-popover">
                                 <div class="u-info me-2">
-                                    <p class="mb-0 text-end line-height-sm "><span class="font-weight-bold">John Quinn</span></p>
+                                    <p class="mb-0 text-end line-height-sm "><span class="font-weight-bold">Admin</span></p>
                                     <small>Admin Profile</small>
                                 </div>
                                 <a class="nav-link dropdown-toggle pulse p-0" href="#" role="button" data-bs-toggle="dropdown" data-bs-display="static">
@@ -274,18 +276,17 @@
                                             <div class="d-flex py-1">
                                                 <img class="avatar rounded-circle" src="assets/images/profile_av.svg" alt="profile">
                                                 <div class="flex-fill ms-3">
-                                                    <p class="mb-0"><span class="font-weight-bold">John	Quinn</span></p>
-                                                    <small class="">Johnquinn@gmail.com</small>
+                                                    <p class="mb-0"><span class="font-weight-bold">admin</span></p>
+                                                    <small class="">Sample@gmail.com</small>
                                                 </div>
                                             </div>
                                             
                                             <div><hr class="dropdown-divider border-dark"></div>
                                         </div>
                                         <div class="list-group m-2 ">
-                                            <a href="admin-profile.html" class="list-group-item list-group-item-action border-0 "><i class="icofont-ui-user fs-5 me-3"></i>Profile Page</a>
-                                            <a href="order-invoices.html" class="list-group-item list-group-item-action border-0 "><i class="icofont-file-text fs-5 me-3"></i>Order Invoices</a>
-                                            <a href="ui-elements/auth-signin.html" class="list-group-item list-group-item-action border-0 "><i class="icofont-logout fs-5 me-3"></i>Signout</a>
-                                            
+                                            <a href="/admin-profile" class="list-group-item list-group-item-action border-0 "><i class="icofont-ui-user fs-5 me-3"></i>Profile Page</a>
+                                            <!-- <a href="order-invoices.html" class="list-group-item list-group-item-action border-0 "><i class="icofont-file-text fs-5 me-3"></i>Order Invoices</a> -->
+                                            <a href="/admin-logout" class="list-group-item list-group-item-action border-0 "><i class="icofont-logout fs-5 me-3"></i>Signout</a>
                                         </div>
                                     </div>
                                 </div>
@@ -305,7 +306,6 @@
                             <div class="input-group flex-nowrap input-group-lg">
                                 <input type="search" class="form-control" placeholder="Search" aria-label="search" aria-describedby="addon-wrapping">
                                 <button type="button" class="input-group-text" id="addon-wrapping"><i class="fa fa-search"></i></button>
-                                
                             </div>
                         </div>
         
@@ -330,93 +330,95 @@
                                     <table id="myDataTable" class="table table-hover align-middle mb-0" style="width: 100%;">  
                                         <thead>
                                             <tr>
-                                                <th>Id</th>
+                                                <th>Order Id</th>
                                                 <th>Item</th>
                                                 <th>Customer Name</th>
                                                 <th>Payment Info</th>
                                                 <th>Price</th>
+                                                <th>orderdate</th>
                                                 <th>Status</th>
+                                                <th>Address</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td><a href="order-details.html"><strong>#Order-78414</strong></a></td>
-                                                <td><img src="assets/images/product/product-1.jpg" class="avatar lg rounded me-2" alt="profile-image"><span> Oculus VR </span></td>
-                                                <td>Molly</td>
-                                                <td>Credit Card</td>
-                                                <td>
-                                                    $420
-                                                </td>
-                                                <td><span class="badge bg-warning">Progress</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td><a href="order-details.html"><strong>#Order-58414</strong></a></td>
-                                                <td><img src="assets/images/product/product-2.jpg" class="avatar lg rounded me-2" alt="profile-image"><span>Wall Clock</span></td>
-                                                <td>Brian</td>
-                                                <td>Debit Card</td>
-                                                <td>
-                                                    $220
-                                                </td>
-                                                <td><span class="badge bg-success">Complited</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td><a href="order-details.html"><strong>#Order-48414</strong></a></td>
-                                                <td><img src="assets/images/product/product-3.jpg" class="avatar lg rounded me-2" alt="profile-image"><span>Note Diaries</span></td>
-                                                <td>Julia</td>
-                                                <td>Debit Card</td>
-                                                <td>
-                                                    $250
-                                                </td>
-                                                <td><span class="badge bg-success">Complited</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td><a href="order-details.html"><strong>#Order-38414</strong></a></td>
-                                                <td><img src="assets/images/product/product-4.jpg" class="avatar lg rounded me-2" alt="profile-image"><span>Flower Port</span></td>
-                                                <td>Sonia</td>
-                                                <td>Credit Card</td>
-                                                <td>
-                                                    $320
-                                                </td>
-                                                <td><span class="badge bg-warning">Progress</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td><a href="order-details.html"><strong>#Order-28414</strong></a></td>
-                                                <td><img src="assets/images/product/product-1.jpg" class="avatar lg rounded me-2" alt="profile-image"><span>Oculus VR</span></td>
-                                                <td>Adam H</td>
-                                                <td>Debit Card</td>
-                                                <td>
-                                                    $20
-                                                </td>
-                                                <td><span class="badge bg-warning">Progress</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td><a href="order-details.html"><strong>#Order-18414</strong></a></td>
-                                                <td><img src="assets/images/product/product-2.jpg" class="avatar lg rounded me-2" alt="profile-image"><span>Wall Clock</span></td>
-                                                <td>Alexander</td>
-                                                <td>Debit Card</td>
-                                                <td>
-                                                    $820
-                                                </td>
-                                                <td><span class="badge bg-success">Complited</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td><a href="order-details.html"><strong>#Order-11414</strong></a></td>
-                                                <td><img src="assets/images/product/product-3.jpg" class="avatar lg rounded me-2" alt="profile-image"><span>Note Diaries</span></td>
-                                                <td>Gabrielle</td>
-                                                <td>Bank Emi</td>
-                                                <td>
-                                                    $620
-                                                </td>
-                                                <td><span class="badge bg-success">Complited</span></td>
-                                            </tr>
+                                            <% orders.forEach(order => { %>
+                                                <% order.products.forEach(product => { %>
+                                                    <tr>
+                                                        <td><a href="order-details.html"><strong>#<%= product._id %></strong></a></td>
+                                                        <td>
+                                                            <img src="<%= product.image[0] %>" class="avatar lg rounded me-2" alt="profile-image">
+                                                            <span><%= product.name %></span>
+                                                        </td>
+                                                        <td><%= order.shippingAddress.name %></td>
+                                                        <td><%= order.paymentMethod %></td>
+                                                        <td>₹<%= product.price %></td>
+                                                        <td><%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></td>
+                                                        <td>
+                                                            <form action="/orederstatus" method="post">
+                                                                <span class="badge bg-success"><%= product.orderStatus %></span>
+                                                                <select class="status-select" name="newStatus">
+                                                                    <option value="select">Select</option>
+                                                                    <option value="shipped">Shipped</option>
+                                                                    <option value="delivered">Delivered</option>
+                                                                    <option value="cancel">Cancel</option>
+                                                                </select>
+                                                                <input type="hidden" name="orderId" value="<%=order._id %>">
+                                                                <input type="hidden" name="productId" value="<%=product._id %>">
+                                                                <button type="submit" style="background-color: rgb(199, 218, 218); border-radius: 10px; border: none;">Update</button>
+                                                            </form>
+                                                        </td>
+                                                        <td>
+                                                            <h5><%= order.shippingAddress.name %></h5>
+                                                            <p>
+                                                                <%= order.shippingAddress.address %> 
+                                                                <%= order.shippingAddress.city %>
+                                                                <%= order.shippingAddress.district %><br>
+                                                                <%= order.shippingAddress.state %>
+                                                                <%= order.shippingAddress.pincode %>
+                                                            </p>
+                                                            <h6><i class="bi bi-telephone" style="margin-right: 10px;"></i><%= order.shippingAddress.phone %></h6>
+                                                        </td>
+                                                    </tr>
+                                                <% }); %>
+                                            <% }); %>
                                         </tbody>
                                     </table>
                                 </div>
+                                
                             </div>
                         </div>
                     </div> <!-- Row end  -->
                 </div>
             </div>
+            <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectElements = document.querySelectorAll('.status-select');
+        
+        selectElements.forEach(select => {
+            select.addEventListener('change', function() {
+                const orderId = this.getAttribute('data-order-id');
+                const productId = this.getAttribute('data-product-id');
+                const newStatus = this.value;
+
+                // Send AJAX request to update order status
+                axios.post('/orederstatus', {
+                    orderId: orderId,
+                    productId: productId,
+                    newStatus: newStatus
+                })
+                .then(response => {
+                    // Handle success response
+                    console.log(response.data);
+                })
+                .catch(error => {
+                    // Handle error response
+                    console.error(error);
+                });
+            });
+        });
+    });
+</script>
         
             <!-- Modal Custom Settings-->
             <div class="modal fade right" id="Settingmodal" tabindex="-1"  aria-hidden="true">
