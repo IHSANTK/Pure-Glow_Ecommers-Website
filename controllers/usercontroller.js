@@ -6,6 +6,8 @@ const passport = require('passport');
 const cloudinary = require('../config/cloudinary')
 const upload = require('../config/multer.js');
 const otpService = require('../services/otpService');
+const helpers = require('../helpers/userHelpers');
+const { response } = require('express');
 
 const Homepage = async (req, res) => {
     try {
@@ -1073,37 +1075,55 @@ const placeholder = async (req, res) => {
 
         let exactProducts = [];
 
+        let totalAmount ='' ;
+
         if (productIds.length === 1) {
             const product = products.find(product => product.products.some(p => p._id.toString() === productIds[0]));
+          
             exactProducts = product.products.filter(p => p._id.toString() === productIds[0]);
+
+            totalAmount = exactProducts[0].productPrice
+           
+       
+            
+
+          
         } else {
             // Assuming user.cart.products is where the user's cart items are stored
             exactProducts = user.cart.products.filter(product => !product.disable);
+
+             totalAmount = exactProducts.reduce((total, product) => {
+                return total + (product.productPrice * product.quantity);
+            }, 0);
         }
 
         // Calculate total amount based on the found products
-        const totalAmount = exactProducts.reduce((total, product) => {
-            return total + (product.productPrice * product.quantity);
-        }, 0);
+  
 
         // Ensure totalAmount is a number, if it's NaN set it to 0
+
+
         const sanitizedTotalAmount = isNaN(totalAmount) ? 0 : totalAmount;
+
+       
 
         // Create new order object
         const newOrder = {
+           
             products: exactProducts.map(product => ({
                 productId: product._id,
                 name:product.productName,
                 qty: product.quantity,
                 price: product.productPrice,
                 image:product.image,
-                orderStatus: "Pending",
+                orderStatus: "Pending", 
                 cancelReason: null
             })),
             totalAmount: sanitizedTotalAmount,
             orderDate: new Date(),
             shippingAddress: exactAddress,
-            paymentMethod: selectedPaymentMethod
+            paymentMethod: selectedPaymentMethod,
+            
         };
 
         // Add the new order to the user's orders array
@@ -1112,20 +1132,45 @@ const placeholder = async (req, res) => {
         // Save the updated user document
         await user.save();
 
-        console.log("Product IDs:", selectedAddressId);
-        console.log("Product IDs:", selectedPaymentMethod);
-        console.log("Product IDs:", productIds);
-        console.log("Products:", exactProducts);
-        console.log(exactAddress);
+        const orderId = user.orders[user.orders.length - 1].orderId;
 
-        // Further processing logic here
+        console.log("Newly created order ID:", orderId);
+        
+        
 
-        res.status(200).json({ products: exactProducts, exactAddress });
+        if (req.body.selectedPaymentMethod === 'razorpay') {
+            try {
+                // Generate Razorpay order
+                const razorpayResponse = await helpers.generateRazorpay(orderId, totalAmount);
+
+                const name =user.name;
+                const email =user.email;
+                const number =user.phoneNumber;
+              
+                // Send Razorpay order details to client
+                res.json(razorpayResponse,name,email,number);
+            } catch (error) {
+                console.error('Error generating Razorpay order:', error);
+                res.status(500).json({ error: 'Error generating Razorpay order' });
+            }
+        } else {
+            if (req.body.selectedPaymentMethod === 'Cash On Delivery'){
+
+                res.json(true);
+
+            }
+        }
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).json('Internal Server Error');
     }
 }
+
+
+
+
+
+
 
 
 const ordermanage = async (req, res) => {

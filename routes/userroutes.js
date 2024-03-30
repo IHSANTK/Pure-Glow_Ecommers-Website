@@ -72,7 +72,7 @@ router.post('/manageaddress', userController.manageaddress);
 
 router.post('/addressdelete/:id',userController. addressdelete);
 
-router.post('/placeholder',userController.placeholder);
+router.post('/placeorder',userController.placeholder);
 
 router.get('/orders',userController.ordermanage);
 

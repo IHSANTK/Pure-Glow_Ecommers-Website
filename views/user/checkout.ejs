@@ -144,7 +144,7 @@
         <div class="container-fluid py-5 mt-5" style="">
             <div class="container py-5 mt-5">
                 <h1 class="mb-4">Billing details</h1>
-                <form action="/placeholder" method="post">
+                <form action="" method="">
                     <div class="row g-5">
                         <div class="col-md-12 col-lg-6 col-xl-7">
                             <!-- Display user's addresses dynamically -->
@@ -230,8 +230,8 @@
                             <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
                                 <div class="col-12">
                                     <div class="form-check text-start my-3">
-                                        <input type="checkbox" class="form-payment-input bg-primary border-0" id="Paypal-1" name="Paypal" value="Paypal">
-                                        <label class="form-check-label" for="Paypal-1">Razo Pay</label>
+                                        <input type="checkbox" class="form-payment-input bg-primary border-0" id="Delivery-1" value="razorpay" name="selectedPaymentMethod">
+                                        <label class="form-check-label" for="Delivery-1">razorpay</label>
                                     </div>
                                 </div>
                             </div>
@@ -244,6 +244,117 @@
             </div>
         </div>
         <!-- Checkout Page End -->
+
+<!-- Add this before the closing </body> tag in your HTML file -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    // Function to handle form submission
+    const handleSubmit = async (event) => {
+    event.preventDefault(); // Prevent default form submission behavior
+    
+    // Gather form data
+    const formData = new FormData(event.target);
+    const selectedAddressId = formData.get('selectedAddressId');
+    const selectedPaymentMethod = formData.get('selectedPaymentMethod');
+    const productIds = formData.getAll('productIds[]'); // Use getAll to get all values of an array-like field
+    
+    try {
+        // Send data to server using Axios
+        const response = await axios.post('/placeorder', {
+            selectedAddressId,
+            selectedPaymentMethod,
+            productIds
+        });
+
+        // Handle further logic based on server response
+        // Log response from server
+        console.log(response.data);
+
+        if (selectedPaymentMethod === 'razorpay') {
+            const razorpayOrder = response.data;
+
+            // Initiate Razorpay Checkout
+            const options = {
+                key: 'rzp_test_97NF7SboryYNH9', // Your Razorpay Key ID
+                amount: razorpayOrder.amount,
+                currency: razorpayOrder.currency,
+                order_id: razorpayOrder.id,
+                name: 'Pure Glow',
+                description: 'Payment for your order',
+                handler: function (response) {
+                    // Handle success callback (payment success)
+                    console.log('Payment successful:', response);
+                    // Show the success modal
+                    $('#successModal').modal('show');
+                },
+                prefill: {
+                    name: response.name,
+                    email: response.name,
+                    contact: response.number
+                },
+                theme: {
+                    color: '#F37254' // Customize color if needed
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        } else {
+            if(response.data===true){
+            $('#successModal').modal('show');
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error); // Log any errors
+    }
+};
+
+// Add event listener to the form for form submission
+const form = document.querySelector('form');
+form.addEventListener('submit', handleSubmit);
+</script>>
+
+
+
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Order Success</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Your order has been successfully placed. Thank you for shopping with us!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         <!-- Footer Start -->
