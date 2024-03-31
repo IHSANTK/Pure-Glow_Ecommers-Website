@@ -294,31 +294,16 @@
                             </div>
                             <div class="modal-body">
                                 <!-- Edit Address Form -->
-                                <form id="editAddressForm<%= address._id %>">
-                                    
-                                    
-                                        <input type="text" placeholder="name" class="form-control" id="editName" value="<%= address.name %>" required>
-                              
-                                        <input type="number" placeholder="Phone number" class="form-control" id="editName" value="<%= address.phone %>" required>
-
-                                   
-                              
-                                        <input type="text" placeholder="Address" class="form-control" id="editAddress" value="<%= address.address %>" required>
-                                     
-                                      
-                                        <input type="text" placeholder="City" class="form-control" id="editAddress" value="<%= address.city %>" required>
-
-                                       
-                                        <input type="text" placeholder="District" class="form-control" id="editAddress" value="<%= address.district %>" required>
-                                    
-                                      
-                                        <input type="text" placeholder="State" class="form-control" id="editAddress" value=" <%= address.state %>" required>
-
-                              
-                                        <input type="number" placeholder="Picode" class="form-control" id="editAddress" value=" <%= address.pincode %>" required>
-
-                                    <!-- Add more form fields as needed -->
-                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <form id="editAddressForm" action="/editAddressForm/<%= address._id %>" method="post"> <!-- Fix the "methord" typo to "method" -->
+                                  <input type="text" name="name"  placeholder="name" class="form-control" id="editName<%= address._id %>" value="<%= address.name %>" required>
+                                  <input type="number" name="phone" placeholder="Phone number" class="form-control" id="editPhone<%= address._id %>" value="<%= address.phone %>" required>
+                                  <input type="text" name="address" placeholder="Address" class="form-control" id="editAddress<%= address._id %>" value="<%= address.address %>" required>
+                                  <input type="text" name="city" placeholder="City" class="form-control" id="editCity<%= address._id %>" value="<%= address.city %>" required>
+                                  <input type="text" name="district" placeholder="District" class="form-control" id="editDistrict<%= address._id %>" value="<%= address.district %>" required>
+                                  <input type="text" name="state" placeholder="State" class="form-control" id="editState<%= address._id %>" value="<%= address.state %>" required>
+                                  <input type="number" name="pincode" placeholder="Pincode" class="form-control" id="editPincode<%= address._id %>" value="<%= address.pincode %>" required>
+                                  <input type="email" name="email" placeholder="Email" class="form-control" id="editPincode<%= address.email %>" value="<%= address.email %>" required>
+                                  <button type="submit" class="btn btn-primary">Save Changes</button>
                                 </form>
                             </div>
                         </div>

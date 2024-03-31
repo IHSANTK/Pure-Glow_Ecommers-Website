@@ -284,11 +284,14 @@
                 name: 'Pure Glow',
                 description: 'Payment for your order',
                 handler: function (response) {
-                    // Handle success callback (payment success)
-                    console.log('Payment successful:', response);
-                    // Show the success modal
-                    $('#successModal').modal('show');
-                },
+                        // Handle success callback (payment success)
+                        console.log(response);
+                        if (response.razorpay_payment_id) {
+                            // Payment successful, show success modal
+                            console.log("Payment successful");
+                            $('#successModal').modal('show');
+                        }
+                    },
                 prefill: {
                     name: response.name,
                     email: response.name,

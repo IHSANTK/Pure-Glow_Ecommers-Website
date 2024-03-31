@@ -1035,6 +1035,60 @@ const addressdelete = async (req, res) => {
     }
 };
 
+const editaddress = async (req, res) => {
+    try {
+        const addressId = req.params.id;
+
+        // Capture the new address data from the request body
+        const { name, phone, address, city, district, state, pincode,email  } = req.body;
+
+        
+
+        // Find the user and pull the matched address from the address array
+        const user = await User.findOneAndUpdate(
+            { 'address._id': addressId },
+            { $pull: { address: { _id: addressId } } },
+            { new: true }
+        );
+
+        // Check if the user was found and updated
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+
+        // Add the new address data to the user's address array
+        user.address.push({
+            name,
+            phone,
+            address,
+            city,
+            district,
+            state,
+            pincode,
+            email,
+           
+        });
+
+        // Save the updated user document
+        await user.save();
+
+        // Redirect to the profile page with a success message
+        res.redirect('/profile?passwordUpdate=address updated successfully');
+
+    } catch (error) {
+        console.error('Error updating address:', error);
+        return res.status(500).send('Internal Server Error');
+    }
+}
+
+
+
+
+
+
+
+
+
 
 const placeholder = async (req, res) => {
     const { selectedAddressId, selectedPaymentMethod, productIds } = req.body;
@@ -1387,6 +1441,7 @@ module.exports={
     checkoutfromcart,
     manageaddress,
     addressdelete,
+    editaddress,
     placeholder,
     ordermanage,
     cancellreson,

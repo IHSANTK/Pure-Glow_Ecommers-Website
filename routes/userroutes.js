@@ -73,10 +73,12 @@ router.post('/manageaddress', userController.manageaddress);
 router.post('/addressdelete/:id',userController. addressdelete);
 
 router.post('/placeorder',userController.placeholder);
-
+ 
 router.get('/orders',userController.ordermanage);
 
 router.post('/cancellreson/:id',userController.cancellreson);
+
+router.post('/editAddressForm/:id', userController.editaddress);
 
 
 
