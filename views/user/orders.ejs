@@ -154,7 +154,7 @@
                         <div class="order-details">
                             <h2><%= product.name %></h2>
                             <p>Quantity: <%= product.qty %></p>
-                            <p>Price: <%= product.price %></p>
+                            <p>Price: <%= product.price*product.qty %></p>
                            
                             <% if (product.cancelReason) { %>
                                 <p>Cancel Reason: <%= product.cancelReason %></p>

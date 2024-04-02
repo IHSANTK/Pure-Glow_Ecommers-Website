@@ -84,6 +84,8 @@ router.post('/editAddressForm/:id', userController.editaddress);
 
 router.post('/editAddressFormcheckout/:id',userController.editAddressFormcheckout)
 
+router.get('/getshopproduct', preventBack, userController.getShopProducts);
+
 
 
 

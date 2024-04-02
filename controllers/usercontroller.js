@@ -1389,6 +1389,78 @@ const cancellreson = async (req, res) => {
 }
 
 
+const getShopProducts = async (req, res) => {
+    try {
+        const { search } = req.query;
+
+        // Extract category from search input
+        const category = await getCategoryFromSearchInput(search);
+
+        console.log(category);
+
+        const data = await Products.findOne();
+        const uniqueCategories = [...new Set(data.products.map(product => product.category))];
+
+        console.log(uniqueCategories)
+
+        let categorProducts = []; // Initialize products variable as an array
+
+        if (category) {
+            // If a category is found, filter products by category
+            const products = await Products.find({ 'products.category': category });
+
+            // Loop through each document returned by Products.find()
+            products.forEach(product => {
+                // Filter the products array of each document for the specified category
+                const filteredProducts = product.products.filter(produ => produ.category === category);
+                // Concatenate the filtered products to categorProducts array
+                categorProducts = categorProducts.concat(filteredProducts);
+            });
+        } 
+        
+        console.log(categorProducts);
+
+        if(categorProducts.length > 0){
+        
+        return res.render('user/shop', { categor: categorProducts, uniqueCategories:uniqueCategories, cartcount:req.cartcount, user:req.user });
+        }else{
+            res.render('user/error404',{errormessage:'Products Not found '})
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+};
+
+async function getCategoryFromSearchInput(search) {
+    try {
+        // Check if search input has at least three characters
+        if (search.length < 3) {
+            return null; // Return null if search input has less than three characters
+        }
+
+        // Fetch data from the database
+        const data = await Products.findOne();
+
+        // Extract unique category names from the products array
+        const uniqueCategories = [...new Set(data.products.map(product => product.category))];
+
+        console.log("hi");
+
+        // Remove spaces and convert search input to lowercase for case-insensitive comparison
+        const formattedSearch = search.replace(/\s+/g, '').toLowerCase();
+
+        // Check if search input partially matches any category name
+        const matchedCategory = uniqueCategories.find(category =>
+            category.replace(/\s+/g, '').toLowerCase().includes(formattedSearch)
+        );
+
+        return matchedCategory ? matchedCategory : null;
+    } catch (error) {
+        console.error(error);
+        return null; // Handle errors appropriately
+    }
+}
 
 
 
@@ -1602,6 +1674,7 @@ module.exports={
     editAddressFormcheckout,
     placeholder,
     ordermanage,
+    getShopProducts,
     cancellreson,
     signupwithotp, 
     sendOTP,
