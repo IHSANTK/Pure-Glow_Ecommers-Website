@@ -354,17 +354,22 @@
                                                         <td>₹<%= product.price %></td>
                                                         <td><%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></td>
                                                         <td>
+                                                            
                                                             <form action="/orederstatus" method="post">
                                                                 <span class="badge bg-success"><%= product.orderStatus %></span>
-                                                                <select class="status-select" name="newStatus">
-                                                                    <option value="select">Select</option>
-                                                                    <option value="shipped">Shipped</option>
-                                                                    <option value="delivered">Delivered</option>
-                                                                    <option value="cancel">Cancel</option>
-                                                                </select>
-                                                                <input type="hidden" name="orderId" value="<%=order._id %>">
-                                                                <input type="hidden" name="productId" value="<%=product._id %>">
-                                                                <button type="submit" style="background-color: rgb(199, 218, 218); border-radius: 10px; border: none;">Update</button>
+                                                                <% if (product.orderStatus === "cancel") { %>
+                                                                    <span class="badge bg-success"><%= product.cancelReason %></span>
+                                                                <% } else { %>
+                                                                    <select class="status-select" name="newStatus">
+                                                                        <option value="select">Select</option>
+                                                                        <option value="shipped">Shipped</option>
+                                                                        <option value="delivered">Delivered</option>
+                                                                        <option value="cancel">Cancel</option>
+                                                                    </select>
+                                                                    <input type="hidden" name="orderId" value="<%= order._id %>">
+                                                                    <input type="hidden" name="productId" value="<%= product._id %>">
+                                                                    <button type="submit" style="background-color: rgb(199, 218, 218); border-radius: 10px; border: none;">Update</button>
+                                                                <% } %>
                                                             </form>
                                                         </td>
                                                         <td>

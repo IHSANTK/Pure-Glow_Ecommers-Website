@@ -61,8 +61,8 @@
                       
                         <ul class="sub-menu collapse" id="menu-order">
                             <li><a class="ms-link" href="/orederslist">Orders List</a></li>
-                            <li><a class="ms-link" href="order-details.html">Order Details</a></li>
-                            <li><a class="ms-link" href="order-invoices.html">Order Invoices</a></li>
+                            <!-- <li><a class="ms-link" href="order-details.html">Order Details</a></li>
+                            <li><a class="ms-link" href="order-invoices.html">Order Invoices</a></li> -->
                         </ul>
                     </li>
                     <li class="collapsed">
@@ -350,7 +350,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col">
+                        <!-- <div class="col">
                             <div class="alert-info alert mb-0">
                                 <div class="d-flex align-items-center">
                                     <div class="avatar rounded no-thumbnail bg-info text-light"><i class="fa fa-shopping-bag" aria-hidden="true"></i></div>
@@ -360,7 +360,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div><!-- Row end  -->
 
                     <div class="row g-3">
@@ -387,7 +387,7 @@
                                                 <div class="card-body py-xl-4 py-3 d-flex flex-wrap align-items-center justify-content-between">
                                                     <div class="left-info">
                                                         <span class="text-muted">Customers</span>
-                                                        <div><span class="fs-6 fw-bold me-2">14,208</span></div>
+                                                        <div><span class="fs-6 fw-bold me-2"><%=countUsersWithOrders %></span></div>
                                                     </div>
                                                     <div class="right-icon">
                                                         <i class="icofont-student-alt fs-3 color-light-orange"></i>
@@ -400,7 +400,7 @@
                                                 <div class="card-body py-xl-4 py-3 d-flex flex-wrap align-items-center justify-content-between">
                                                     <div class="left-info">
                                                         <span class="text-muted">Order</span>
-                                                        <div><span class="fs-6 fw-bold me-2">2314</span></div>
+                                                        <div><span class="fs-6 fw-bold me-2"><%=totalOrdersCount %></span></div>
                                                     </div>
                                                     <div class="right-icon">
                                                         <i class="icofont-shopping-cart fs-3 color-lavender-purple"></i>
@@ -408,7 +408,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6">
+                                        <!-- <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6">
                                             <div class="card">
                                                 <div class="card-body py-xl-4 py-3 d-flex flex-wrap align-items-center justify-content-between">
                                                     <div class="left-info">
@@ -420,8 +420,8 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6">
+                                        </div> -->
+                                        <!-- <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6">
                                             <div class="card">
                                                 <div class="card-body py-xl-4 py-3 d-flex flex-wrap align-items-center justify-content-between">
                                                     <div class="left-info">
@@ -433,8 +433,8 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6">
+                                        </div> -->
+                                        <!-- <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6">
                                             <div class="card">
                                                 <div class="card-body py-xl-4 py-3 d-flex flex-wrap align-items-center justify-content-between">
                                                     <div class="left-info">
@@ -446,8 +446,8 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6">
+                                        </div> -->
+                                        <!-- <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6">
                                             <div class="card">
                                                 <div class="card-body py-xl-4 py-3 d-flex flex-wrap align-items-center justify-content-between">
                                                     <div class="left-info">
@@ -459,13 +459,13 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div> -->
                                         <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6">
                                             <div class="card">
                                                 <div class="card-body py-xl-4 py-3 d-flex flex-wrap align-items-center justify-content-between">
                                                     <div class="left-info">
                                                         <span class="text-muted">Total Products</span>
-                                                        <div><span class="fs-6 fw-bold me-2">184511</span></div>
+                                                        <div><span class="fs-6 fw-bold me-2"><%=productcount%></span></div>
                                                     </div>
                                                     <div class="right-icon">
                                                         <i class="icofont-bag fs-3 color-light-orange"></i>
@@ -473,7 +473,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6">
+                                        <!-- <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6">
                                             <div class="card">
                                                 <div class="card-body py-xl-4 py-3 d-flex flex-wrap align-items-center justify-content-between">
                                                     <div class="left-info">
@@ -485,8 +485,8 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6">
+                                        </div> -->
+                                        <!-- <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6">
                                             <div class="card">
                                                 <div class="card-body py-xl-4 py-3 d-flex flex-wrap align-items-center justify-content-between">
                                                     <div class="left-info">
@@ -498,7 +498,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div> -->
                                     </div> <!-- row end -->
                                 </div>
                                 <div class="tab-pane fade" id="summery-week">
@@ -508,7 +508,7 @@
                                                 <div class="card-body py-xl-4 py-3 d-flex flex-wrap align-items-center justify-content-between">
                                                     <div class="left-info">
                                                         <span class="text-muted">Customers</span>
-                                                        <div><span class="fs-6 fw-bold me-2">54,208</span></div>
+                                                        <div><span class="fs-6 fw-bold me-2"><%=countUsersWithOrders %><span></div>
                                                     </div>
                                                     <div class="right-icon">
                                                         <i class="icofont-student-alt fs-3 color-light-orange"></i>
@@ -900,7 +900,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xxl-4 col-xl-4">
+                        <!-- <div class="col-xxl-4 col-xl-4">
                             <div class="card">
                                 <div class="card-header py-3 d-flex justify-content-between align-items-center bg-transparent border-bottom-0">
                                     <h6 class="m-0 fw-bold">Our Branch Location & Revenue</h6>
@@ -936,7 +936,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div><!-- Row end  -->
 
                     <!-- <div class="row g-3 mb-3 row-deck">

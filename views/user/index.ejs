@@ -90,7 +90,7 @@
                                     <a href="404.html" class="dropdown-item">404 Page</a>
                                 </div>
                             </div> -->
-                            <a href="/contact" class="nav-item nav-link">Contact</a>
+                            <!-- <a href="/contact" class="nav-item nav-link">Contact</a> -->
                         </div>
                         <div class="d-flex m-3 me-0">
                             <a href="/whishlist" class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" ><i class="fas fa-heart heart-icon ok"></i></a>
@@ -295,11 +295,15 @@
                                     <div class="fruite-img position-relative">
                                         <a href="/productveiw/<%= product._id %>"><img src="<%= product.image[0] %>" class="img-fluid w-100 rounded-top" alt=""></a>
                                         <!-- Heart icon -->
-                                        <button type="submit" class="btn p-0 heart-icon position-absolute top-0 end-0" onclick="toggleWishlist('<%= product._id %>')">
-                                            <div class="wishicon">
-                                                <i id="heartIcon_<%= product._id %>" class="fa fa-heart me-3 mt-2 heart-icon text-dark"></i>
-                                            </div>
-                                        </button>
+                                        <% if(wishlist.some(wProduct => wProduct.productId.toString() === product._id.toString())) { %>
+                                            <i id="heartIcon_<%= product._id %>" class="fa fa-heart position-absolute top-0 end-0 me-3 mt-3 heart-icon text-danger"  onclick="toggleWishlist('<%= product._id %>')"></i>
+                                        <% } else { %>
+                                            <i id="heartIcon_<%= product._id %>" class="fa fa-heart position-absolute top-0 end-0 me-3 mt-3 heart-icon text-dark"  onclick="toggleWishlist('<%= product._id %>')"></i>
+                                        <% } %>
+
+
+
+                                       
                                         <!-- End Heart icon -->
                                     </div>
                                     <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;"><%= product.category %></div>

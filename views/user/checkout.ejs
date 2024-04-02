@@ -64,13 +64,13 @@
                                     <a href="404.html" class="dropdown-item">404 Page</a>
                                 </div>
                             </div> -->
-                            <a href="/contact" class="nav-item nav-link">Contact</a>
+                            <!-- <a href="/contact" class="nav-item nav-link">Contact</a> -->
                         </div>
                         <div class="d-flex m-3 me-0">
                             <a href="/whishlist" class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" ><i class="fas fa-heart heart-icon ok"></i></a>
                             <a href="/cart" class="position-relative me-4 my-auto">
                                 <i class="fa fa-shopping-bag fa-2x"></i>
-                                <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;"><%= totalCartCount%></span>
+                                <!-- <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;"><%= totalCartCount%></span> -->
                             </a>
                             <a href="/profile" class="my-auto">
                                 <i class="fas fa-user fa-2x"></i>
@@ -140,29 +140,204 @@
                 });
             });
         </script>
+<div class="modal fade" id="addAddressModal" tabindex="-1" role="dialog" aria-labelledby="addAddressModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addAddressModalLabel">Add New Address</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> <!-- Modal closing button -->
+            </div>
+            <div class="modal-body">
+                <!-- Address form -->
+                <form id="addressForm" action="/addaddresscheckout" method="POST">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Name" required>
+                    </div><br>
+                    <div class="form-group">
+                        <input type="number" class="form-control" id="number" name="number" placeholder="Phone number" required>
+                    </div><br>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="address" name="address" placeholder="Address" required>
+                    </div><br>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="city" name="city" placeholder="City" required>
+                    </div><br>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="district" name="district" placeholder="District" required>
+                    </div><br>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="state" name="state" placeholder="State" required>
+                    </div><br>
+                    <div class="form-group">
+                        <input type="number" class="form-control" id="pincode" name="pincode" placeholder="Pincode" required>
+                    </div><br>
+                    <div class="form-group">
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+                    </div><br>
+                    <button type="button" class="btn btn-primary" onclick="submitForm()">Save Address</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#addAddressBtn').click(function() {
+            $('#addAddressModal').modal('show');
+        });
+    });
+
+    function submitForm() {
+        const name = document.getElementById('name').value;
+        const number = document.getElementById('number').value;
+        const address = document.getElementById('address').value;
+        const city = document.getElementById('city').value;
+        const district = document.getElementById('district').value;
+        const state = document.getElementById('state').value;
+        const pincode = document.getElementById('pincode').value;
+        const email = document.getElementById('email').value;
+
+        axios.post('/addaddresscheckout', {
+            name, number, address, city, district, state, pincode, email
+        })
+        .then(function(response) {
+            console.log(response.data);
+            location.reload();
+        })
+        .catch(function(error) {
+            console.error('Error:', error);
+        });
+    }
+
+    
+
+
+    $(document).ready(function() {
+    $('.edit-address').click(function() {
+        var modalId = $(this).data('target');
+        $(modalId).modal('show');
+    });
+});
+
+
+function editaddress(addressId) {
+    console.log(addressId);
+    const name = document.getElementById('nameedit' + addressId).value;
+    const number = document.getElementById('phoneedit' + addressId).value;
+    const address = document.getElementById('addressedit' + addressId).value;
+    const city = document.getElementById('cityedit' + addressId).value;
+    const district = document.getElementById('districtedit' + addressId).value;
+    const state = document.getElementById('stateedit' + addressId).value;
+    const pincode = document.getElementById('pincodeedit' + addressId).value;
+    const email = document.getElementById('emailedit' + addressId).value;
+
+    console.log(name, number, address, city, district, state, pincode, email);
+
+    axios.post('/editAddressFormcheckout/' + addressId, {
+            name,
+            number,
+            address,
+            city,
+            district,
+            state,
+            pincode,
+            email
+        })
+        .then(function(response) {
+            console.log(response.data);
+            location.reload();
+            
+        })
+        .catch(function(error) {
+            console.error('Error:', error);
+        });
+}
+ function addressdelete(addressId){
+
+    console.log(addressId);
+    axios.post(`/addressdelete/${addressId}`)
+
+          .then(function (response) {
+         
+          location.reload()
+        
+
+        })
+            .catch(function (error) {
+                 console.error('Error:', error);
+        });
+ }
+    
+</script>
+
+
         <!-- Checkout Page Start -->
         <div class="container-fluid py-5 mt-5" style="">
             <div class="container py-5 mt-5">
                 <h1 class="mb-4">Billing details</h1>
-                <form action="" method="">
+                
+   
+                <% if (userAddresse.length < 3) { %>
+                    <button id="addAddressBtn" class="btn btn-primary mb-3" data-toggle="modal" data-target="#addAddressModal">New Address</button>
+                  <% } %>
+
+                  <form id="form" action="/placeorder" method="POST">
                     <div class="row g-5">
                         <div class="col-md-12 col-lg-6 col-xl-7">
                             <!-- Display user's addresses dynamically -->
                             <% userAddresse.forEach((address, index) => { %>
-                                <div class="form-item w-100 address-item" style="background-color: rgb(252, 224, 190); padding: 15px; border-radius: 20px; margin-top: 10px;">
-
-                                    <input type="checkbox" class="form-check-input" name="selectedAddressId" id="useDifferentAddress" data-address-id="<%= address._id %>" value="<%= address._id %>">
-
-                                    <h5><%= address.name %>, <%= address.number %></h5>
+                              
+                                <div class="form-item w-100 address-item" style="background-color: rgb(218, 226, 223); padding: 15px; border-radius: 20px; margin-top: 10px; position: relative;">
+                                    <button type="button" class="btn btn-sm edit-address " style="position: absolute; top: 5px; left: 5px;" data-toggle="modal" data-target="#editAddressModal<%= index %>">
+                                        <i class="bi bi-pencil-square" style="font-size: 20px;"></i>
+                                    </button>
+                                
+                                    <button type="button" class="btn btn-sm delete-address ms-2 " style="position: absolute; top: 5px; left: 30px;" onclick="addressdelete('<%= address._id %>')">
+                                        <i class="bi bi-trash" style="font-size: 20px; "></i>
+                                    </button>
+                                
+                                    <input type="checkbox" class="form-check-input" style="position: absolute; top: 5px; right: 15px;" name="selectedAddressId" id="useDifferentAddress" data-address-id="<%= address._id %>" value="<%= address._id %>">
+                                
+                                    <h5 class="mt-5"><%= address.name %></h5>
                                     <p>
-                                      <%= address.address %>,
-                                      <%= address.city %>,
-                                      <%= address.district %>,
-                                      <%= address.state %>,
-                                      <%= address.pincode %>
+                                        <%= address.address %>,
+                                        <%= address.city %>,
+                                        <%= address.district %>,
+                                        <%= address.state %>,
+                                        <%= address.pincode %>
                                     </p>
                                     <h6><i class="bi bi-telephone" style="margin-right: 10px;"></i><%= address.phone %></h6>
-                                    <h6><i class="bi bi-envelope "  style="margin-right: 10px;"></i><%= address.email %></h6>
+                                    <!-- <h6><i class="bi bi-envelope" style="margin-right: 10px;"></i><%= address.email %></h6> -->
+                                </div>
+                                <div class="modal fade" id="editAddressModal<%= index %>" tabindex="-1" role="dialog" aria-labelledby="editAddressModalLabel<%= index %>" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="editAddressModalLabel">Edit Address</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <!-- Edit Address Form -->
+                                                <form id="editAddressForm<%= address._id %>">
+                                                    <input type="text" id="nameedit<%= address._id %>" name="name" placeholder="name" class="form-control" value="<%= address.name %>" required><br>
+                                                    <input type="tel" id="phoneedit<%= address._id %>" name="phone" placeholder="Phone number" class="form-control" value="<%= address.phone %>" required pattern="[0-9]{10}" title="Please enter a 10-digit phone number"><br>
+                                                    <input type="text" id="addressedit<%= address._id %>" name="address" placeholder="Address" class="form-control" value="<%= address.address %>" required><br>
+                                                    <input type="text" id="cityedit<%= address._id %>" name="city" placeholder="City" class="form-control" value="<%= address.city %>" required><br>
+                                                    <input type="text" id="districtedit<%= address._id %>" name="district" placeholder="District" class="form-control" value="<%= address.district %>" required><br>
+                                                    <input type="text" id="stateedit<%= address._id %>" name="state" placeholder="State" class="form-control" value="<%= address.state %>" required><br>
+                                                    <input type="number" id="pincodeedit<%= address._id %>" name="pincode" placeholder="Pincode" class="form-control" value="<%= address.pincode %>" required pattern="[0-9]{6}" title="Please enter a 6-digit pincode"><br>
+                                                    <input type="email" id="emailedit<%= address._id %>" name="email" placeholder="Email" class="form-control" value="<%= address.email %>" required><br>
+                                                    <button type="button" class="btn btn-primary" onclick="editaddress('<%= address._id %>')">Save Changes</button>
+                                                </form>
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             <% }); %>
                         </div>
@@ -199,6 +374,7 @@
                                                 <td class="py-5">₹<%= product.productPrice %></td> <!-- Total can be dynamic if required -->
                                             </tr>
                                             <% } %>
+                                            
                                         <% }); %>
                                         <!-- Other rows for subtotal, shipping, and total -->
                                     </tbody>
@@ -260,6 +436,8 @@
     const selectedPaymentMethod = formData.get('selectedPaymentMethod');
     const productIds = formData.getAll('productIds[]'); // Use getAll to get all values of an array-like field
     
+
+    console.log("hiiiiiiiii");
     try {
         // Send data to server using Axios
         const response = await axios.post('/placeorder', {
@@ -290,6 +468,10 @@
                             // Payment successful, show success modal
                             console.log("Payment successful");
                             $('#successModal').modal('show');
+
+                            setTimeout(function() {
+                                     $('#successModal').modal('hide'); // Hide the modal
+                             }, 3000);
                         }
                     },
                 prefill: {
@@ -307,6 +489,9 @@
         } else {
             if(response.data===true){
             $('#successModal').modal('show');
+            setTimeout(function() {
+                   $('#successModal').modal('hide'); // Hide the modal
+             }, 5000);
             }
         }
     } catch (error) {
@@ -315,24 +500,18 @@
 };
 
 // Add event listener to the form for form submission
-const form = document.querySelector('form');
+const form = document.getElementById('form');
 form.addEventListener('submit', handleSubmit);
 </script>>
 
 
 
-<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="successModalLabel">Order Success</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Your order has been successfully placed. Thank you for shopping with us!
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-bs-dismiss="modal">Close</button>
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true" >
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
+        <div class="modal-content" style="background-color: rgb(160, 245, 160);">
+            <div class="modal-body text-center" style="padding-top: 50px; padding-bottom: 50px;">
+                <img src="https://static.vecteezy.com/system/resources/previews/011/858/556/original/green-check-mark-icon-with-circle-tick-box-check-list-circle-frame-checkbox-symbol-sign-png.png" alt="" style="width: 100px;">
+                <h5 class="mt-3">Your order has been successfully placed.</h5>
             </div>
         </div>
     </div>

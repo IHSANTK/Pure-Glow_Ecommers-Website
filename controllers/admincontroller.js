@@ -33,8 +33,33 @@ const admindashbord = async (req, res) => {
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             if (decoded && decoded.id) {
-               
-                return res.render('admin/index');
+                // Count users where orders field is not null
+                let countUsersWithOrders = await User.countDocuments({ orders: { $ne: null } });
+
+                // Aggregate to count the total number of orders across all users
+                let totalOrdersCount = await User.aggregate([
+                    { 
+                        $match: { orders: { $exists: true, $ne: null } } // Match documents where orders field exists and is not null
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            totalOrders: { $sum: { $size: "$orders" } } // Sum the size of orders array for each user
+                        }
+                    }
+                ]);
+
+                // console.log(countUsersWithOrders);
+                // console.log(totalOrdersCount[0].totalOrders);
+
+                let product = await Products.findOne();
+
+
+                let productcount = product.products.length
+
+                console.log(productcount);
+
+                return res.render('admin/index', { countUsersWithOrders, totalOrdersCount: totalOrdersCount.length > 0 ? totalOrdersCount[0].totalOrders : 0,productcount });
             }
         } catch (error) {
             console.error("Error:", error);
@@ -102,7 +127,7 @@ let categorilist = async(req,res)=>{
    
 }
 
-let categoriesadd= async(req,res)=>{
+let categoriesadd= async(req,res)=>{ 
 
     res.render('admin/categories-add')
 
@@ -221,14 +246,14 @@ let productlist = async (req, res) => {
             }
         } catch (error) {
             console.log(error);
-            res.status(500).send('Internal Server Error');
+            res.render('admin/product-add',{data:req.data})
         }
     
 };
 
  
  let productadd = async(req,res)=>{
-
+ 
     let data = await Products.findOne();
   
       res.render('admin/product-add',{data});
@@ -424,7 +449,7 @@ const orderslist = async (req, res) => {
                 $match: {
                     orders: { $exists: true, $ne: null } // Filter users with non-empty orders
                 }
-            },
+            }, 
             {
                 $unwind: "$orders" // Deconstruct the orders array
             },
@@ -455,10 +480,10 @@ const orederstatus = async (req, res) => {
 
         // Extract order ID, product ID, and new status from request parameters and body
         const { orderId, productId, newStatus } = req.body;
-          console.log("orderid",orderId, "productid", productId , newStatus );
+        console.log("orderid", orderId, "productid", productId, newStatus);
 
         // Find the user based on the order ID
-        const user = await User.findOne();
+        const user = await User.findOne({ 'orders._id': orderId });
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -470,27 +495,31 @@ const orederstatus = async (req, res) => {
         if (!order) {
             return res.status(404).json({ error: 'Order not found' });
         }
- 
+
         // Find the product within the order based on product ID
         const product = order.products.find(product => product._id.toString() === productId);
 
         if (!product) {
             return res.status(404).json({ error: 'Product not found in order' });
-        }
+        } 
 
         // Update the order status for the specific product
         product.orderStatus = newStatus;
 
         // Save the updated user document
-          await user.save();
+        await user.save();
 
-       res.redirect('/orederslist');
-       
+        // Redirect to the orders list page
+        res.redirect('/orederslist');
+
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+
+
 
 const adminlogout = (req, res) => {
     res.clearCookie('admin_jwt'); // Clear the JWT token stored in cookies

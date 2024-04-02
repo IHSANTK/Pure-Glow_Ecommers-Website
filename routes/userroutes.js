@@ -19,9 +19,9 @@ router.get('/block',preventBack,userController.blockpage)
 router.post('/login',preventBack, userController.dataslogin);
 
 router.post('/login-otp', preventBack, userController.sendOTP); // Add route for sending OTP
-router.post('/verify-otp', preventBack,userController.loginWithOTP);
+router.post('/verify-otp', preventBack,userController. signupwithotp);
 
-router.get('/signup',preventBack, userController.signuppage); 
+router.get('/signup',preventBack, userController.signuppage);  
 
 router.post('/signup',preventBack, userController.getsignupdata);
 
@@ -68,7 +68,9 @@ router.get('/checkoutfromcart',preventBack,userController.checkoutfromcart);
 
 router.post('/checkout/:id',preventBack,userController.checkoutpage);
 
-router.post('/manageaddress', userController.manageaddress);
+router.post('/manageaddress', userController.manageaddress); 
+
+router.post('/addaddresscheckout', userController.addaddresscheckout);
 
 router.post('/addressdelete/:id',userController. addressdelete);
 
@@ -79,6 +81,8 @@ router.get('/orders',userController.ordermanage);
 router.post('/cancellreson/:id',userController.cancellreson);
 
 router.post('/editAddressForm/:id', userController.editaddress);
+
+router.post('/editAddressFormcheckout/:id',userController.editAddressFormcheckout)
 
 
 

@@ -137,7 +137,7 @@ const dataslogin = async (req, res) => {
         res.cookie('user_jwt', token, { httpOnly: true });
         res.redirect('/');
 
-    } catch (error) {
+    } catch (error) { 
         console.error('Error logging in:', error);
         res.render('user/login', { errorMessage: 'Something went wrong. Please try again.' });
     }
@@ -168,40 +168,7 @@ let signuppage = (req, res) => {
     }
 };
 
-const getsignupdata = async (req, res) => {
-    const { name, email, phoneNumber, password } = req.body;
 
-    try {
-        const existingUser = await User.findOne({ email });
-
-        if (existingUser) {
-            return res.render('user/signup', { signupSuccessful: "User already exists" });
-        }
-
-        const hashedPassword = bcrypt.hashSync(password, 10);
-
-        const newUser = new User({
-            name,
-            email,
-            password: hashedPassword,
-            phoneNumber,
-        });
-
-        await newUser.save();
-
-        // Generate JWT token
-        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
-        
-        // Set JWT token in the cookie
-        res.cookie('user_jwt', token, { httpOnly: true });
-
-        // Redirect the user to the homepage or any desired page after successful signup
-        res.redirect('/');
-    } catch (error) {
-        console.error('Error signing up:', error);
-        res.status(500).json({ error: "Internal server error" });
-    }
-};
 
 
 
@@ -470,11 +437,16 @@ const addToCart = async (req, res) => {
         }
 
         const existingProduct = user.cart.products.find(item => item.productId == productId);
+
+        console.log("hi");
         if (existingProduct) {
+            console.log("exting",existingProduct);
             existingProduct.quantity += 1;
         } else {
             // If the product doesn't exist, add it to the cart
             const productData = product.products.find(prod => prod._id == productId);
+
+            console.log("product data",productData);
             user.cart.products.push({
                 productId: productData._id,
                 productName: productData.productName,
@@ -483,7 +455,7 @@ const addToCart = async (req, res) => {
                 quantity: 1,
                 disable:productData.disable
             });
-        }
+        } 
 
         // Calculate the sum of product prices in the cart
         const totalPrice = user.cart.products.reduce((total, product) => {
@@ -632,6 +604,9 @@ const quantityplus = async (req, res) => {
     try {
         const productId = req.params.productId;
 
+        console.log(productId);
+        console.log("hi");
+
         // Find the user by productId and update the quantity
         const user = await User.findOneAndUpdate(
             { "cart.products.productId": productId },
@@ -639,6 +614,7 @@ const quantityplus = async (req, res) => {
             { new: true }
         );
 
+        console.log(user);
         if (!user) {
             return res.status(404).json({ error: 'User or product not found' });
         }
@@ -650,6 +626,7 @@ const quantityplus = async (req, res) => {
         user.cart.total = totalPrice;
            
         await user.save();
+
         return res.json({ user });
 
     } catch (error) {
@@ -663,14 +640,18 @@ const latestproduct = async (req, res) => {
     try {
         const category = req.body.category;
 
-
-        const data = await Products.findOne({ 'products.category': category }).sort({ createdAt: -1 }).limit(4);
+        // Find the latest four products belonging to the specified category
+        const data = await Products.findOne({ "products.category": category })
+                                    .sort({ "products.createdAt": -1 })
+                                    .limit(4);
 
         if (!data) {
             return res.render('user/error404', { errormessage: "Product Not Available Now !!" });
         }
 
-        const categor = data.products.filter(produ => produ.category === category);
+        const categor = data.products
+                            .filter(product => product.category === category)
+                            .slice(0, 4); // Slice to include only the first 4 products
 
         const allCategories = await Products.distinct("products.category");
 
@@ -899,7 +880,7 @@ const checkoutfromcart = async (req, res) => {
         let cartTotalNonDisabled = cart.products.reduce((total, product) => {
             if (!product.disable) {
                 productId=product.productId
-                return total + parseFloat(product.productPrice);
+                return total + parseFloat(product.productPrice*product.quantity);
                 
             } else {
                 return total;
@@ -912,6 +893,8 @@ const checkoutfromcart = async (req, res) => {
 
         // Get the total number of products in the cart
         let totalCartCount = cart.products.length;
+
+        
 
         // Render the checkout page with the relevant information
         res.render('user/checkout', { products: cart.products, cartTotal: cartTotalNonDisabled, totalCartCount, userAddresse: address });
@@ -928,13 +911,13 @@ const checkoutpage = async (req, res) => {
         const token = req.cookies.user_jwt;
       
         if (!token) {
-            return res.status(401).json({ error: 'Unauthorized' });
+            return res.redirect( '/login');
         }
 
         // Verify the JWT token to get user ID
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         if (!decoded || !decoded.id) {
-            return res.status(401).json({ error: 'Unauthorized' });
+            return res.redirect( '/login');
         }
         const user = await User.findById(decoded.id);
 
@@ -965,10 +948,59 @@ const checkoutpage = async (req, res) => {
 
 const manageaddress = async (req, res) => {
     const { name,number, pincode, address, city, district, state, email } = req.body;
-console.log(number);
+
     try {
         const token = req.cookies.user_jwt;
       
+        if (!token) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        // Verify the JWT token to get user ID
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded || !decoded.id) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        // Find the user by ID obtained from the decoded JWT token
+        const user = await User.findById(decoded.id);
+
+        // If user is not found, handle the situation
+        if (!user) {
+            return res.status(404).send('User not found');
+        } 
+
+        // Push the new address to the user's address array
+        user.address.push({
+            name: name,
+            phone: number,
+            pincode: pincode,
+            address: address,
+            city: city,
+            district: district,
+            state: state,
+            email: email
+        });
+
+        // Save the changes
+        await user.save();
+
+        res.redirect('/profile?passwordUpdate=address added successfully');
+    } catch (error) {
+        console.error('Error adding address:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+
+const addaddresscheckout = async (req, res) => {
+    const { name,number,address,city,district,state,pincode,email } = req.body;
+    console.log("Received form data:");
+    console.log( name,number,address,city,district,state,pincode,email); // Log the received form data
+ 
+    try {
+        const token = req.cookies.user_jwt;
+
         if (!token) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
@@ -998,16 +1030,18 @@ console.log(number);
             state: state,
             email: email
         });
-
+ 
         // Save the changes
-        await user.save();
+        await user.save(); 
 
-        res.redirect('/profile?addressUpdate=address added');
+        // Redirect or render as needed
+       res.json('added succcessfully')
     } catch (error) {
         console.error('Error adding address:', error);
         res.status(500).send('Internal Server Error');
     }
 };
+
 
 
 
@@ -1018,7 +1052,7 @@ const addressdelete = async (req, res) => {
         // Find the user and pull the matched address from the address array
         const user = await User.findOneAndUpdate(
             { 'address._id': addressId },
-            { $pull: { address: { _id: addressId } } },
+            { $pull: { address: { _id: addressId } } }, 
             { new: true }
         );
 
@@ -1039,6 +1073,8 @@ const editaddress = async (req, res) => {
     try {
         const addressId = req.params.id;
 
+        console.log("hooooooil");
+
         // Capture the new address data from the request body
         const { name, phone, address, city, district, state, pincode,email  } = req.body;
 
@@ -1047,31 +1083,24 @@ const editaddress = async (req, res) => {
         // Find the user and pull the matched address from the address array
         const user = await User.findOneAndUpdate(
             { 'address._id': addressId },
-            { $pull: { address: { _id: addressId } } },
+            {
+                $set: {
+                    'address.$.name': name,
+                    'address.$.phone': phone,
+                    'address.$.address': address,
+                    'address.$.city': city,
+                    'address.$.district': district,
+                    'address.$.state': state,
+                    'address.$.pincode': pincode,
+                    'address.$.email': email,
+                }
+            },
             { new: true }
         );
 
-        // Check if the user was found and updated
         if (!user) {
             return res.status(404).send('User not found');
         }
-
-        // Add the new address data to the user's address array
-        user.address.push({
-            name,
-            phone,
-            address,
-            city,
-            district,
-            state,
-            pincode,
-            email,
-           
-        });
-
-        // Save the updated user document
-        await user.save();
-
         // Redirect to the profile page with a success message
         res.redirect('/profile?passwordUpdate=address updated successfully');
 
@@ -1081,9 +1110,47 @@ const editaddress = async (req, res) => {
     }
 }
 
+const editAddressFormcheckout = async (req, res) => {
+    const addressId = req.params.id;
 
+    console.log(addressId);
 
+    const { name, number, address, city, district, state, pincode, email } = req.body;
 
+    console.log(name, number, address, city, district, state, pincode, email);
+
+    console.log("hloooo");
+
+    try {
+        const user = await User.findOneAndUpdate(
+            { 'address._id': addressId },
+            {
+                $set: {
+                    'address.$.name': name,
+                    'address.$.phone': number,
+                    'address.$.address': address,
+                    'address.$.city': city,
+                    'address.$.district': district,
+                    'address.$.state': state,
+                    'address.$.pincode': pincode,
+                    'address.$.email': email,
+                }
+            },
+            { new: true }
+        );
+
+        // Check if the user was found and updated
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+
+        res.json('addressedited');
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+ 
 
 
 
@@ -1092,6 +1159,10 @@ const editaddress = async (req, res) => {
 
 const placeholder = async (req, res) => {
     const { selectedAddressId, selectedPaymentMethod, productIds } = req.body;
+
+console.log('hooooi');
+    
+    console.log(productIds);
 
     try {
         const token = req.cookies.user_jwt;
@@ -1109,6 +1180,8 @@ const placeholder = async (req, res) => {
         // Find the exact user matching the decoded user ID
         const user = await User.findById(decoded.id);
 
+        // console.log(user);
+
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -1123,6 +1196,8 @@ const placeholder = async (req, res) => {
         // Find only the products whose IDs match the provided productIds within the 'products' array field
         const products = await Products.find();
 
+        // console.log(products);
+
         if (!products || products.length === 0) {
             return res.status(404).json({ error: 'Products not found' });
         }
@@ -1131,16 +1206,16 @@ const placeholder = async (req, res) => {
 
         let totalAmount ='' ;
 
-        if (productIds.length === 1) {
-            const product = products.find(product => product.products.some(p => p._id.toString() === productIds[0]));
-          
-            exactProducts = product.products.filter(p => p._id.toString() === productIds[0]);
-
-            totalAmount = exactProducts[0].productPrice
+        if (productIds.length === 1) { 
+            const productId = productIds[0];
+            for (const product of products) {
+                const matchedProduct = product.products.find(p => p._id.toString() === productId);
+                if (matchedProduct) {
+                    exactProducts.push(matchedProduct); // Push matched product into the array
+                    totalAmount += matchedProduct.productPrice; // Add product price to totalAmount
+                }
+            }
            
-       
-            
-
           
         } else {
             // Assuming user.cart.products is where the user's cart items are stored
@@ -1161,9 +1236,8 @@ const placeholder = async (req, res) => {
 
        
 
-        // Create new order object
-        const newOrder = {
-           
+
+        user.orders.push({
             products: exactProducts.map(product => ({
                 productId: product._id,
                 name:product.productName,
@@ -1177,16 +1251,15 @@ const placeholder = async (req, res) => {
             orderDate: new Date(),
             shippingAddress: exactAddress,
             paymentMethod: selectedPaymentMethod,
-            
-        };
+        });
 
         // Add the new order to the user's orders array
-        user.orders.push(newOrder);
+        
 
         // Save the updated user document
         await user.save();
 
-        const orderId = user.orders[user.orders.length - 1].orderId;
+        const orderId = user.orders[user.orders.length - 1]._id;
 
         console.log("Newly created order ID:", orderId);
         
@@ -1259,8 +1332,9 @@ const ordermanage = async (req, res) => {
     
 
     // const ordersdata =user.orders;
+    let totalCartCount = user.cart.length
 
-    res.render('user/orders', { products:userProducts,userOrders});
+    res.render('user/orders', { products:userProducts,userOrders,totalCartCount:totalCartCount});
 }
 
 const cancellreson = async (req, res) => {
@@ -1307,7 +1381,7 @@ const cancellreson = async (req, res) => {
         await user.save();
         // You can do further operations with the found product and cancel reason here
 
-        res.status(200).json({ message: 'Cancellation reason received successfully' });
+        res.redirect('/orders');
     } catch (error) {
         console.error('Error:', error);
         res.status(500).send('Internal Server Error');
@@ -1321,44 +1395,126 @@ const cancellreson = async (req, res) => {
 
 async function sendOTP(req, res) {
     const { email } = req.body;
-   
-    const otp = otpService.generateOTP();
-    otpService.otpMap.set(email, otp.toString());
+
     try {
-      await otpService.sendOTP(email, otp);
-      res.sendStatus(200);
-    } catch (error) {
-      console.error('Error sending OTP:', error);
-      res.status(500).json({ message: error.message });
-    }
-  }
-  
-  async function loginWithOTP(req, res) {
-    try {
-        const { email, otp } = req.body;
-        console.log(email);                                                                                                                                               `                                                                                                                                                                                                                                                                       `
-        const user = await User.findOne({ email });
-       
-        if (!user) {
-            return res.render('user/login', { errorMessage: 'Invalid email or OTP. Please sign up or try again.' });
-        }
-        
-        const isOTPValid = otpService.verifyOTP(email, otp);
-        if (!isOTPValid) {
-            return res.render('user/login', { errorMessage: 'Invalid email or OTP. Please sign up or try again.' });
+        // Check if the email already exists in the User collection
+        const existingUser = await User.findOne({ email });
+
+        if (existingUser) {
+            // If the email exists, return a response indicating that the user already exists
+            return res.status(400).json({ message: "User already exists " });
         }
 
-        // Generate JWT token
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        // If the email doesn't exist, generate OTP and send it
+        const otp = otpService.generateOTP();
+        otpService.otpMap.set(email, otp.toString());
+        await otpService.sendOTP(email, otp);
 
-        res.cookie('user_jwt', token, { httpOnly: true });
-        res.redirect('/');
+        // Send a success response
+        res.sendStatus(200);
     } catch (error) {
-        console.error('Error logging in with OTP:', error);
-        res.render('user/login', { errorMessage: 'Something went wrong. Please try again.' });
+        console.error('Error sending OTP:', error);
+        res.status(500).json({ message: error.message });
     }
 }
+  
 
+
+  const signupwithotp = async (req, res) => {
+    const { email, otp, formData } = req.body;
+    console.log(email, otp, formData);
+    
+    try {
+        // Check if the user already exists
+        const existingUser = await User.findOne({ email });
+
+        console.log(existingUser);
+
+        if (existingUser) {
+            return res.status(400).json({ message: "User already exists " });
+        }
+
+        // Verify OTP
+        const isOTPValid = otpService.verifyOTP(email, otp);
+
+        if (!isOTPValid) {
+            return res.status(400).json( {message:'Invalid OTP. Please sign up again.'} );
+        }
+
+        // Extract form data
+        const { name, phoneNumber, password } = formData;
+
+        // Hash the password
+        const hashedPassword = bcrypt.hashSync(password, 10);
+
+        // Create a new user
+        const newUser = new User({
+            name,
+            email,
+            password: hashedPassword,
+            phoneNumber
+        });
+
+        // Save the new user to the database
+        await newUser.save();
+
+        // Generate JWT token
+        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+
+        // Set JWT token in the cookie
+        res.cookie('user_jwt', token, { httpOnly: true });
+
+        // Redirect the user to the homepage or any desired page after successful signup
+        res.redirect('/');
+    } catch (error) {
+        console.error('Error signing up:', error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+
+const getsignupdata = async (req, res) => {
+    // const { name, email, phoneNumber, password } = req.body;
+
+    // console.log(name, email, phoneNumber, password );
+
+    // try {
+    //     const existingUser = await User.findOne({ email });
+    
+    //     if (existingUser) {
+    //         return res.render('user/signup', { signupSuccessful: "User already exists" });
+    //     }
+    //     const isOTPValid = otpService.verifyOTP(email, otp);
+        
+    //     if (!isOTPValid) {
+    //         return res.render('user/login', { errorMessage: 'Invalid email or OTP. Please sign up or try again.' });
+    //     }
+
+    //     const hashedPassword = bcrypt.hashSync(password, 10);
+
+    //     const newUser = new User({
+    //         name,
+    //         email,
+    //         password: hashedPassword,
+    //         phoneNumber,
+           
+    //     });
+
+    //     await newUser.save();
+
+    //     // Generate JWT token
+    //     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+        
+    //     // Set JWT token in the cookie
+    //     res.cookie('user_jwt', token, { httpOnly: true });
+
+    //     // Redirect the user to the homepage or any desired page after successful signup
+    //     res.redirect('/');
+    // } catch (error) {
+    //     console.error('Error signing up:', error);
+    //     res.status(500).json({ error: "Internal server error ooooh" });
+    // }
+};
 
 
 
@@ -1440,12 +1596,14 @@ module.exports={
     checkoutpage,
     checkoutfromcart,
     manageaddress,
+    addaddresscheckout,
     addressdelete,
     editaddress,
+    editAddressFormcheckout,
     placeholder,
     ordermanage,
     cancellreson,
-    loginWithOTP, 
+    signupwithotp, 
     sendOTP,
     succesGoogleLogin,
     failureGooglelogin,

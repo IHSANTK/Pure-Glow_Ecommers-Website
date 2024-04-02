@@ -15,56 +15,142 @@
   </style>
 </head>
 <body style="background-color: rgb(108, 230, 84);">
-  <div class="container mt-2  " >
-    <div class="row justify-content-center" >
-      <div class="col-md-5">
-        <div class="card custom-card-shadow " style="border-radius: 15px; background-color: rgb(204, 204, 204);padding-left: 5%; padding-right: 5%;">
-          <div class="card-body" >
-            <h1 class="text-center" style="font-size: xx-large;">Create Account</h1>
-            <form action="/signup" method="post" onsubmit="return validateForm()">
-              <div class="form-group">
-                <label for="name" style="font-weight: 500;">Name</label>
-                <input type="text" class="form-control" id="name" name="name">
-                <span id="name-error" style="color: red;"></span>
-              </div>
-              <div class="form-group">
-                <label for="email" style="font-weight: 500;">Email</label>
-                <input type="email" class="form-control" id="email" name="email">
-                <span id="email-error" style="color: red;"></span>
-              </div>
-              <div class="form-group">
-                <label for="phoneNumber" style="font-weight: 500;">Phone Number</label>
-                <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber">
-                <span id="phoneNumber-error" style="color: red;"></span>
-              </div>
-              <div class="form-group">
-                <label for="password"style="font-weight: 500;">Password</label>
-                <input type="password" class="form-control" id="password" name="password">
-                <span id="password-error" style="color: red;"></span>
-              </div>
-              <div class="form-group">
-                <label for="confirmPassword"style="font-weight: 500;">Confirm Password</label>
-                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
-                <span id="confirmPassword-error" style="color: red;"></span>
-              </div>
-              <button type="submit" class="btn btn-primary btn-block">Signup</button>
+  <div class="container mt-2">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card custom-card-shadow" style="border-radius: 15px; background-color: rgb(204, 204, 204);padding-left: 5%; padding-right: 5%;">
+                <div class="card-body">
+                    <h1 class="text-center" style="font-size: xx-large;">Create Account</h1>
 
-              <a href="/auth/google" class="btn btn-danger btn-block mt-3">Sign up with Google</a>
-            </form>
-            <!-- Add Google sign-up button/link -->
-            
-           
-            <!-- <button type="button" onclick="window.location='/auth/google'" class="btn btn-danger btn-block mt-3">Sign up with Google</button> -->
-            <p class="text-center mt-3">Already have an account? <a href="/login">Login</a></p>
-            <p class="text-center mt-3"><%= signupSuccessful %></p>
-          </div>
+                    <form id="signupForm">
+                        <div class="form-group">
+                            <label for="name" style="font-weight: 500;">Name</label>
+                            <input type="text" class="form-control" id="name" name="name">
+                            <span id="name-error" style="color: red;"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="email" style="font-weight: 500;">Email</label>
+                            <input type="email" class="form-control" id="email" name="email">
+                            <span id="email-error" style="color: red;"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="phoneNumber" style="font-weight: 500;">Phone Number</label>
+                            <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber">
+                            <span id="phoneNumber-error" style="color: red;"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="password"style="font-weight: 500;">Password</label>
+                            <input type="password" class="form-control" id="password" name="password">
+                            <span id="password-error" style="color: red;"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword"style="font-weight: 500;">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
+                            <span id="confirmPassword-error" style="color: red;"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block" id="signupButton">Signup</button>
+                        <!-- <a href="/auth/google" class="btn btn-danger btn-block mt-3">Sign up with Google</a> -->
+                    </form>
+
+                    <p class="text-center mt-3">Already have an account? <a href="/login">Login</a></p>
+                    <p class="text-center mt-3" style="color: rgb(255, 4, 4);" id="signupMessage"><%=signupSuccessful %></p>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-  
-  </div>
+</div>
 
+<div class="modal fade" id="otpVerifyModal" tabindex="-1" role="dialog" aria-labelledby="otpVerifyModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="otpVerifyModalLabel">Verify OTP</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="otp">OTP</label>
+                    <input type="text" class="form-control" id="otp" required>
+                    <input type="hidden" id="otpEmail">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="verifyOTPButton">Verify OTP</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+  document.getElementById('signupForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevent form submission
+
+      // Get form data
+      const formData = new FormData(this);
+
+      // Convert formData to object
+      const formDataObject = {};
+      formData.forEach((value, key) => {
+          formDataObject[key] = value;
+      });
+
+      // Send form data to the backend using Axios for OTP verification
+      axios.post('/login-otp', formDataObject)
+          .then(function(response) {
+              if (response.status === 200) {
+                  alert('OTP sent successfully. Check your email.');
+                  // Open the OTP verification modal
+                  $('#otpEmail').val(formDataObject.email);
+                  $('#otpVerifyModal').modal('show');
+
+                  // Store form data in localStorage to access after OTP verification
+                  localStorage.setItem('formData', JSON.stringify(formDataObject));
+              }
+          })
+          .catch(function(error) {
+              // Handle errors here
+              console.error('Error:', error.response.data);
+              $('#signupMessage').text('Error: ' + error.response.data.message);
+          });
+  });
+
+  // Handle OTP verification
+  document.getElementById('verifyOTPButton').addEventListener('click', function() {
+      const otp = document.getElementById('otp').value;
+      const email = document.getElementById('otpEmail').value;
+      
+      // Retrieve form data from localStorage
+      const formDataObject = JSON.parse(localStorage.getItem('formData'));
+
+      // Send form data along with OTP verification to the backend
+      axios.post('/verify-otp', { email: email, otp: otp, formData: formDataObject })
+          .then(function(response) {
+              if (response.status === 200) {
+                  alert('OTP verified successfully. Redirecting...');
+                  // Redirect user to the homepage or any other desired page
+                  window.location.href = '/';
+              } else {
+                  alert('Error verifying OTP: ' + response.data.message);
+              }
+          })
+          .catch(function(error) {
+              if (error.response) {
+                  alert('Error verifying OTP: ' + error.response.data.message);
+              } else {
+                  alert('Error verifying OTP: ' + error.message);
+              }
+          });
+  });
+</script>
 
 
   <!-- Bootstrap JS -->
