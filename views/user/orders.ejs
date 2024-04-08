@@ -143,6 +143,7 @@
 <h2 style="margin-left: 10%; margin-top: 12%;">My Orders</h2>
     <div class="container" style="">
         <div class="order-container">
+            <% if (products.length > 0) { %>
             <% products.forEach(product => { %>
                 <div class="order" style="background-color: rgb(224, 236, 177); padding: 10px; border-radius: 10px; margin-bottom: 15px;">
                     <div class="product-info">
@@ -156,9 +157,7 @@
                             <p>Quantity: <%= product.qty %></p>
                             <p>Price: <%= product.price*product.qty %></p>
                            
-                            <% if (product.cancelReason) { %>
-                                <p>Cancel Reason: <%= product.cancelReason %></p>
-                            <% } %>
+                           
                                  <!-- Format orderDate -->
             <p>Order Date: <%= new Date(userOrders[0].orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
     
@@ -171,41 +170,63 @@
             <p>Expected Delivery Date: <%= expectedDeliveryDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
 
             <p>Payment Method: <%= userOrders[0].paymentMethod %></p>
-            <% if (product.orderStatus=== 'cancel') { %>
-                 <p style="color: red;">Order Status: <%= product.orderStatus %></p>
-                 <% }else{ %>
-                    <p >Order Status: <%= product.orderStatus %></p>
-                    <% }%>
+            <% if (product.orderStatus === 'cancel') { %>
+                <span style="">Order Status:<span style="color: red;"> <%= product.orderStatus %></span></span>
+                <p class="mt-3">Cancel Reason: <%= product.cancelReason %></p>
+            <% } else if (product.orderStatus === 'delivered') { %>
+                <span style="">Order Status:<span style="color: rgb(11, 167, 63);"><strong> <%= product.orderStatus %></strong></span></span>
+            <% } else { %>
+                <p>Order Status: <%= product.orderStatus %></p>
+            <% } %>
                         </div>
                     </div>
-                    <div class="address-info">
-                        <h5><i class="fas fa-map-marker-alt"></i> <%= userOrders[0].shippingAddress.name %></h5>
-                        <p><%= userOrders[0].shippingAddress.address %>, 
-                            <%= userOrders[0].shippingAddress.city %>,
-                            <%= userOrders[0].shippingAddress.district %> <br>
-                            <%= userOrders[0].shippingAddress.state %>
-                            <%= userOrders[0].shippingAddress.pincode %></p>
-                        <h6><i class="fas fa-phone-alt"></i> <%= userOrders[0].shippingAddress.phone %></h6>
-                        <!-- <h6><i class="fas fa-envelope"></i> <%= userOrders[0].shippingAddress.email %></h6> -->
-                    </div>
-                    <form class="cancel-form" action="/cancellreson/<%=product.productId %>" method="post" onsubmit="return submitCancellationReason(this)">
-                        <div class="form-group">
-                            <label for="cancelReasonSelect">Cancel Product</label>
-                            <select class="form-control" id="cancelReasonSelect" name="cancelReason">
-                                <option selected disabled>Select a reason</option>
-                                <option value="size Not Match">size Not Match</option>
-                                <option value="Change My Mind">Change My Mind</option>
-                                <option value="Product Damages">Product Damages</option>
-                                <!-- Add more reasons as needed -->
-                            </select>
+
+                    <div class="additional-info" style="display: none;">
+                        <div class="address-info">
+                            <h5> <%= userOrders[0].shippingAddress.name %></h5>
+                            <p><i class="fas fa-map-marker-alt"></i><br><%= userOrders[0].shippingAddress.address %>,
+                                <%= userOrders[0].shippingAddress.city %>,
+                                <%= userOrders[0].shippingAddress.district %> <br>
+                                <%= userOrders[0].shippingAddress.state %>
+                                <%= userOrders[0].shippingAddress.pincode %></p>
+                            <h6><i class="fas fa-phone-alt"></i> <%= userOrders[0].shippingAddress.phone %></h6>
                         </div>
-                        <button type="submit" class="btn btn-danger">Cancel</button>
-                    </form>
+                        <form class="cancel-form" action="/cancellreson/<%=product._id%>" method="post" onsubmit="return submitCancellationReason(this)">
+                            <div class="form-group">
+                                <label for="cancelReasonSelect">Cancel Product</label>
+                                <select class="form-control" id="cancelReasonSelect" name="cancelReason">
+                                    <option selected disabled>Select a reason</option>
+                                    <option value="size Not Match">Diffrent varient</option>
+                                    <option value="Change My Mind">Change My Mind</option>
+                                    <option value="Product Damages">Product Damage</option>
+                                    <!-- Add more reasons as needed -->
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-danger">Cancel</button>
+                        </form>
+                    </div>
+                    <button class="btn  view-details-btn mt-2" style="color: blue;" onclick="toggleDetails(this)">View Details</button>
+             
                 </div>
             <% }); %>
+            <% } else { %>
+                <h2>No orders !</h2>
+                <a class="btn border-secondary rounded-pill py-3 px-5 mt-3" href="/shop/<%= totalCartCount ? totalCartCount : '0' %>">Shop Now</a>
+            <% } %>
         </div>
     </div>
-
+<script>
+    function toggleDetails(button) {
+        const additionalInfo = button.parentElement.querySelector('.additional-info');
+        if (additionalInfo.style.display === 'none') {
+            additionalInfo.style.display = 'block';
+            button.innerText = 'Hide Details';
+        } else {
+            additionalInfo.style.display = 'none';
+            button.innerText = 'View Details';
+        }
+    }
+</script>
     <!-- Add Bootstrap JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>

@@ -361,7 +361,7 @@
                                                                     <span class="badge bg-success"><%= product.cancelReason %></span>
                                                                 <% } else { %>
                                                                     <select class="status-select" name="newStatus">
-                                                                        <option value="select">Select</option>
+                                                                       
                                                                         <option value="shipped">Shipped</option>
                                                                         <option value="delivered">Delivered</option>
                                                                         <option value="cancel">Cancel</option>
@@ -415,6 +415,7 @@
                 .then(response => {
                     // Handle success response
                     console.log(response.data);
+               
                 })
                 .catch(error => {
                     // Handle error response

@@ -48,7 +48,7 @@ const Homepage = async (req, res) => {
                         console.error("Token has expired:", error);
                         res.locals.tokenExpiredHandled = true; // Set flag to indicate that redirection has occurred
                         return res.render('user/index', { uniqueCategories, categor: latestProducts, wishlist: userWishlist, totalCartCount:totalCartCount });
-                    } 
+                    }  
                 } else {
                     // Handle other JWT verification errors
                     console.error("JWT verification error:", error);
@@ -217,7 +217,7 @@ const editpassword = async (req, res) => {
 
 const editprofile = async (req, res) => {
     const token = req.cookies.user_jwt;
-    const { userName, email, phoneNumber } = req.body;
+    const { userName, phoneNumber } = req.body;
 
     try {
         if (!token) {
@@ -250,7 +250,6 @@ const editprofile = async (req, res) => {
 
         // Update user data with the new information
         user.name = userName;
-        user.email = email;
         user.phoneNumber = phoneNumber;
 
         // Update the image URL only if a new image is provided
@@ -285,7 +284,7 @@ const deleteProfileImage = async (req, res) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         if (!decoded || !decoded.id) {
             return res.status(401).json({ error: 'Unauthorized' });
-        }
+        } 
 
         const userId = decoded.id;
 
@@ -379,15 +378,29 @@ const shoppage = async (req, res) => {
 const getproductdetails = async (req, res) => {
     try {
         const category = req.params.category;
+        const sortingOption = req.query.sorting;
 
+        
+
+        // Retrieve products based on the category
         const product = await Products.findOne({ 'products.category': category });
 
         if (!product) {
             return res.render('user/error404', { error: "Product Not Available Now !!" });
-        }
+        }  
 
+        // Filter products based on the category
         const categorProducts = product.products.filter(produ => produ.category === category);
 
+        // Sort products based on the sorting option
+        
+        if (sortingOption === 'lowToHigh') {
+            categorProducts.sort((a, b) => a.productPrice - b.productPrice);
+        } else if (sortingOption === 'highToLow') {
+            categorProducts.sort((a, b) => b.productPrice - a.productPrice);
+        }
+
+        // Get user information if available
         let user = undefined;
         if (req.cookies.user_jwt) {
             jwt.verify(req.cookies.user_jwt, process.env.JWT_SECRET, async (err, decodedToken) => {
@@ -1025,7 +1038,7 @@ const addaddresscheckout = async (req, res) => {
             phone: number,
             pincode: pincode,
             address: address,
-            city: city,
+            city: city, 
             district: district,
             state: state,
             email: email
@@ -1040,7 +1053,7 @@ const addaddresscheckout = async (req, res) => {
         console.error('Error adding address:', error);
         res.status(500).send('Internal Server Error');
     }
-};
+}; 
 
 
 
@@ -1155,7 +1168,7 @@ const editAddressFormcheckout = async (req, res) => {
 
 
 
-
+ 
 
 const placeholder = async (req, res) => {
     const { selectedAddressId, selectedPaymentMethod, productIds } = req.body;
@@ -1164,13 +1177,13 @@ console.log('hooooi');
     
     console.log(productIds);
 
-    try {
+    try {  
         const token = req.cookies.user_jwt;
 
         if (!token) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
-
+ 
         // Verify the JWT token to get user ID
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         if (!decoded || !decoded.id) {
@@ -1203,10 +1216,15 @@ console.log('hooooi');
         }
 
         let exactProducts = [];
+        let cartProduct = null;
 
         let totalAmount ='' ;
+        if(productIds.length === 1){
+           cartProduct = user.cart.products.find(p => p._id.toString() === productIds[0]);
+        }
+        if (!cartProduct) { 
 
-        if (productIds.length === 1) { 
+            console.log("ooooo");
             const productId = productIds[0];
             for (const product of products) {
                 const matchedProduct = product.products.find(p => p._id.toString() === productId);
@@ -1214,9 +1232,7 @@ console.log('hooooi');
                     exactProducts.push(matchedProduct); // Push matched product into the array
                     totalAmount += matchedProduct.productPrice; // Add product price to totalAmount
                 }
-            }
-           
-          
+            }  
         } else {
             // Assuming user.cart.products is where the user's cart items are stored
             exactProducts = user.cart.products.filter(product => !product.disable);
@@ -1233,9 +1249,6 @@ console.log('hooooi');
 
 
         const sanitizedTotalAmount = isNaN(totalAmount) ? 0 : totalAmount;
-
-       
-
 
         user.orders.push({
             products: exactProducts.map(product => ({
@@ -1304,13 +1317,13 @@ const ordermanage = async (req, res) => {
     const token = req.cookies.user_jwt;
 
     if (!token) {
-        return res.status(401).json({ error: 'Unauthorized' });
+        return res.redirect('/login');
     }
 
     // Verify the JWT token to get user ID
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded || !decoded.id) {
-        return res.status(401).json({ error: 'Unauthorized' });
+         return res.redirect('/login');
     }
     const user = await User.findById(decoded.id);
 
@@ -1340,6 +1353,7 @@ const ordermanage = async (req, res) => {
 const cancellreson = async (req, res) => {
     try {
         const productId = req.params.id;
+        console.log(productId);
         const token = req.cookies.user_jwt;
 
         if (!token) {
@@ -1359,8 +1373,8 @@ const cancellreson = async (req, res) => {
 
         // Iterate over each order and its products to find the product with the matching productId
         user.orders.forEach(order => {
-            order.products.forEach(product => {
-                if (product.productId.toString() === productId) {
+            order.products.filter(product => {
+                if (product._id.toString() === productId) {
                     foundProduct = product;
                     product.orderStatus = "cancel"                    
                     product.cancelReason = cancelReason
@@ -1393,6 +1407,8 @@ const getShopProducts = async (req, res) => {
     try {
         const { search } = req.query;
 
+        const sortingOption =req.query.sorting;
+
         // Extract category from search input
         const category = await getCategoryFromSearchInput(search);
 
@@ -1403,29 +1419,46 @@ const getShopProducts = async (req, res) => {
 
         console.log(uniqueCategories)
 
-        let categorProducts = []; // Initialize products variable as an array
+        let categorProducts = []; 
 
         if (category) {
-            // If a category is found, filter products by category
+          
             const products = await Products.find({ 'products.category': category });
 
-            // Loop through each document returned by Products.find()
+          
             products.forEach(product => {
-                // Filter the products array of each document for the specified category
+                
                 const filteredProducts = product.products.filter(produ => produ.category === category);
                 // Concatenate the filtered products to categorProducts array
                 categorProducts = categorProducts.concat(filteredProducts);
             });
-        } 
-        
-        console.log(categorProducts);
-
-        if(categorProducts.length > 0){
-        
-        return res.render('user/shop', { categor: categorProducts, uniqueCategories:uniqueCategories, cartcount:req.cartcount, user:req.user });
         }else{
             res.render('user/error404',{errormessage:'Products Not found '})
         }
+        
+        console.log(categorProducts);
+
+        let user = undefined;
+        if (req.cookies.user_jwt) {
+            jwt.verify(req.cookies.user_jwt, process.env.JWT_SECRET, async (err, decodedToken) => {
+                if (!err) {
+                    req.user = decodedToken;
+                    user = await User.findOne({ _id: req.user.id });
+                }
+                return res.render('user/shop', { categor: categorProducts, uniqueCategories:uniqueCategories, cartcount:req.cartcount, user });
+            });
+        } else {
+          
+        
+
+        if(categorProducts.length > 0){
+        
+        return res.render('user/shop', { categor: categorProducts, uniqueCategories:uniqueCategories, cartcount:req.cartcount, user });
+        }else{
+            res.render('user/error404',{errormessage:'Products Not found '})
+        }
+
+    }
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Internal Server Error' });
@@ -1434,34 +1467,81 @@ const getShopProducts = async (req, res) => {
 
 async function getCategoryFromSearchInput(search) {
     try {
-        // Check if search input has at least three characters
+
         if (search.length < 3) {
-            return null; // Return null if search input has less than three characters
+            return null;
         }
 
         // Fetch data from the database
         const data = await Products.findOne();
 
-        // Extract unique category names from the products array
+  
         const uniqueCategories = [...new Set(data.products.map(product => product.category))];
 
         console.log("hi");
 
-        // Remove spaces and convert search input to lowercase for case-insensitive comparison
+       
         const formattedSearch = search.replace(/\s+/g, '').toLowerCase();
 
-        // Check if search input partially matches any category name
+      
         const matchedCategory = uniqueCategories.find(category =>
             category.replace(/\s+/g, '').toLowerCase().includes(formattedSearch)
         );
 
         return matchedCategory ? matchedCategory : null;
+
     } catch (error) {
         console.error(error);
         return null; // Handle errors appropriately
     }
 }
 
+
+const shopsorting = async (req, res) => {
+    try {
+        const category = req.params.category;
+        const sortingOption = req.query.sorting;
+
+        console.log(category);
+        console.log(sortingOption);
+
+        // Find products based on the category
+        const product = await Products.findOne({ 'products.category': category });
+        if (!product) {
+            return res.render('user/error404', { error: "Product Not Available Now !!" });
+        }
+
+        // Get unique categories for navigation
+        const data = await Products.findOne();
+        const uniqueCategories = [...new Set(data.products.map(product => product.category))];
+
+        // Filter products based on the category
+        let categorProducts = product.products.filter(produ => produ.category === category);
+
+        // Sort products based on the sorting option
+        if (sortingOption === 'lowToHigh') {
+            categorProducts.sort((a, b) => a.productPrice - b.productPrice);
+        } else if (sortingOption === 'highToLow') {
+            categorProducts.sort((a, b) => b.productPrice - a.productPrice);
+        }
+
+       
+        // Get user information if available
+        let user = undefined;
+        if (req.cookies.user_jwt) {
+            jwt.verify(req.cookies.user_jwt, process.env.JWT_SECRET, async (err, decodedToken) => {
+                if (!err) {
+                    req.user = decodedToken;
+                    user = await User.findOne({ _id: req.user.id });
+                }
+                res.json({ categor: categorProducts, product, user })            });
+        } else {
+            res.json({ categor: categorProducts, product, user })        }
+    } catch (error) {
+        console.error("Error:", error);
+        res.render('user/error404', { errormessage: "Product Not Available" });
+    } 
+};
 
 
 
@@ -1471,6 +1551,8 @@ async function sendOTP(req, res) {
     try {
         // Check if the email already exists in the User collection
         const existingUser = await User.findOne({ email });
+
+        console.log(existingUser);
 
         if (existingUser) {
             // If the email exists, return a response indicating that the user already exists
@@ -1545,48 +1627,7 @@ async function sendOTP(req, res) {
 };
 
 
-const getsignupdata = async (req, res) => {
-    // const { name, email, phoneNumber, password } = req.body;
 
-    // console.log(name, email, phoneNumber, password );
-
-    // try {
-    //     const existingUser = await User.findOne({ email });
-    
-    //     if (existingUser) {
-    //         return res.render('user/signup', { signupSuccessful: "User already exists" });
-    //     }
-    //     const isOTPValid = otpService.verifyOTP(email, otp);
-        
-    //     if (!isOTPValid) {
-    //         return res.render('user/login', { errorMessage: 'Invalid email or OTP. Please sign up or try again.' });
-    //     }
-
-    //     const hashedPassword = bcrypt.hashSync(password, 10);
-
-    //     const newUser = new User({
-    //         name,
-    //         email,
-    //         password: hashedPassword,
-    //         phoneNumber,
-           
-    //     });
-
-    //     await newUser.save();
-
-    //     // Generate JWT token
-    //     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
-        
-    //     // Set JWT token in the cookie
-    //     res.cookie('user_jwt', token, { httpOnly: true });
-
-    //     // Redirect the user to the homepage or any desired page after successful signup
-    //     res.redirect('/');
-    // } catch (error) {
-    //     console.error('Error signing up:', error);
-    //     res.status(500).json({ error: "Internal server error ooooh" });
-    // }
-};
 
 
 
@@ -1647,7 +1688,6 @@ module.exports={
     blockpage,
     dataslogin,
     signuppage,
-    getsignupdata,
     logout,
     editpassword,
     editprofile,
@@ -1675,6 +1715,7 @@ module.exports={
     placeholder,
     ordermanage,
     getShopProducts,
+    shopsorting,
     cancellreson,
     signupwithotp, 
     sendOTP,

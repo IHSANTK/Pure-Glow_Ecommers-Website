@@ -45,6 +45,39 @@
            /* Gray color */
          
       }
+     
+   
+    .form-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-color: #eef1f5;
+        border: 1px solid #ced4da;
+        border-radius: 10px;
+        padding: 8px 12px;
+        width: 100%;
+        font-size: 16px;
+        color: #000000;
+        cursor: pointer;
+        outline: none;
+    }
+
+    /* Style for select dropdown when focused */
+    .form-select:focus {
+        border-color: #c8cdd1;
+    }
+
+    /* Style for select dropdown options */
+    .form-select option {
+        background-color: #fff;
+        color: #020300;
+    }
+
+    /* Style for select dropdown options on hover */
+    .form-select option:hover {
+        background-color: #e9ecef;
+    }
+
     </style>
 
     <body>
@@ -167,33 +200,46 @@
                                 </div>
                             </div> -->
                         </div>
+                      
                         <div class="row g-4 mt-2">
-                            <div class="col-lg-3">
+                            <div class="col-lg-3 ">
                                 <div class="row g-4">
-                                    <div class="col-lg-12">
+                                    <div class="col-lg-12 col-6">
                                         <div class="mb-3">
                                             <select class="form-select" id="categorySelect" onchange="shopProduct()">
-                                                <option value="" selected disabled id="categoryPlaceholder">Select Category</option>
+                                                <option value="" selected  id="categoryPlaceholder">Select Category</option>
                                                 <% uniqueCategories.forEach(category => { %>
                                                     <option value="<%= encodeURIComponent(category) %>"><%= category %></option>
                                                 <% }); %>
                                             </select>
                                         </div>
                                     </div>
+                                    <div class="col-lg-12 col-6">
+                                        <div class="mb-3">
+                                            <!-- Sorting options -->
+                                            <select class="form-select" id="sortingSelect"  onchange="shopProduct()">
+                                                <option value="Sorting" selected disabled >Sorting</option>
+                                                <option value="lowToHigh">Price: Low to High</option>
+                                                <option value="highToLow">Price: High to Low</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                        
                             
                             <div class="col-lg-9">
                                 <div class="row g-4 justify-content-center" id="productsContainer">
                                     <% if (categor && categor.length > 0) { %>
                                         <!-- Product details -->
                                         <% categor.forEach(product => { %>
-                                            <div class="col-md-6 col-lg-6 col-xl-4 col-sm-6">
+                                            <div class="col-md-6 col-lg-6 col-xl-4 col-10">
                                                 <div class="rounded position-relative fruite-item">
                                                     <div class="fruite-img">
                                                         <a href="/productveiw/<%= product._id %>">
                                                             <img src="<%= product.image[0] %>" class="img-fluid w-100 rounded-top" alt="">
-                                                        </a>                                                        
+                                                        </a>          
+                                                        <input type="hidden" id="categoryinput" value="<%= product.category %>">                                              
                                                         <button type="submit" class="btn p-0 heart-icon position-absolute top-0 end-0 wishicon" onclick="toggleWishlist('<%= product._id %>')">
 
                                                             <% if(user !== undefined && user.wishlist.some( wProduct => wProduct.productId.toString() === product._id.toString() )) { %>
@@ -249,9 +295,16 @@
                     
 <script>
    function shopProduct() {
-    const category = document.getElementById('categorySelect').value;
-    console.log(category);
-    axios.get(`/getshopproduct/${category}`)
+
+    
+     const category = document.getElementById('categorySelect').value;
+    const sortingOption = document.getElementById('sortingSelect').value; // Get the selected sorting option
+    if(category){
+    axios.get(`/getshopproduct/${category}`, {
+        params: {
+            sorting: sortingOption 
+        }
+    })
         .then(function (response) {
             const productsContainer = document.getElementById('productsContainer');
             const { categor, product, user } = response.data;
@@ -294,39 +347,85 @@
             console.error('Error fetching products:', error);
             // Optionally, show an error message to the user
         });
-}
+    }else{
+        
+    
+        const category = document.getElementById('categoryinput').value;
 
-    function toggleWishlist(productId) {
-        console.log(productId);
+console.log(category);
+console.log(sortingOption);
 
-        const icon = document.getElementById('heartIcon')
-       
-        axios.post(`/wishlist/${productId}`)
-            .then(function (response) {
-                console.log(response.data.message);
-                console.log(response.data.color);
-                    // Show wishlist status message from response
-                    showWishlistStatusMessage(response.data.message);
-                    const heartIcon = document.querySelector(`.wishicon`);
-
-                    console.log(heartIcon);
-
-                    if(response.data.color){
-
-                    heartIcon.innerHTML = '<i  class="fa fa-heart me-3 mt-2 heart-icon text-danger"></i>';
-                    }else{
-                        heartIcon.innerHTML = '<i  class="fa fa-heart me-3 mt-2 heart-icon"></i>';
-                    }          
-                    setTimeout(function() {
-           location.reload()
-      }, 1000);
-                    
-                
-            })
-            .catch(function (error) {
-                console.error('Error:', error);
-            });
+axios.get(`/shopsort/${encodeURIComponent(category)}`, {
+    params: {
+        sorting: sortingOption 
     }
+})
+.then(function (response) {
+    const productsContainer = document.getElementById('productsContainer');
+    const { categor, product, user } = response.data;
+    productsContainer.innerHTML = '';
+    categor.forEach(product => {
+        const heartIconClass = user && user.wishlist.some(wProduct => wProduct.productId.toString() === product._id.toString()) ? "text-danger" : "text-dark";
+        const productElement = `
+            <div class="col-md-6 col-lg-6 col-xl-4">
+                <div class="rounded position-relative fruite-item">
+                    <div class="fruite-img">
+                        <a href="/productview/${product._id}">
+                            <a href="/productveiw/${product._id}"><img src="${product.image[0]}" class="img-fluid w-100 rounded-top" alt="${product.image}"></a>
+                        </a> 
+                        <button type="submit" class="btn p-0 heart-icon position-absolute top-0 end-0 wishicon" onclick="toggleWishlist('${product._id}')">
+                            
+                                <i id="heartIcon_${product._id}" class="fa fa-heart me-3 mt-2 heart-icon ${heartIconClass}"></i>
+                            
+                        </button>
+                    </div>
+                    <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">
+                        ${product.category}
+                    </div>
+                    <div class="p-4 border border-secondary border-top-0 rounded-bottom">
+                        <h4>${product.productName}</h4>
+                        <p>${product.description}</p>
+                        <div class="d-flex justify-content-between flex-lg-wrap">
+                            <p class="text-dark fs-5 fw-bold mb-0">₹${product.productPrice}</p>
+                            <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn" onclick="addtoCart('${product._id}')">
+                                <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        productsContainer.innerHTML += productElement;
+    });
+})
+.catch(function (error) {
+    // Handle error
+});
+ }
+
+ }
+
+         function toggleWishlist(productId) {
+                        axios.post(`/wishlist/${productId}`)
+                            .then(function (response) {
+                                console.log(response.data);
+                                // Show wishlist status message
+                                showWishlistStatusMessage(response.data.message);
+            
+                                // Update heart icon color based on response
+                                const heartIcon = document.querySelector(`#heartIcon_${productId}`);
+                                if (response.data.color === true) {
+                                    heartIcon.classList.remove('text-dark');
+                                    heartIcon.classList.add('text-danger'); // Change to red color
+                                } else {
+                                    heartIcon.classList.remove('text-danger'); // Change to normal color
+                                    heartIcon.classList.add('text-dark');
+                                }
+                            })
+                            .catch(function (error) {
+                                console.error('Error:', error);
+                            });
+                    }
 
     function showWishlistStatusMessage(message) {
         const wishlistModalBody = document.getElementById('wishlistModalBody');

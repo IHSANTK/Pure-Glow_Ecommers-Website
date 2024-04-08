@@ -23,7 +23,7 @@ router.post('/verify-otp', preventBack,userController. signupwithotp);
 
 router.get('/signup',preventBack, userController.signuppage);  
 
-router.post('/signup',preventBack, userController.getsignupdata);
+// router.post('/signup',preventBack, userController.getsignupdata);
 
 router.get('/logout',preventBack, userController.logout);
 
@@ -84,7 +84,9 @@ router.post('/editAddressForm/:id', userController.editaddress);
 
 router.post('/editAddressFormcheckout/:id',userController.editAddressFormcheckout)
 
-router.get('/getshopproduct', preventBack, userController.getShopProducts);
+router.get('/getsearchproduct', preventBack, userController.getShopProducts);
+
+router.get('/shopsort/:category',preventBack,userController.shopsorting)
 
 
 

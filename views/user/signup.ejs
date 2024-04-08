@@ -12,43 +12,75 @@
     .custom-card-shadow {
       box-shadow: 0px 0px 25px; /* Adjust the shadow properties as needed */
     }
+    .otp-container {
+    display: flex;
+}
+
+/* Style for individual OTP input box */
+.otp-box {
+    width: 40px; /* Adjust width as needed */
+    height: 40px; /* Adjust height as needed */
+    margin: 0 5px; /* Adjust margin as needed */
+    text-align: center;
+    font-size: 16px; /* Adjust font size as needed */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Style for focused OTP input box */
+.otp-box:focus {
+    border-color: blue; /* Change border color when focused */
+}
+
+/* Hide browser default number spinner */
+.otp-box::-webkit-outer-spin-button,
+.otp-box::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.loginpage{
+      background-image: url('https://img.freepik.com/premium-photo/abstract-white-wavy-clothes-background_167650-5864.jpg'); /* Replace 'path/to/your/image.jpg' with the actual path to your image */
+      background-size: cover; /* This ensures the image covers the entire div */
+      background-position: center;
+
+    }
   </style>
 </head>
-<body style="background-color: rgb(108, 230, 84);">
+<body style="background-color: rgb(211, 235, 232);">
   <div class="container mt-2">
     <div class="row justify-content-center">
         <div class="col-md-5">
-            <div class="card custom-card-shadow" style="border-radius: 15px; background-color: rgb(204, 204, 204);padding-left: 5%; padding-right: 5%;">
+            <div class="card custom-card-shadow loginpage" style="border-radius: 15px; padding-left: 5%; padding-right: 5%;">
                 <div class="card-body">
                     <h1 class="text-center" style="font-size: xx-large;">Create Account</h1>
 
                     <form id="signupForm">
                         <div class="form-group">
                             <label for="name" style="font-weight: 500;">Name</label>
-                            <input type="text" class="form-control" id="name" name="name">
+                            <input type="text" class="form-control rounded-pill" id="name" name="name">
                             <span id="name-error" style="color: red;"></span>
                         </div>
                         <div class="form-group">
                             <label for="email" style="font-weight: 500;">Email</label>
-                            <input type="email" class="form-control" id="email" name="email">
+                            <input type="email" class="form-control rounded-pill" id="email" name="email">
                             <span id="email-error" style="color: red;"></span>
                         </div>
                         <div class="form-group">
                             <label for="phoneNumber" style="font-weight: 500;">Phone Number</label>
-                            <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber">
+                            <input type="tel" class="form-control rounded-pill" id="phoneNumber" name="phoneNumber">
                             <span id="phoneNumber-error" style="color: red;"></span>
                         </div>
                         <div class="form-group">
                             <label for="password"style="font-weight: 500;">Password</label>
-                            <input type="password" class="form-control" id="password" name="password">
+                            <input type="password" class="form-control rounded-pill" id="password" name="password">
                             <span id="password-error" style="color: red;"></span>
                         </div>
                         <div class="form-group">
                             <label for="confirmPassword"style="font-weight: 500;">Confirm Password</label>
-                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
+                            <input type="password" class="form-control rounded-pill" id="confirmPassword" name="confirmPassword">
                             <span id="confirmPassword-error" style="color: red;"></span>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block" id="signupButton">Signup</button>
+                        <button type="submit" onclick="validateForm()" class="btn btn-primary btn-block" id="signupButton">Signup</button>
                         <!-- <a href="/auth/google" class="btn btn-danger btn-block mt-3">Sign up with Google</a> -->
                     </form>
 
@@ -61,28 +93,46 @@
 </div>
 
 <div class="modal fade" id="otpVerifyModal" tabindex="-1" role="dialog" aria-labelledby="otpVerifyModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="otpVerifyModalLabel">Verify OTP</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="otp">OTP</label>
-                    <input type="text" class="form-control" id="otp" required>
-                    <input type="hidden" id="otpEmail">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="verifyOTPButton">Verify OTP</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <!-- <h5 class="modal-title" id="otpVerifyModalLabel">Verify OTP</h5> -->
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <div class="otp-container d-flex justify-content-center">
+                  <!-- Create individual input boxes for OTP -->
+                  <input type="text" class="otp-box" id="otp1" maxlength="1">
+                  <input type="text" class="otp-box" id="otp2" maxlength="1">
+                  <input type="text" class="otp-box" id="otp3" maxlength="1">
+                  <input type="text" class="otp-box" id="otp4" maxlength="1">
+                  <input type="text" class="otp-box" id="otp5" maxlength="1">
+                  <input type="text" class="otp-box" id="otp6" maxlength="1">
+              </div>
+              <input type="hidden" id="otpEmail">
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-primary" id="verifyOTPButton">Verify OTP</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+      </div>
+  </div>
 </div>
+<script>
+document.querySelectorAll('.otp-box').forEach(box => {
+  box.addEventListener('input', (event) => {
+      const input = event.target;
+      if (input.value.length === 1) {
+          const nextBox = input.nextElementSibling;
+          if (nextBox) {
+              nextBox.focus();
+          }
+      }
+  });
+});
+</script>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -125,31 +175,42 @@
 
   // Handle OTP verification
   document.getElementById('verifyOTPButton').addEventListener('click', function() {
-      const otp = document.getElementById('otp').value;
-      const email = document.getElementById('otpEmail').value;
-      
-      // Retrieve form data from localStorage
-      const formDataObject = JSON.parse(localStorage.getItem('formData'));
+    // Retrieve OTP digits from individual input boxes
+    const otp1 = document.getElementById('otp1').value;
+    const otp2 = document.getElementById('otp2').value;
+    const otp3 = document.getElementById('otp3').value;
+    const otp4 = document.getElementById('otp4').value;
+    const otp5 = document.getElementById('otp5').value;
+    const otp6 = document.getElementById('otp6').value;
 
-      // Send form data along with OTP verification to the backend
-      axios.post('/verify-otp', { email: email, otp: otp, formData: formDataObject })
-          .then(function(response) {
-              if (response.status === 200) {
-                  alert('OTP verified successfully. Redirecting...');
-                  // Redirect user to the homepage or any other desired page
-                  window.location.href = '/';
-              } else {
-                  alert('Error verifying OTP: ' + response.data.message);
-              }
-          })
-          .catch(function(error) {
-              if (error.response) {
-                  alert('Error verifying OTP: ' + error.response.data.message);
-              } else {
-                  alert('Error verifying OTP: ' + error.message);
-              }
-          });
-  });
+    // Concatenate OTP digits into a single OTP string
+    const otp = otp1 + otp2 + otp3 + otp4 + otp5 + otp6;
+
+    // Retrieve email from hidden input field
+    const email = document.getElementById('otpEmail').value;
+
+    // Retrieve form data from localStorage
+    const formDataObject = JSON.parse(localStorage.getItem('formData'));
+
+    // Send form data along with OTP verification to the backend
+    axios.post('/verify-otp', { email: email, otp: otp, formData: formDataObject })
+        .then(function(response) {
+            if (response.status === 200) {
+                alert('OTP verified successfully. Redirecting...');
+                // Redirect user to the homepage or any other desired page
+                window.location.href = '/';
+            } else {
+                alert('Error verifying OTP: ' + response.data.message);
+            }
+        })
+        .catch(function(error) {
+            if (error.response) {
+                alert('Error verifying OTP: ' + error.response.data.message);
+            } else {
+                alert('Error verifying OTP: ' + error.message);
+            }
+        });
+});
 </script>
 
 

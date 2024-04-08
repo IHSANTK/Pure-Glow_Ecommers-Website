@@ -1008,85 +1008,62 @@
                                     <table id="myDataTable" class="table table-hover align-middle mb-0" style="width: 100%;">  
                                         <thead>
                                             <tr>
-                                                <th>Id</th>
+                                                <th>Order Id</th>
                                                 <th>Item</th>
                                                 <th>Customer Name</th>
                                                 <th>Payment Info</th>
                                                 <th>Price</th>
+                                                <th>orderdate</th>
                                                 <th>Status</th>
+                                                <th>Address</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td><strong>#Order-78414</strong></td>
-                                                <td><img src="assets/images/product/product-1.jpg" class="avatar lg rounded me-2" alt="profile-image"><span> Oculus VR </span></td>
-                                                <td>Molly</td>
-                                                <td>Credit Card</td>
-                                                <td>
-                                                    $420
-                                                </td>
-                                                <td><span class="badge bg-warning">Progress</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>#Order-58414</strong></td>
-                                                <td><img src="assets/images/product/product-2.jpg" class="avatar lg rounded me-2" alt="profile-image"><span>Wall Clock</span></td>
-                                                <td>Brian</td>
-                                                <td>Debit Card</td>
-                                                <td>
-                                                    $220
-                                                </td>
-                                                <td><span class="badge bg-success">Complited</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>#Order-48414</strong></td>
-                                                <td><img src="assets/images/product/product-3.jpg" class="avatar lg rounded me-2" alt="profile-image"><span>Note Diaries</span></td>
-                                                <td>Julia</td>
-                                                <td>Debit Card</td>
-                                                <td>
-                                                    $250
-                                                </td>
-                                                <td><span class="badge bg-success">Complited</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>#Order-38414</strong></td>
-                                                <td><img src="assets/images/product/product-4.jpg" class="avatar lg rounded me-2" alt="profile-image"><span>Flower Port</span></td>
-                                                <td>Sonia</td>
-                                                <td>Credit Card</td>
-                                                <td>
-                                                    $320
-                                                </td>
-                                                <td><span class="badge bg-warning">Progress</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>#Order-28414</strong></td>
-                                                <td><img src="assets/images/product/product-1.jpg" class="avatar lg rounded me-2" alt="profile-image"><span>Oculus VR</span></td>
-                                                <td>Adam H</td>
-                                                <td>Debit Card</td>
-                                                <td>
-                                                    $20
-                                                </td>
-                                                <td><span class="badge bg-warning">Progress</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>#Order-18414</strong></td>
-                                                <td><img src="assets/images/product/product-2.jpg" class="avatar lg rounded me-2" alt="profile-image"><span>Wall Clock</span></td>
-                                                <td>Alexander</td>
-                                                <td>Debit Card</td>
-                                                <td>
-                                                    $820
-                                                </td>
-                                                <td><span class="badge bg-success">Complited</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>#Order-11414</strong></td>
-                                                <td><img src="assets/images/product/product-3.jpg" class="avatar lg rounded me-2" alt="profile-image"><span>Note Diaries</span></td>
-                                                <td>Gabrielle</td>
-                                                <td>Bank Emi</td>
-                                                <td>
-                                                    $620
-                                                </td>
-                                                <td><span class="badge bg-success">Complited</span></td>
-                                            </tr>
+                                            <% latestOrders.forEach(order => { %>
+                                                <% order.products.forEach(product => { %>
+                                                    <tr>
+                                                        <td><a href="order-details.html"><strong>#<%= product._id %></strong></a></td>
+                                                        <td>
+                                                            <img src="<%= product.image[0] %>" class="avatar lg rounded me-2" alt="profile-image">
+                                                            <span><%= product.name %></span>
+                                                        </td>
+                                                        <td><%= order.shippingAddress.name %></td>
+                                                        <td><%= order.paymentMethod %></td>
+                                                        <td>₹<%= product.price %></td>
+                                                        <td><%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></td>
+                                                        <td>
+                                                            
+                                                            <form action="/orederstatus" method="post">
+                                                                <span class="badge bg-success"><%= product.orderStatus %></span>
+                                                                <% if (product.orderStatus === "cancel") { %>
+                                                                    <span class="badge bg-success"><%= product.cancelReason %></span>
+                                                                <% } else { %>
+                                                                    <select class="status-select" name="newStatus">
+                                                                      
+                                                                        <option value="shipped">Shipped</option>
+                                                                        <option value="delivered">Delivered</option>
+                                                                        <option value="cancel">Cancel</option>
+                                                                    </select>
+                                                                    <input type="hidden" name="orderId" value="<%= order._id %>">
+                                                                    <input type="hidden" name="productId" value="<%= product._id %>">
+                                                                    <button type="submit" style="background-color: rgb(199, 218, 218); border-radius: 10px; border: none;">Update</button>
+                                                                <% } %>
+                                                            </form>
+                                                        </td>
+                                                        <td>
+                                                            <h5><%= order.shippingAddress.name %></h5>
+                                                            <p>
+                                                                <%= order.shippingAddress.address %> 
+                                                                <%= order.shippingAddress.city %>
+                                                                <%= order.shippingAddress.district %><br>
+                                                                <%= order.shippingAddress.state %>
+                                                                <%= order.shippingAddress.pincode %>
+                                                            </p>
+                                                            <h6><i class="bi bi-telephone" style="margin-right: 10px;"></i><%= order.shippingAddress.phone %></h6>
+                                                        </td>
+                                                    </tr>
+                                                <% }); %>
+                                            <% }); %>
                                         </tbody>
                                     </table>
                                 </div>
@@ -1096,7 +1073,35 @@
                     
                 </div>
             </div>
-        
+            <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const selectElements = document.querySelectorAll('.status-select');
+                    
+                    selectElements.forEach(select => {
+                        select.addEventListener('change', function() {
+                            const orderId = this.getAttribute('data-order-id');
+                            const productId = this.getAttribute('data-product-id');
+                            const newStatus = this.value;
+            
+                            // Send AJAX request to update order status
+                            axios.post('/orederstatus', {
+                                orderId: orderId,
+                                productId: productId,
+                                newStatus: newStatus
+                            })
+                            .then(response => { 
+                                // Handle success response
+                                console.log(response.data);
+                            })
+                            .catch(error => {
+                                // Handle error response
+                                console.error(error);
+                            });
+                        });
+                    });
+                });
+            </script>
             <!-- Modal Custom Settings-->
             <div class="modal fade right" id="Settingmodal" tabindex="-1"  aria-hidden="true">
                 <div class="modal-dialog  modal-sm">

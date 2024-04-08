@@ -507,17 +507,29 @@
                                         </div>
                                     </div>
                                     <div class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom-0">
-                                        <h6 class="mb-0 fw-bold ">Images</h6>
+                                        <h6 class="mb-0 fw-bold">Images</h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="row g-3 align-items-center">
                                             <div class="col-md-12">
                                                 <label class="form-label">Update Product Images</label><br>
-                                                <div>
-                                                    <img src="<%= data.image[0] %>" alt="Current Image" style="max-width: 200px;">
-                                                    <input type="file" name="image" id="input-file-to-destroy1" class="dropify" multiple data-allowed-formats="portrait square" data-max-file-size="2M" data-max-height="2000">
-                                                    <img src="<%= data.image[1] %>" alt="Current Image" style="max-width: 200px;">
-                                                    <input type="file" name="image" id="input-file-to-destroy2" class="dropify" multiple data-allowed-formats="portrait square" data-max-file-size="2M" data-max-height="2000">
+                                                <div class="col-md-12">
+                                                    
+                                                    <!-- <small class="d-block text-muted mb-2">Only portrait or square images, 2M max and 2000px max-height.</small> -->
+                                                    
+                                                    <!-- Display existing images -->
+                                                  
+                                                    <% data.image.forEach(image => { %>
+                                                        <img src="<%= image %>" alt="Existing Image" style="max-width: 100px; max-height: 100px;"><br>
+                                                        <!-- Hidden input fields to pass existing image URLs to server-side -->
+                                                        <input type="hidden" name="image" value="<%= image %>">
+                                                    <% }); %>
+                                                    
+                                
+                                                    <!-- Allow users to upload new images -->
+                                                    <input type="file" name="image" id="input-file-to-destroy" class="dropify" data-allowed-formats="portrait square" data-max-file-size="2M" data-max-height="2000">
+                                                    <!-- <small class="d-block text-muted mb-2">Only portrait or square images, 2M max and 2000px max-height.</small> -->
+                                                    <input type="file" name="image" id="input-file-to-destroy" class="dropify" data-allowed-formats="portrait square" data-max-file-size="2M" data-max-height="2000">
                                                 </div>
                                             </div>
                                         </div>

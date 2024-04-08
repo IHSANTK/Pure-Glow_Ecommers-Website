@@ -48,7 +48,40 @@ const admindashbord = async (req, res) => {
                         }
                     }
                 ]);
+            
+                    const latestOrders = await User.aggregate([
+                        {
+                            $match: {
+                                orders: { $exists: true, $ne: null } // Filter users with non-empty orders
+                            }
+                        }, 
+                        {
+                            $unwind: "$orders" // Deconstruct the orders array
+                        },
+                        {
+                            $project: {
+                                _id: "$orders._id", // Exclude the default MongoDB ID field
+                                userId: "$_id", // Include the userId for reference
+                                paymentMethod: "$orders.paymentMethod",
+                                orderDate: "$orders.orderDate",
+                                shippingAddress: "$orders.shippingAddress",
+                                products: "$orders.products"
+                            }
+                        },
+                        {
+                            $sort: { orderDate: -1 } // Sort by orderDate in descending order (latest first)
+                        },
+                        {
+                            $limit: 10 // Limit to only the latest 10 orders
+                        }
+                    ]);
 
+                    console.log( latestOrders);
+            
+                    // console.log(usersWithOrders);
+            
+                    // res.render('admin/order-list', { orders: usersWithOrders }); // Pass orders as a variable to the template
+                
                 // console.log(countUsersWithOrders);
                 // console.log(totalOrdersCount[0].totalOrders);
 
@@ -56,10 +89,10 @@ const admindashbord = async (req, res) => {
 
 
                 let productcount = product.products.length
-
+ 
                 console.log(productcount);
 
-                return res.render('admin/index', { countUsersWithOrders, totalOrdersCount: totalOrdersCount.length > 0 ? totalOrdersCount[0].totalOrders : 0,productcount });
+                return res.render('admin/index', { countUsersWithOrders, latestOrders, totalOrdersCount: totalOrdersCount.length > 0 ? totalOrdersCount[0].totalOrders : 0,productcount });
             }
         } catch (error) {
             console.error("Error:", error);
@@ -327,45 +360,62 @@ let productlist = async (req, res) => {
   const updateProduct = async (req, res) => {
     try {
         const productId = req.params.id;
-        const { ProductName, Price, description, category, existingImage1, existingImage2 } = req.body;
-        let updatedImages = [];
+        const { ProductName, Price, description, category } = req.body;
+        const imageData = req.files || [];
+
+        
 
         // Check if new images are uploaded
-        if (req.files && req.files.length > 0) {
-            // Upload new images to Cloudinary
-            for (const file of req.files) {
+        if (imageData.length > 0) {
+            let imageUrls = [];
+
+            // If new images are uploaded, upload them to cloudinary
+            for (const file of imageData) {
                 const result = await cloudinary.uploader.upload(file.path);
-                updatedImages.push(result.secure_url);
+                imageUrls.push(result.secure_url);
             }
-        }
 
-        // If no new images uploaded, use existing images
-        if (updatedImages.length === 0) {
-            // Push existing images to the updatedImages array
-            updatedImages.push(existingImage1, existingImage2);
-        }
-console.log(updatedImages);
-        // Update product details including images
-        const product = await Products.findOneAndUpdate(
-            { 'products._id': productId },
-            {
-                $set: {
-                    'products.$.productName': ProductName,
-                    'products.$.productPrice': Price,
-                    'products.$.description': description,
-                    'products.$.category': category,
-                    'products.$.image': updatedImages
-                }
-            },
-            { new: true }
-        );
+            // Update product details including images
+            const product = await Products.findOneAndUpdate(
+                { 'products._id': productId },
+                {
+                    $set: {
+                        'products.$.productName': ProductName,
+                        'products.$.productPrice': Price,
+                        'products.$.description': description,
+                        'products.$.category': category,
+                        'products.$.image': imageUrls
+                    }
+                },
+                { new: true }
+            );
 
-        if (!product) {
-            return res.status(404).json({ error: "Product not found" });
-        }
+            if (!product) {
+                return res.status(404).json({ error: "Product not found" });
+            } 
 
-        res.redirect('/product-list');
-        
+            res.redirect('/product-list');
+        } else {
+            // If no new images uploaded, update only other product details
+            const product = await Products.findOneAndUpdate(
+                { 'products._id': productId },
+                {
+                    $set: {
+                        'products.$.productName': ProductName,
+                        'products.$.productPrice': Price,
+                        'products.$.description': description,
+                        'products.$.category': category
+                    }
+                },
+                { new: true }
+            );
+
+            if (!product) {
+                return res.status(404).json({ error: "Product not found" });
+            } 
+
+            res.redirect('/product-list');
+        }
     } catch (error) {
         console.error("Error updating product:", error);
         res.status(500).json({ error: "Internal server error" });
@@ -495,7 +545,7 @@ const orederstatus = async (req, res) => {
         if (!order) {
             return res.status(404).json({ error: 'Order not found' });
         }
-
+ 
         // Find the product within the order based on product ID
         const product = order.products.find(product => product._id.toString() === productId);
 

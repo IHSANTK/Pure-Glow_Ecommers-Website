@@ -24,6 +24,7 @@
       background-repeat: no-repeat;
       font-family: Arial, sans-serif;
       color: #fff; /* White text color */
+      height: 100%;
     }
     .navbar {
       background-color: #7ad148;
@@ -109,7 +110,7 @@
     <div class="row" >
       <div class=" col-4 col-lg-3 ">
         <div class="profile-container ">
-          <div class="profile-buttons p-4" style="height: calc(70vh - 70px);">
+          <div class="profile-buttons mt-3 " style="height: calc(50vh - 50px);">
             <a href="#" class="profile-btn" data-target="edit-profile"><i class="fas fa-edit"></i> Edit Profile</a>
             <a href="#" class="profile-btn mt-3" data-target="change-password"><i class="fas fa-key"></i> Change Password</a>
   
@@ -122,22 +123,8 @@
       </div>
 
 
-      <div id="orders" class="profile-edit col-lg-5 col-sm-12 mt-3  p-3" style="display: none; background-color: rgb(255, 232, 201); color:rgb(36, 36, 36)">
-        <h3 class="text-center"><strong> Orders</strong></h3>
-        <!--Add your order display logic here -->
-        <!-- Example: -->
-        <div class="order">
-            <p>Order ID: 123456</p>
-            <p>Product: Example Product</p>
-            <p>Quantity</p>
-            <p>Price: $50.00</p>
-            <p>Status</p>
-            <p>Order Date</p>
-            <p>Expected Date</p>
-        </div>
-     </div>
       <div class="col-8 right-content">
-        <div class="profile-top col-6" style="background-color: rgb(224, 224, 224); padding: 10%; margin-left: 15%; border-radius: 10px;">
+        <div class="profile-top col-7 col-lg-6" style="background-color: rgb(238, 255, 254); padding: 10%; margin-left: 15%; border-radius: 10px;">
             <% if (profileImage) { %>
                 <img src="<%= profileImage %>" alt="Profile Image" style="width: 80px; height: 80px; border-radius: 50%;">
             <% } else { %>
@@ -159,7 +146,7 @@
                   </label>
               <% } else { %>
                   <label for="profileImage">
-                      <img src="https://cdn4.iconfinder.com/data/icons/social-communication/142/add_user-512.png" alt="Default Avatar" style="cursor: pointer;width: 70px; height: 70px; border-radius: 50%;">
+                      <img src="https://cdn4.iconfinder.com/data/icons/social-communication/142/add_user-512.png" alt="Default Avatar" style="cursor: pointer;width: 60px; height: 60px; border-radius: 50%;">
                       Add Profile
                   </label>
               <% } %>
@@ -362,7 +349,7 @@
         </div>
       </div>
       
-      <script>
+      <!-- <script>
         function validateForm() {
             var inputs = document.getElementById('addressForm').querySelectorAll('input');
             for (var i = 0; i < inputs.length; i++) {
@@ -373,7 +360,7 @@
             }
             return true;
         }
-    </script>
+    </script> -->
 
       <div class="modal fade" id="wishlistModal" tabindex="-1" aria-labelledby="wishlistModalLabel" aria-hidden="true">
         <div class="modal-dialog">

@@ -149,12 +149,12 @@
             </div>
             <div class="modal-body">
                 <!-- Address form -->
-                <form id="addressForm" action="/addaddresscheckout" method="POST">
+                <form id="addressForm" action="" method="POST" onsubmit="event.preventDefault(); submitForm()">
                     <div class="form-group">
                         <input type="text" class="form-control" id="name" name="name" placeholder="Name" required>
                     </div><br>
                     <div class="form-group">
-                        <input type="number" class="form-control" id="number" name="number" placeholder="Phone number" required>
+                        <input type="tel" class="form-control" id="number" name="number" placeholder="Phone number" pattern="[0-9]{10}" title="Please enter a 10 digit phone number" required>
                     </div><br>
                     <div class="form-group">
                         <input type="text" class="form-control" id="address" name="address" placeholder="Address" required>
@@ -169,12 +169,12 @@
                         <input type="text" class="form-control" id="state" name="state" placeholder="State" required>
                     </div><br>
                     <div class="form-group">
-                        <input type="number" class="form-control" id="pincode" name="pincode" placeholder="Pincode" required>
+                        <input type="tel" class="form-control" id="pincode" name="pincode" placeholder="Pincode" pattern="[0-9]{6}" title="Enter Correct Pincode" required>
                     </div><br>
                     <div class="form-group">
                         <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
                     </div><br>
-                    <button type="button" class="btn btn-primary" onclick="submitForm()">Save Address</button>
+                    <button type="submit" class="btn btn-primary">Save Address</button>
                 </form>
             </div>
         </div>
@@ -186,6 +186,7 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
+    
     $(document).ready(function() {
         $('#addAddressBtn').click(function() {
             $('#addAddressModal').modal('show');
@@ -193,25 +194,30 @@
     });
 
     function submitForm() {
-        const name = document.getElementById('name').value;
-        const number = document.getElementById('number').value;
-        const address = document.getElementById('address').value;
-        const city = document.getElementById('city').value;
-        const district = document.getElementById('district').value;
-        const state = document.getElementById('state').value;
-        const pincode = document.getElementById('pincode').value;
-        const email = document.getElementById('email').value;
+        var form = document.getElementById("addressForm");
+        if (form.checkValidity()) {
+            const name = document.getElementById('name').value;
+            const number = document.getElementById('number').value;
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            const district = document.getElementById('district').value;
+            const state = document.getElementById('state').value;
+            const pincode = document.getElementById('pincode').value;
+            const email = document.getElementById('email').value;
 
-        axios.post('/addaddresscheckout', {
-            name, number, address, city, district, state, pincode, email
-        })
-        .then(function(response) {
-            console.log(response.data);
-            location.reload();
-        })
-        .catch(function(error) {
-            console.error('Error:', error);
-        });
+            axios.post('/addaddresscheckout', {
+                name, number, address, city, district, state, pincode, email
+            })
+            .then(function(response) {
+                console.log(response.data);
+                location.reload();
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+            });
+        } else {
+            // Form is not valid, handle accordingly
+        }
     }
 
     
@@ -226,19 +232,19 @@
 
 
 function editaddress(addressId) {
-    console.log(addressId);
-    const name = document.getElementById('nameedit' + addressId).value;
-    const number = document.getElementById('phoneedit' + addressId).value;
-    const address = document.getElementById('addressedit' + addressId).value;
-    const city = document.getElementById('cityedit' + addressId).value;
-    const district = document.getElementById('districtedit' + addressId).value;
-    const state = document.getElementById('stateedit' + addressId).value;
-    const pincode = document.getElementById('pincodeedit' + addressId).value;
-    const email = document.getElementById('emailedit' + addressId).value;
+        console.log(addressId);
+        const name = document.getElementById('nameedit' + addressId).value;
+        const number = document.getElementById('phoneedit' + addressId).value;
+        const address = document.getElementById('addressedit' + addressId).value;
+        const city = document.getElementById('cityedit' + addressId).value;
+        const district = document.getElementById('districtedit' + addressId).value;
+        const state = document.getElementById('stateedit' + addressId).value;
+        const pincode = document.getElementById('pincodeedit' + addressId).value;
+        const email = document.getElementById('emailedit' + addressId).value;
 
-    console.log(name, number, address, city, district, state, pincode, email);
+        console.log(name, number, address, city, district, state, pincode, email);
 
-    axios.post('/editAddressFormcheckout/' + addressId, {
+        axios.post('/editAddressFormcheckout/' + addressId, {
             name,
             number,
             address,
@@ -251,12 +257,11 @@ function editaddress(addressId) {
         .then(function(response) {
             console.log(response.data);
             location.reload();
-            
         })
         .catch(function(error) {
             console.error('Error:', error);
         });
-}
+    }
  function addressdelete(addressId){
 
     console.log(addressId);
@@ -323,18 +328,17 @@ function editaddress(addressId) {
                                             </div>
                                             <div class="modal-body">
                                                 <!-- Edit Address Form -->
-                                                <form id="editAddressForm<%= address._id %>">
-                                                    <input type="text" id="nameedit<%= address._id %>" name="name" placeholder="name" class="form-control" value="<%= address.name %>" required><br>
+                                                <form id="editAddressForm<%= address._id %>" onsubmit="event.preventDefault(); editaddress('<%= address._id %>')">
+                                                    <input type="text" id="nameedit<%= address._id %>" name="name" placeholder="Name" class="form-control" value="<%= address.name %>" required><br>
                                                     <input type="tel" id="phoneedit<%= address._id %>" name="phone" placeholder="Phone number" class="form-control" value="<%= address.phone %>" required pattern="[0-9]{10}" title="Please enter a 10-digit phone number"><br>
                                                     <input type="text" id="addressedit<%= address._id %>" name="address" placeholder="Address" class="form-control" value="<%= address.address %>" required><br>
                                                     <input type="text" id="cityedit<%= address._id %>" name="city" placeholder="City" class="form-control" value="<%= address.city %>" required><br>
                                                     <input type="text" id="districtedit<%= address._id %>" name="district" placeholder="District" class="form-control" value="<%= address.district %>" required><br>
                                                     <input type="text" id="stateedit<%= address._id %>" name="state" placeholder="State" class="form-control" value="<%= address.state %>" required><br>
-                                                    <input type="number" id="pincodeedit<%= address._id %>" name="pincode" placeholder="Pincode" class="form-control" value="<%= address.pincode %>" required pattern="[0-9]{6}" title="Please enter a 6-digit pincode"><br>
+                                                    <input type="tel" id="pincodeedit<%= address._id %>" name="pincode" placeholder="Pincode" class="form-control" value="<%= address.pincode %>" required pattern="[0-9]{6}" title="Please enter correct pincode"><br>
                                                     <input type="email" id="emailedit<%= address._id %>" name="email" placeholder="Email" class="form-control" value="<%= address.email %>" required><br>
-                                                    <button type="button" class="btn btn-primary" onclick="editaddress('<%= address._id %>')">Save Changes</button>
+                                                    <button type="submit" class="btn btn-primary">Save Changes</button>
                                                 </form>
-                                                
                                             </div>
                                         </div>
                                     </div>
