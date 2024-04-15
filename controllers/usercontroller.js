@@ -11,25 +11,43 @@ const { response } = require('express');
 
 const Homepage = async (req, res) => {
     try {
-        const data = await Products.findOne();
+        const products = await Products.find();
 
-        if (!data || !data.products || data.products.length === 0) {
+        if (! products || !  products.length === 0) {
             return res.render('user/error404', { errormessage: "Data not found or empty" });
         }
 
-        const uniqueCategories = [...new Set(data.products.map(product => product.category))];
+       
+        // Extract category names from each document
+        const categories = products.map(product => product.category);
+
+        // Create a Set to ensure uniqueness and spread it into an array
+        const uniqueCategories = [...new Set(categories)];
+
+        console.log("Unique categories:", uniqueCategories);
 
         // Fetch latest product from each category
-        const latestProducts = uniqueCategories.map(category => {
-            return data.products.filter(product => product.category === category).sort((a, b) => b.createdAt - a.createdAt)[0];
+        const latestProducts = [];
+
+        // Iterate over each unique category
+        uniqueCategories.forEach(category => {
+            // Filter products by category
+            const categoryProducts = products.filter(product => product.category === category);
+            
+            // Sort products in descending order based on createdAt
+            categoryProducts.sort((a, b) => b.createdAt - a.createdAt);
+            
+            // Select the latest product for the category and add it to latestProducts array
+            latestProducts.push(categoryProducts[0]);
         });
 
+        console.log("Latest products by category:", latestProducts);
         let userWishlist = [];
         let totalCartCount = "";
 
         const token = req.cookies.user_jwt;
 
-        if (token) {
+        if (token) { 
             try {
                 // Verify the JWT token to get user ID
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -37,7 +55,29 @@ const Homepage = async (req, res) => {
                     // Fetch user details from the database using the user ID from the JWT payload
                     const user = await User.findById(decoded.id);
                     if (user) {
-                        userWishlist = user.wishlist;
+                        const wishlistData = user.wishlist.map(item => ({
+                            productId: item._id,
+                            
+                        }));
+                        // Extract the wishlist data from the user document
+                         userWishlist = await Promise.all(wishlistData.map(async item => {
+                            // Find the product by its ID
+                            const product = await Products.findById(item.productId); 
+                        
+                            if (!product) {
+                                // If product not found, handle the error
+                                throw new Error(`Product with ID ${item.productId} not found`);
+                            }
+                            
+                            // Return product details including the image array
+                            return { 
+                                productId: product._id,
+                                productName: product.productName,
+                                productPrice: product.productPrice,
+                                
+                                image: product.image // Assuming image is an array field in your product schema
+                            };
+                        }));
                         totalCartCount = user.cart.products.length;
                     }
                 }
@@ -57,7 +97,9 @@ const Homepage = async (req, res) => {
             }
         }
 
-        // Render the homepage with the latest product from each category and user's wishlist
+        console.log("ooooofdf",userWishlist);
+
+
         res.render('user/index', { uniqueCategories, categor: latestProducts, wishlist: userWishlist, totalCartCount:totalCartCount });
     } catch (error) {
         console.error("Error:", error);
@@ -86,6 +128,9 @@ const userprofilepage = async (req, res) => {
             return res.redirect('/login');
         }
 
+        // Check if the URL contains an anchor for the edit profile section
+        const showEditProfile = req.url.includes('#edit-profile');
+
         res.render('user/profile', {
             userName: user.name,
             email: user.email,
@@ -95,6 +140,7 @@ const userprofilepage = async (req, res) => {
             errorMessage: req.errorMessage,
             successMessage: message,
             addrress:user.address,
+            showEditProfile: showEditProfile // Pass a variable to indicate whether to show the edit profile section
         });
     } catch (error) {
         console.error('Error fetching user profile:', error);
@@ -129,12 +175,29 @@ const dataslogin = async (req, res) => {
 
     try {
         const user = await User.findOne({ email });
-        if (!user || !bcrypt.compareSync(password, user.password)) {
+
+        // Check if user exists
+        if (!user) {
             return res.render('user/login', { errorMessage: 'Invalid email or password. Please sign up.' });
         }
 
+        // Check if the user is blocked
+        if (user.blocked) {
+            return res.redirect('/block'); // Redirect to the blocked route
+        }
+
+        // Check if the password is correct
+        if (!bcrypt.compareSync(password, user.password)) {
+            return res.render('user/login', { errorMessage: 'Invalid email or password. Please sign up.' });
+        }
+
+        // Generate JWT token
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+        
+        // Set the JWT token in a cookie
         res.cookie('user_jwt', token, { httpOnly: true });
+
+        // Redirect to the home page
         res.redirect('/');
 
     } catch (error) { 
@@ -147,6 +210,8 @@ const blockpage =(req,res)=>{
 
     res.render('user/error404',{errormessage:"You Are Blocked !!"});
 }
+
+
 
 let signuppage = (req, res) => {
     const token = req.cookies.user_jwt;
@@ -264,7 +329,7 @@ const editprofile = async (req, res) => {
         const newToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
         res.cookie('user_jwt', newToken, { httpOnly: true });
 
-        res.redirect('/profile?passwordUpdate=profile updated successfully');
+        res.redirect('/profile#edit-profile');
 
     } catch (error) {
         console.error("Error updating profile:", error);
@@ -343,29 +408,38 @@ const contactpage = async (req,res)=>{
 
 
 const shoppage = async (req, res) => {
-    const cartcount = req.params.count;
+    // const cartcount = req.params.count;
 
     try {
-        const data = await Products.findOne();
+        const products = await Products.find();
 
-        if (!data || !data.products || data.products.length === 0) {
+        if (!products || products.length === 0) {
             return res.status(404).json({ error: "Data not found or empty" });
         }
 
-        const uniqueCategories = [...new Set(data.products.map(product => product.category))];
+        const uniqueCategories = [...new Set(products.map(product => product.category))];
+
+        console.log(uniqueCategories);
+
+        let totalCartCount =""
         
         if (req.cookies.user_jwt) {
             jwt.verify(req.cookies.user_jwt, process.env.JWT_SECRET, async (err, decodedToken) => {
                 if (err) {
-                    return res.render('user/shop', { categor: data.products, uniqueCategories, cartcount, user: undefined });
+                    return res.render('user/shop', { categor: products, uniqueCategories,user: undefined,totalCartCount:totalCartCount });
                 } else {
                     req.user = decodedToken;
                     const user = await User.findOne({ _id: req.user.id });
-                    return res.render('user/shop', { categor: data.products, uniqueCategories, cartcount, user });
+                    if (user) {
+                       
+                        totalCartCount = user.cart.products.length;
+                    }
+                    console.log(user);
+                    return res.render('user/shop', { categor: products, uniqueCategories, user,totalCartCount:totalCartCount });
                 }
-            });
+            });  
         } else {
-            return res.render('user/shop', { categor: data.products, uniqueCategories, cartcount, user: undefined });
+            return res.render('user/shop', { categor: products, uniqueCategories, user: undefined,totalCartCount:totalCartCount });
         }
 
     } catch (error) {
@@ -383,21 +457,23 @@ const getproductdetails = async (req, res) => {
         
 
         // Retrieve products based on the category
-        const product = await Products.findOne({ 'products.category': category });
+        const products = await Products.find({ 'category': category });
 
-        if (!product) {
+        console.log(products);
+
+        if (!products) { 
             return res.render('user/error404', { error: "Product Not Available Now !!" });
         }  
 
         // Filter products based on the category
-        const categorProducts = product.products.filter(produ => produ.category === category);
+        // const categorProducts = products.filter(produ => produ.category === category);
 
         // Sort products based on the sorting option
         
         if (sortingOption === 'lowToHigh') {
-            categorProducts.sort((a, b) => a.productPrice - b.productPrice);
+            products.sort((a, b) => a.productPrice - b.productPrice);
         } else if (sortingOption === 'highToLow') {
-            categorProducts.sort((a, b) => b.productPrice - a.productPrice);
+            products.sort((a, b) => b.productPrice - a.productPrice);
         }
 
         // Get user information if available
@@ -408,10 +484,10 @@ const getproductdetails = async (req, res) => {
                     req.user = decodedToken;
                     user = await User.findOne({ _id: req.user.id });
                 }
-                res.json({ categor: categorProducts, product, user });
+                res.json({ categor:products, user });
             });
         } else {
-            res.json({ categor: categorProducts, product, user });
+            res.json({ categor:products,user }); 
         }
     } catch (error) {
         console.error("Error:", error);
@@ -438,7 +514,7 @@ const addToCart = async (req, res) => {
         const userId = decoded.id;
 
         // Find the product by ID
-        const product = await Products.findOne({ 'products._id': productId });
+        const product = await Products.findOne({'_id': productId });
         if (!product) {
             return res.status(404).send('Product not found');
         }
@@ -454,19 +530,19 @@ const addToCart = async (req, res) => {
         console.log("hi");
         if (existingProduct) {
             console.log("exting",existingProduct);
-            existingProduct.quantity += 1;
+            existingProduct.quantity += 1; 
         } else {
             // If the product doesn't exist, add it to the cart
-            const productData = product.products.find(prod => prod._id == productId);
+            // const productData = product.find(prod => prod._id == productId);
 
-            console.log("product data",productData);
+            console.log("product data",product);
             user.cart.products.push({
-                productId: productData._id,
-                productName: productData.productName,
-                productPrice: productData.productPrice,
-                image: productData.image,
-                quantity: 1,
-                disable:productData.disable
+                productId: product._id,
+                // productName: productData.productName,
+                // productPrice: productData.productPrice,
+                // image: productData.image,
+                // quantity: 1,
+                // disable:productData.disable
             });
         } 
 
@@ -487,6 +563,7 @@ const addToCart = async (req, res) => {
         res.status(500).send('Internal Server Error ');
     }
 };
+
 const cartpage = async (req, res) => {
     const token = req.cookies.user_jwt;
 
@@ -508,25 +585,45 @@ const cartpage = async (req, res) => {
         }
 
         // Extract the cart data from the user document
-        const usercartdata = user.cart.products.map(item => ({
+        const userCartData = user.cart.products.map(item => ({
             productId: item.productId,
-            productName: item.productName,
-            productPrice: item.productPrice,
-            image: item.image,
             quantity: item.quantity
+        })); 
+ 
+        
+
+        const productsInCart = await Promise.all(userCartData.map(async item => {
+            // Find the product by its ID
+            const product = await Products.findById(item.productId); 
+        
+            if (!product) {
+                // If product not found, handle the error
+                throw new Error(`Product with ID ${item.productId} not found`);
+            }
+            
+            // Return product details including the image array
+            return { 
+                productId: product._id,
+                productName: product.productName,
+                productPrice: product.productPrice,
+                quantity: item.quantity,
+                
+                image: product.image // Assuming image is an array field in your product schema
+            };
         }));
-        const totalPrice = user.cart.total;
+
+        // Calculate total price
+        const totalPrice = productsInCart.reduce((total, product) => {
+            return total + (product.productPrice * product.quantity);
+        }, 0);
+
+        // Count total items in the cart
+        const totalCartCount = user.cart.products.length;
 
        
-        if (user) {  
-            totalCartCount = user.cart.products.length;
-         
-          }else{
-               totalCartCount = "";
-          }
-        res.render('user/cart', { usercartdata, totalPrice,totalCartCount:totalCartCount });
 
-    }  catch (error) {
+        res.render('user/cart', { usercartdata:productsInCart, totalPrice, totalCartCount });
+    } catch (error) {
         // Handle error, including token expiration
         console.error(error);
         if (error instanceof jwt.TokenExpiredError) {
@@ -538,6 +635,8 @@ const cartpage = async (req, res) => {
         }
     }
 };
+
+
 
 const deletecartproduct = async (req, res) => {
     const token = req.cookies.user_jwt;
@@ -584,13 +683,24 @@ const deletecartproduct = async (req, res) => {
 };
 
 const quantityminus = async (req, res) => {
-    try {
+    try { 
         const productId = req.params.productId;
+        const token = req.cookies.user_jwt;
 
-        
+        console.log("kkkkkk");
+
+        if (!token) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        // Verify the JWT token to get user ID
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded || !decoded.id) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
         // Find the user by productId and update the quantity
         const user = await User.findOneAndUpdate(
-            { "cart.products.productId": productId },
+            { _id: decoded.id,"cart.products.productId": productId },
             { $inc: { "cart.products.$.quantity": -1 } }, // Decrease quantity by 1
             { new: true }
         );
@@ -616,22 +726,35 @@ const quantityminus = async (req, res) => {
 const quantityplus = async (req, res) => {
     try {
         const productId = req.params.productId;
+        const token = req.cookies.user_jwt;
 
         console.log(productId);
-        console.log("hi");
+        console.log("hioooooooooo");
 
-        // Find the user by productId and update the quantity
+        if (!token) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        // Verify the JWT token to get user ID
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded || !decoded.id) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        
+        // Find the user by ID and update the quantity of the specified product
         const user = await User.findOneAndUpdate(
-            { "cart.products.productId": productId },
-            { $inc: { "cart.products.$.quantity": 1 } }, // Decrease quantity by 1
+            { _id: decoded.id, "cart.products.productId": productId }, // Filter object
+            { $inc: { "cart.products.$.quantity": 1 } }, // Increase quantity by 1
             { new: true }
-        );
+        ); 
 
         console.log(user);
+       
         if (!user) {
             return res.status(404).json({ error: 'User or product not found' });
         }
 
+        // Recalculate total price
         const totalPrice = user.cart.products.reduce((total, product) => {
             return total + (product.productPrice * product.quantity);
         }, 0);
@@ -653,24 +776,24 @@ const latestproduct = async (req, res) => {
     try {
         const category = req.body.category;
 
-        // Find the latest four products belonging to the specified category
-        const data = await Products.findOne({ "products.category": category })
-                                    .sort({ "products.createdAt": -1 })
-                                    .limit(4);
+        console.log(category);
 
-        if (!data) {
+        // Find the latest product in the specified category
+        const latestProduct = await Products.findOne({ category })
+                                            .sort({ createdAt: -1 });
+
+        if (!latestProduct) { 
             return res.render('user/error404', { errormessage: "Product Not Available Now !!" });
         }
 
-        const categor = data.products
-                            .filter(product => product.category === category)
-                            .slice(0, 4); // Slice to include only the first 4 products
+        // Find up to four products in the same category with a creation date before or equal to the latest product
+        const products = await Products.find({ category, createdAt: { $lte: latestProduct.createdAt } })
+                                       .sort({ createdAt: -1 })
+                                       .limit(4);
 
-        const allCategories = await Products.distinct("products.category");
+        res.json({ message: "successfully passed", products, wishlist: [] });
 
-        res.json({ message: "successfully passed", categor, uniqueCategories: allCategories, wishlist: [] });
-
-    } catch (error) {
+    } catch (error) { 
         console.error("Error:", error);
         res.render('user/error404', { errormessage: "Product Not Available" });
     }
@@ -694,13 +817,29 @@ const whishlistget = async (req, res) => {
             return res.status(404).send('User not found');
         }
 
+
+        const userwishlistData = user.wishlist.map(item => ({
+            productId: item._id,
+            
+        }));
         // Extract the wishlist data from the user document
-        const wishlistData = user.wishlist.map(item => ({
-            productId: item.productId,
-            productName: item.productName,
-            productPrice: item.productPrice,
-            image: item.image,
-            color: item.color
+        const wishlistData = await Promise.all(userwishlistData.map(async item => {
+            // Find the product by its ID
+            const product = await Products.findById(item.productId); 
+        
+            if (!product) {
+                // If product not found, handle the error
+                throw new Error(`Product with ID ${item.productId} not found`);
+            }
+            
+            // Return product details including the image array
+            return { 
+                productId: product._id,
+                productName: product.productName,
+                productPrice: product.productPrice,
+                
+                image: product.image // Assuming image is an array field in your product schema
+            };
         }));
            if (user) {  
             totalCartCount = user.cart.products.length;
@@ -727,7 +866,8 @@ const whishlistget = async (req, res) => {
 const wishlist = async (req, res) => {
     const token = req.cookies.user_jwt;
     const productId = req.params.id;
-
+    
+    console.log(productId);
     try {
         if (!token) {
             return res.json({ message: 'Please Login' });
@@ -739,43 +879,30 @@ const wishlist = async (req, res) => {
             return res.json({ message: 'Please Login' });
         }
 
-        // Find the product by ID
-        const product = await Products.findOne({ 'products._id': productId });
-        if (!product) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
-
-        // Find the user by ID
+        // Check if the user exists
         const user = await User.findById(decoded.id);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
-        }
+        } 
 
         // Check if the product already exists in the wishlist
-        const existingProductIndex = user.wishlist.findIndex(item => item.productId == productId);
+        const existingProductIndex = user.wishlist.findIndex(item => item._id.toString() === productId);
 
-        const productData = product.products.find(prod => prod._id == productId);
+        console.log(existingProductIndex);
 
         if (existingProductIndex !== -1) {
             // If the product exists, remove it from the wishlist
             user.wishlist.splice(existingProductIndex, 1);
             await user.save();
-             color = false;
+            let color = false;
             res.json({  message: 'Product removed from wishlist', color });
         } else {
-            // If the product doesn't exist, add it to the wishlist
-            user.wishlist.push({
-                productId: productData._id,
-                productName: productData.productName,
-                productPrice: productData.productPrice,
-                image: productData.image[0], // Assuming image is an array and you want the first image
-            });
-
+            // If the product doesn't exist, add its ID to the wishlist
+            user.wishlist.push(productId);
+ 
             // Save the user data
             await user.save();
 
-            // Access the added product from the wishlist
-            const addedProduct = user.wishlist.find(item => item.productId == productId);
             let color = true;
             res.json({  message: 'Product added to wishlist', color });
         }
@@ -784,6 +911,7 @@ const wishlist = async (req, res) => {
         res.status(500).json({ success: false, error: 'Internal Server Error' }); // Handle internal server errors
     }
 };
+
 
 
 const removewishlist = async (req, res) => {
@@ -804,7 +932,7 @@ const removewishlist = async (req, res) => {
         // Find the user by ID and remove the product from the wishlist array
         const user = await User.findOneAndUpdate(
             { _id: decoded.id }, // Use decoded.id
-            { $pull: { wishlist: { productId: productId } } },
+            { $pull: { wishlist: {_id: productId } } },
             { new: true }
         );
 
@@ -819,26 +947,23 @@ const removewishlist = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
-    }
+    } 
 };
 
 const productveiw = async (req, res) => {
     try {
         const productId = req.params.id;
 
-        const product = await Products.findOne({ 'products._id': productId });
+        const product = await Products.findOne({ '_id': productId });
 
         if (!product) {
             return res.status(404).send('Product not found');
         }
 
         // Find the exact product within the products array
-        const exactProduct = product.products.find(p => p._id == productId);
+        // const exactProduct = product.products.find(p => p._id == productId);
 
-        if (!exactProduct) {
-            return res.status(404).send('Product not found');
-        }
-
+        
         let totalCartCount = "";
         const token = req.cookies.user_jwt;
         if (token) {
@@ -853,7 +978,7 @@ const productveiw = async (req, res) => {
             }
         }
 
-        res.render('user/productsingleveiw', { product: exactProduct, cartcount: totalCartCount, totalCartCount: req.totalCartCount });
+        res.render('user/productsingleveiw', { product, cartcount: totalCartCount, totalCartCount: req.totalCartCount });
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ error: "Internal server error" });
@@ -875,42 +1000,42 @@ const checkoutfromcart = async (req, res) => {
         if (!decoded || !decoded.id) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
+
+        // Find the user by ID
         const user = await User.findById(decoded.id);
        
-
-        let address = user.address;
-
         // If user not found, send 404 error
         if (!user) {
             return res.status(404).send('User not found');
         }
 
-        let cart = user.cart;
+        // Extract the cart data from the user document
+        const cart = user.cart; 
 
-        let productId = []
-       
+        // Get the IDs of all products in the cart that are not disabled
+        const productIds = cart.products.map(product => product.productId);
 
-        let cartTotalNonDisabled = cart.products.reduce((total, product) => {
-            if (!product.disable) {
-                productId=product.productId
-                return total + parseFloat(product.productPrice*product.quantity);
-                
+        // Find all non-disabled products in the Products collection whose IDs are in the cart
+        const productsInCart = await Products.find({ '_id': { $in: productIds }, 'disable': { $ne: true } });
+
+        // Calculate the total price for non-disabled products in the cart
+        const cartTotalNonDisabled = productsInCart.reduce((total, product) => {
+            // Find the corresponding item in the cart
+            const cartItem = cart.products.find(item => item.productId.toString() === product._id.toString());
+            if (cartItem) {
+                return total + (parseFloat(product.productPrice) * cartItem.quantity);
             } else {
                 return total;
-            }
-        }, 0); 
-        
-
-        console.log(productId);
-        // console.log(cartTotalNonDisabled);
+            } 
+        }, 0);   
+ 
+        console.log(productsInCart);
 
         // Get the total number of products in the cart
-        let totalCartCount = cart.products.length;
-
-        
+        const totalCartCount = cart.products.length;
 
         // Render the checkout page with the relevant information
-        res.render('user/checkout', { products: cart.products, cartTotal: cartTotalNonDisabled, totalCartCount, userAddresse: address });
+        res.render('user/checkout', { products: productsInCart,cart, cartTotal: cartTotalNonDisabled, totalCartCount, userAddresse: user.address });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
@@ -927,6 +1052,7 @@ const checkoutpage = async (req, res) => {
             return res.redirect( '/login');
         }
 
+        console.log("hoooo");
         // Verify the JWT token to get user ID
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         if (!decoded || !decoded.id) {
@@ -934,24 +1060,25 @@ const checkoutpage = async (req, res) => {
         }
         const user = await User.findById(decoded.id);
 
-        const product = await Products.findOne({ 'products._id': productId });
+        const product = await Products.findOne({ '_id': productId });
         
 
         let address = user.address;
+        // let cart = user.cart;
 
         if (!product) {
             return res.status(404).send('Product not found');
         }
 
         // Find the exact product within the products array
-        const exactProduct = product.products.find(p => p._id == productId);
+        // const exactProduct = product.products.find(p => p._id == productId);
 
-        if (!exactProduct) {
+        if (!product) {
             return res.status(404).send('Product not found');
         }
 
         // Render the checkout page with the exact product and user's address
-        res.render('user/checkout', { products: [exactProduct], cartcount: req.cartcount, totalCartCount: req.totalCartCount, cartTotal: req.cartTotal, userAddresse: address });
+        res.render('user/checkout', { products: [product], cartcount: req.cartcount, cart:req.cart, totalCartCount: req.totalCartCount, cartTotal: req.cartTotal, userAddresse: address });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
@@ -1173,14 +1300,14 @@ const editAddressFormcheckout = async (req, res) => {
 const placeholder = async (req, res) => {
     const { selectedAddressId, selectedPaymentMethod, productIds } = req.body;
 
-console.log('hooooi');
+
     
     console.log(productIds);
 
     try {  
         const token = req.cookies.user_jwt;
 
-        if (!token) {
+        if (!token) { 
             return res.status(401).json({ error: 'Unauthorized' });
         }
  
@@ -1209,6 +1336,8 @@ console.log('hooooi');
         // Find only the products whose IDs match the provided productIds within the 'products' array field
         const products = await Products.find();
 
+        
+
         // console.log(products);
 
         if (!products || products.length === 0) {
@@ -1219,86 +1348,149 @@ console.log('hooooi');
         let cartProduct = null;
 
         let totalAmount ='' ;
+        let totalPrice =[];
+        let quantity =[];
+
         if(productIds.length === 1){
-           cartProduct = user.cart.products.find(p => p._id.toString() === productIds[0]);
+           cartProduct = user.cart.products.find(p => p.productId.toString() === productIds[0]);
+ 
+           
+
+           console.log("cartProduct",cartProduct);
+        }else{
+
+            cartProduct =  user.cart.products.filter(product => productIds.includes(product.productId.toString()));
+
+            console.log("mathedall", cartProduct);
         }
         if (!cartProduct) { 
 
-            console.log("ooooo");
-            const productId = productIds[0];
+            console.log("doooooi");
+            const productId = productIds[0]; // Assuming productIds is an array containing the IDs of products to match
+
             for (const product of products) {
-                const matchedProduct = product.products.find(p => p._id.toString() === productId);
-                if (matchedProduct) {
-                    exactProducts.push(matchedProduct); // Push matched product into the array
-                    totalAmount += matchedProduct.productPrice; // Add product price to totalAmount
+                // Check if the current product's ID matches the desired productId
+                if (product._id.toString() === productId) {
+                    // If there's a match, push the product into exactProducts array
+                    exactProducts.push(product);
+                    totalAmount += product.productPrice;
+                    break;
                 }
-            }  
+            } 
         } else {
             // Assuming user.cart.products is where the user's cart items are stored
-            exactProducts = user.cart.products.filter(product => !product.disable);
+            for (const productId of productIds) {
+                // Check if the product exists in the user's cart
+                const cartProduct = user.cart.products.find(p => p.productId.toString() === productId);
+                
+                if (cartProduct) {
+                    // If the product is found in the cart, find it in the Products collection and add it to exactProducts
+                    const product = await Products.findById(productId);
+                    console.log("aaaaaaaaaaaaaaaaa");
+                    if (product && !product.disable) {
+                        exactProducts.push(product);
+                        
+                        // Find the quantity of the product in the cart
+                        const cartQuantity = cartProduct.quantity;
 
-             totalAmount = exactProducts.reduce((total, product) => {
-                return total + (product.productPrice * product.quantity);
-            }, 0);
+                        quantity.push(cartQuantity);
+                        
+                        // Calculate the total price for the product based on quantity
+                        const productTotalPrice = product.productPrice * cartQuantity;
+
+                        
+                        totalPrice.push(productTotalPrice);
+                       
+                        // return totalAmount += (parseFloat(totalPrice) * cartItem.quantity);
+                       
+                    } 
+                    
+                } else {
+                    // If the product is not found in the cart, directly find it in the Products collection and add it to exactProducts
+                    const product = await Products.findById(productId);
+
+                    // console.log(product );
+                     
+                    if (product && !product.disable) {
+                        exactProducts.push(product);
+                       
+                    }
+                }
+            }
+
+            
+
+           
+
+            totalAmount = totalPrice.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+
+           
+           
         }
 
         // Calculate total amount based on the found products
   
 
         // Ensure totalAmount is a number, if it's NaN set it to 0
-
+          console.log("hhhhhhhhhh",totalAmount);
+          console.log(quantity);
 
         const sanitizedTotalAmount = isNaN(totalAmount) ? 0 : totalAmount;
 
-        user.orders.push({
-            products: exactProducts.map(product => ({
-                productId: product._id,
-                name:product.productName,
-                qty: product.quantity,
-                price: product.productPrice,
-                image:product.image,
-                orderStatus: "Pending", 
-                cancelReason: null
-            })),
-            totalAmount: sanitizedTotalAmount,
-            orderDate: new Date(),
-            shippingAddress: exactAddress,
-            paymentMethod: selectedPaymentMethod,
+        // console.log(sanitizedTotalAmount);
+
+        // console.log(selectedPaymentMethod);
+
+    
+console.log(exactProducts);
+        
+        
+       
+
+if (selectedPaymentMethod === 'razorpay') {
+    try {
+        // Generate Razorpay order (assuming this function returns the order details)
+
+        const razorpayResponse = await helpers.generateRazorpay(user._id,sanitizedTotalAmount);
+
+        // Sending response with necessary data to client
+        return res.json({
+            razorpayResponse: razorpayResponse,
+            exactProducts: exactProducts,
+            exactAddress: exactAddress,
+            selectedPaymentMethod: selectedPaymentMethod,
+            sanitizedTotalAmount:sanitizedTotalAmount,
+            
         });
+    } catch (error) {
+        console.error('Error generating Razorpay order:', error);
+        return res.status(500).json({ error: 'Error generating Razorpay order' });
+    }
+} else if (selectedPaymentMethod === 'Cash On Delivery') {
+            // Add the new order to the user's orders array
+            user.orders.push({
+                products: exactProducts.map((product, index) => ({
+                    productId: product._id,
+                    name: product.productName,
+                    category: product.category,
+                    qty: quantity[index], // Use quantity from the quantities array
+                    price: product.productPrice,
+                    image: product.image,
+                    orderStatus: "Pending",
+                    cancelReason: null
+                })),
+                totalAmount: sanitizedTotalAmount,
+                orderDate: new Date(),
+                shippingAddress: exactAddress,
+                paymentMethod: selectedPaymentMethod,
+            });
 
-        // Add the new order to the user's orders array
-        
+            // Save the updated user document
+            await user.save();
 
-        // Save the updated user document
-        await user.save();
-
-        const orderId = user.orders[user.orders.length - 1]._id;
-
-        console.log("Newly created order ID:", orderId);
-        
-        
-
-        if (req.body.selectedPaymentMethod === 'razorpay') {
-            try {
-                // Generate Razorpay order
-                const razorpayResponse = await helpers.generateRazorpay(orderId, totalAmount);
-
-                const name =user.name;
-                const email =user.email;
-                const number =user.phoneNumber;
-              
-                // Send Razorpay order details to client
-                res.json(razorpayResponse,name,email,number);
-            } catch (error) {
-                console.error('Error generating Razorpay order:', error);
-                res.status(500).json({ error: 'Error generating Razorpay order' });
-            }
+            res.json(true);
         } else {
-            if (req.body.selectedPaymentMethod === 'Cash On Delivery'){
-
-                res.json(true);
-
-            }
+            return res.status(400).json({ error: 'Invalid payment method' });
         }
     } catch (error) {
         console.error('Error:', error);
@@ -1306,7 +1498,58 @@ console.log('hooooi');
     }
 }
 
+const saveorder =  async (req, res) => {
 
+
+console.log("ooook");
+
+    const { exactProducts, exactAddress, sanitizedTotalAmount,selectedPaymentMethod } = req.body;
+
+    console.log('Exact Products:', exactProducts);
+    console.log('Exact Address:', exactAddress);
+    console.log('Sanitized Total Amount:', sanitizedTotalAmount);
+
+    const token = req.cookies.user_jwt;
+
+    if (!token) { 
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Verify the JWT token to get user ID
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded || !decoded.id) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const user = await User.findById(decoded.id);
+
+    console.log(user);
+
+    user.orders.push({
+        products: exactProducts.map((product) => ({
+            productId: product._id,
+            name: product.productName,
+            qty: 1, // Use quantity from the quantities array
+            category: product.category,
+            price: product.productPrice,
+            image: product.image,
+            orderStatus: "Pending",
+            cancelReason: null
+        })),
+        totalAmount: sanitizedTotalAmount,
+        orderDate: new Date(),
+        shippingAddress: exactAddress,
+        paymentMethod: selectedPaymentMethod,
+    });
+
+    // Save the updated user document
+    await user.save();
+
+
+
+    
+
+    res.sendStatus(200); // Send a success response
+};
 
 
 
@@ -1342,10 +1585,17 @@ const ordermanage = async (req, res) => {
         };
     });
 
+    console.log( "orders",userOrders);
+
     
 
     // const ordersdata =user.orders;
-    let totalCartCount = user.cart.length
+    if (user) {  
+        totalCartCount = user.cart.products.length;
+     
+      }else{
+           totalCartCount = "";
+      }
 
     res.render('user/orders', { products:userProducts,userOrders,totalCartCount:totalCartCount});
 }
@@ -1376,7 +1626,7 @@ const cancellreson = async (req, res) => {
             order.products.filter(product => {
                 if (product._id.toString() === productId) {
                     foundProduct = product;
-                    product.orderStatus = "cancel"                    
+                    product.orderStatus = "cancelled"                    
                     product.cancelReason = cancelReason
                     return; // Exit the loop once the product is found
                 }
@@ -1713,6 +1963,7 @@ module.exports={
     editaddress,
     editAddressFormcheckout,
     placeholder,
+    saveorder,
     ordermanage,
     getShopProducts,
     shopsorting,

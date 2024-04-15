@@ -53,7 +53,7 @@
                     <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
                         <div class="navbar-nav mx-auto">
                             <a href="/" class="nav-item nav-link">Home</a>
-                            <a href="/shop/<%= totalCartCount ? totalCartCount : '0' %>" class="nav-item nav-link">Shop</a>
+                            <a href="/shop %>" class="nav-item nav-link">Shop</a>
                             <!-- <a href="shop-detail.html" class="nav-item nav-link">Shop Detail</a>
                             <div class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Pages</a>
@@ -68,10 +68,10 @@
                         </div>
                         <div class="d-flex m-3 me-0">
                             <a href="/whishlist" class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" ><i class="fas fa-heart heart-icon ok"></i></a>
-                            <a href="/cart" class="position-relative me-4 my-auto">
-                                <i class="fa fa-shopping-bag fa-2x"></i>
+                            <!-- <a href="/cart" class="position-relative me-4 my-auto">
+                                <i class="fa fa-shopping-bag fa-2x"></i> -->
                                 <!-- <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;"><%= totalCartCount%></span> -->
-                            </a>
+                            <!-- </a> -->
                             <a href="/profile" class="my-auto">
                                 <i class="fas fa-user fa-2x"></i>
                             </a>
@@ -369,13 +369,25 @@ function editaddress(addressId) {
                                                     </div>
                                                 </th>
                                                 <td class="py-5"><%= product.productName %></td>
-                                                <td class="py-5">₹<%= product.productPrice %></td>
-                                                <% if (product.quantity) { %>
-                                                <td class="py-5"><%= product.quantity %></td> <!-- Quantity can be dynamic if required -->
-                                                <% } else { %> 
-                                                <td class="py-5">1</td> 
-                                                <% } %>    
-                                                <td class="py-5">₹<%= product.productPrice %></td> <!-- Total can be dynamic if required -->
+                                                <td class="py-5">₹<%= product.productPrice %></td> 
+                                                <td class="py-5">
+                                                    <% if (cart) { %>
+                                                        <%= cart.products.find(item => item.productId.toString() === product._id.toString()).quantity %>
+                                                    <% } else { %>
+                                                        1
+                                                    <% } %>
+                                                </td>
+                                                <td class="py-5">
+                                                    <% if (cart) { %>
+                                                        ₹<%= product.productPrice * cart.products.find(item => item.productId.toString() === product._id.toString()).quantity %>
+                                                    <% } else { %>
+                                                        ₹<%= product.productPrice %>
+                                                    <% } %>
+                                                </td>
+                                                
+                                               
+                                                  
+                                                <!-- Total can be dynamic if required -->
                                             </tr>
                                             <% } %>
                                             
@@ -411,7 +423,7 @@ function editaddress(addressId) {
                                 <div class="col-12">
                                     <div class="form-check text-start my-3">
                                         <input type="checkbox" class="form-payment-input bg-primary border-0" id="Delivery-1" value="razorpay" name="selectedPaymentMethod">
-                                        <label class="form-check-label" for="Delivery-1">razorpay</label>
+                                        <label class="form-check-label" for="Delivery-1">Online pay</label>
                                     </div>
                                 </div>
                             </div>
@@ -431,34 +443,34 @@ function editaddress(addressId) {
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
     // Function to handle form submission
-    const handleSubmit = async (event) => {
-    event.preventDefault(); // Prevent default form submission behavior
-    
-    // Gather form data
-    const formData = new FormData(event.target);
-    const selectedAddressId = formData.get('selectedAddressId');
-    const selectedPaymentMethod = formData.get('selectedPaymentMethod');
-    const productIds = formData.getAll('productIds[]'); // Use getAll to get all values of an array-like field
-    
+    const handleSubmit = (event) => {
+        event.preventDefault(); // Prevent default form submission behavior
 
-    console.log("hiiiiiiiii");
-    try {
+        // Gather form data
+        const formData = new FormData(event.target);
+        const selectedAddressId = formData.get('selectedAddressId');
+        const selectedPaymentMethod = formData.get('selectedPaymentMethod');
+        const productIds = formData.getAll('productIds[]'); // Use getAll to get all values of an array-like field
+
         // Send data to server using Axios
-        const response = await axios.post('/placeorder', {
+        axios.post('/placeorder', {
             selectedAddressId,
             selectedPaymentMethod,
             productIds
-        });
+        }).then(response => {
+            // Log response from server
+            console.log("Response:", response.data);
 
-        // Handle further logic based on server response
-        // Log response from server
-        console.log(response.data);
+            // Handle further logic based on server response
+            if (selectedPaymentMethod === 'razorpay') {
+                const razorpayOrder = response.data.razorpayResponse;
+                const exactProducts = response.data.exactProducts;
+                const exactAddress = response.data.exactAddress;
+                const sanitizedTotalAmount = response.data.sanitizedTotalAmount;
 
-        if (selectedPaymentMethod === 'razorpay') {
-            const razorpayOrder = response.data;
 
-            // Initiate Razorpay Checkout
-            const options = {
+                // Initiate Razorpay Checkout
+                const options = {
                 key: 'rzp_test_97NF7SboryYNH9', // Your Razorpay Key ID
                 amount: razorpayOrder.amount,
                 currency: razorpayOrder.currency,
@@ -466,18 +478,24 @@ function editaddress(addressId) {
                 name: 'Pure Glow',
                 description: 'Payment for your order',
                 handler: function (response) {
-                        // Handle success callback (payment success)
-                        console.log(response);
-                        if (response.razorpay_payment_id) {
-                            // Payment successful, show success modal
-                            console.log("Payment successful");
-                            $('#successModal').modal('show');
-
-                            setTimeout(function() {
-                                     $('#successModal').modal('hide'); // Hide the modal
-                             }, 3000);
-                        }
-                    },
+                    console.log("Payment successful");
+                    $('#successModal').modal('show'); // Show success modal
+                    setTimeout(function () {
+                        $('#successModal').modal('hide'); // Hide the modal after a delay
+                        axios.post('/saveorder', {
+                            exactProducts,
+                            exactAddress,
+                            sanitizedTotalAmount,
+                            selectedPaymentMethod
+                           
+                        }).then(response => {
+                            console.log("Order saved successfully");
+                            // Redirect to another page or perform further actions if needed
+                        }).catch(error => {
+                            console.error('Error saving order:', error); // Log any errors
+                        });
+                    }, 5000);
+                },
                 prefill: {
                     name: response.name,
                     email: response.name,
@@ -488,25 +506,27 @@ function editaddress(addressId) {
                 }
             };
 
-            const rzp = new Razorpay(options);
-            rzp.open();
-        } else {
-            if(response.data===true){
-            $('#successModal').modal('show');
-            setTimeout(function() {
-                   $('#successModal').modal('hide'); // Hide the modal
-             }, 5000);
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } else {
+                // Handle other payment methods (e.g., Cash On Delivery)
+                if (response.data === true) {
+                    $('#successModal').modal('show');
+                    setTimeout(function () {
+                        $('#successModal').modal('hide'); // Hide the modal
+                    }, 5000);
+                }
             }
-        }
-    } catch (error) {
-        console.error('Error:', error); // Log any errors
-    }
-};
+        }).catch(error => {
+            console.error('Error:', error); // Log any errors
+        });
+    };
 
-// Add event listener to the form for form submission
-const form = document.getElementById('form');
-form.addEventListener('submit', handleSubmit);
-</script>>
+    // Add event listener to the form for form submission
+    const form = document.getElementById('form');
+    form.addEventListener('submit', handleSubmit);
+</script>
+
 
 
 
@@ -556,8 +576,8 @@ form.addEventListener('submit', handleSubmit);
                         </div>
                         <div class="col-lg-6">
                             <div class="position-relative mx-auto">
-                                <input class="form-control border-0 w-100 py-3 px-4 rounded-pill" type="number" placeholder="Your Email">
-                                <button type="submit" class="btn btn-primary border-0 border-secondary py-3 px-4 position-absolute rounded-pill text-white" style="top: 0; right: 0;">Subscribe Now</button>
+                                <!-- <input class="form-control border-0 w-100 py-3 px-4 rounded-pill" type="number" placeholder="Your Email"> -->
+                                <!-- <button type="submit" class="btn btn-primary border-0 border-secondary py-3 px-4 position-absolute rounded-pill text-white" style="top: 0; right: 0;">Subscribe Now</button> -->
                             </div>
                         </div>
                         <div class="col-lg-3">
@@ -571,7 +591,7 @@ form.addEventListener('submit', handleSubmit);
                     </div>
                 </div>
                 <div class="row g-5">
-                    <div class="col-lg-3 col-md-6">
+                    <!-- <div class="col-lg-3 col-md-6">
                         <div class="footer-item">
                             <h4 class="text-light mb-3">Why People Like us!</h4>
                             <p class="mb-4">typesetting, remaining essentially unchanged. It was 
@@ -610,7 +630,7 @@ form.addEventListener('submit', handleSubmit);
                             <p>Payment Accepted</p>
                             <img src="img/payment.png" class="img-fluid" alt="">
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -621,13 +641,13 @@ form.addEventListener('submit', handleSubmit);
             <div class="container">
                 <div class="row">
                     <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        <span class="text-light"><a href="#"><i class="fas fa-copyright text-light me-2"></i>Your Site Name</a>, All right reserved.</span>
+                        <span class="text-light"><a href="#"><i class="fas fa-copyright text-light me-2"></i>Pure Glow</a>, All right reserved.</span>
                     </div>
                     <div class="col-md-6 my-auto text-center text-md-end text-white">
                         <!--/*** This template is free as long as you keep the below author’s credit link/attribution link/backlink. ***/-->
                         <!--/*** If you'd like to use the template without the below author’s credit link/attribution link/backlink, ***/-->
                         <!--/*** you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". ***/-->
-                        Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a> Distributed By <a class="border-bottom" href="https://themewagon.com">ThemeWagon</a>
+                        Designed By <a class="border-bottom" href="https://htmlcodex.com">Ihsan tk</a><a class="border-bottom" href="https://themewagon.com"></a>
                     </div>
                 </div>
             </div>

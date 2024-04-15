@@ -104,11 +104,11 @@
                         <a href="/whishlist" class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" ><i class="fas fa-heart heart-icon ok"></i></a>
                         <a href="/cart" class="position-relative me-4 my-auto">
                             <i class="fa fa-shopping-bag fa-2x"></i>
-                            <% if (totalCartCount) { %>
+                            
                                     <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">
                                         <%= totalCartCount %>
                                     </span>
-                                <% } %>
+                                
                                                  </a>
                         <a href="/profile" class="my-auto">
                             <i class="fas fa-user fa-2x"></i>
@@ -141,81 +141,84 @@
     <!-- Modal Search End -->
    
 <h2 style="margin-left: 10%; margin-top: 12%;">My Orders</h2>
-    <div class="container" style="">
-        <div class="order-container">
-            <% if (products.length > 0) { %>
-            <% products.forEach(product => { %>
-                <div class="order" style="background-color: rgb(224, 236, 177); padding: 10px; border-radius: 10px; margin-bottom: 15px;">
-                    <div class="product-info">
-                        <div class="product-image">
-                            <a href="/productveiw/<%= product.productId %>">
-                            <img src="<%= product.image[0] %>" alt="Product Image" style="max-width: 100px;">
-                            </a>
-                        </div>
-                        <div class="order-details">
-                            <h2><%= product.name %></h2>
-                            <p>Quantity: <%= product.qty %></p>
-                            <p>Price: <%= product.price*product.qty %></p>
-                           
-                           
-                                 <!-- Format orderDate -->
-            <p>Order Date: <%= new Date(userOrders[0].orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
-    
-            <!-- Calculate expected delivery date -->
-            <% 
-                        const orderDate = new Date(userOrders[0].orderDate);
-                        const expectedDeliveryDate = new Date(orderDate);
-                        expectedDeliveryDate.setDate(orderDate.getDate() + 4); // Adding 4 days
-                    %>
-            <p>Expected Delivery Date: <%= expectedDeliveryDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
-
-            <p>Payment Method: <%= userOrders[0].paymentMethod %></p>
-            <% if (product.orderStatus === 'cancel') { %>
-                <span style="">Order Status:<span style="color: red;"> <%= product.orderStatus %></span></span>
-                <p class="mt-3">Cancel Reason: <%= product.cancelReason %></p>
-            <% } else if (product.orderStatus === 'delivered') { %>
-                <span style="">Order Status:<span style="color: rgb(11, 167, 63);"><strong> <%= product.orderStatus %></strong></span></span>
-            <% } else { %>
-                <p>Order Status: <%= product.orderStatus %></p>
-            <% } %>
-                        </div>
-                    </div>
-
-                    <div class="additional-info" style="display: none;">
-                        <div class="address-info">
-                            <h5> <%= userOrders[0].shippingAddress.name %></h5>
-                            <p><i class="fas fa-map-marker-alt"></i><br><%= userOrders[0].shippingAddress.address %>,
-                                <%= userOrders[0].shippingAddress.city %>,
-                                <%= userOrders[0].shippingAddress.district %> <br>
-                                <%= userOrders[0].shippingAddress.state %>
-                                <%= userOrders[0].shippingAddress.pincode %></p>
-                            <h6><i class="fas fa-phone-alt"></i> <%= userOrders[0].shippingAddress.phone %></h6>
-                        </div>
-                        <form class="cancel-form" action="/cancellreson/<%=product._id%>" method="post" onsubmit="return submitCancellationReason(this)">
-                            <div class="form-group">
-                                <label for="cancelReasonSelect">Cancel Product</label>
-                                <select class="form-control" id="cancelReasonSelect" name="cancelReason">
-                                    <option selected disabled>Select a reason</option>
-                                    <option value="size Not Match">Diffrent varient</option>
-                                    <option value="Change My Mind">Change My Mind</option>
-                                    <option value="Product Damages">Product Damage</option>
-                                    <!-- Add more reasons as needed -->
-                                </select>
+<div class="container" style="">
+    <div class="order-container">
+        <% if (userOrders.length > 0) { %>
+            <% userOrders.forEach(order => { %>
+                <% order.products.forEach(product => { %>
+                    <div class="order" style="background-color: rgb(224, 236, 177); padding: 10px; border-radius: 10px; margin-bottom: 15px;">
+                        <div class="product-info">
+                            <div class="product-image">
+                                <a href="/productveiw/<%= product.productId %>">
+                                    <img src="<%= product.image[0] %>" alt="Product Image" style="max-width: 100px;">
+                                </a>
                             </div>
-                            <button type="submit" class="btn btn-danger">Cancel</button>
-                        </form>
+                            <div class="order-details">
+                                <h2><%= product.name %></h2>
+                                <p>Quantity: <%= product.qty %></p>
+                                <p>Price: <%= product.price * product.qty %></p>
+                                
+                                <p>Order Date: <%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
+                                <% const orderDate = new Date(order.orderDate);
+                                const expectedDeliveryDate = new Date(orderDate);
+                                expectedDeliveryDate.setDate(orderDate.getDate() + 4); %>
+                                <p>Expected Delivery Date: <%= expectedDeliveryDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
+                                <p>Payment Method: <%= order.paymentMethod %></p>
+                                <% if (product.orderStatus === 'cancelled') { %>
+                                    <span style="">Order Status:<span style="color: red;"> <%= product.orderStatus %></span></span>
+                                    <p class="mt-3">Cancel Reason: <%= product.cancelReason %></p>
+                                <% } else if (product.orderStatus === 'delivered') { %>
+                                    <span style="">Order Status:<span style="color: rgb(11, 167, 63);"><strong> <%= product.orderStatus %></strong></span></span>
+                                <% } else { %>
+                                    <p>Order Status: <%= product.orderStatus %></p>
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="additional-info" style="display: none;">
+                            <div class="address-info">
+                                <h4>Shipping Address</h4><br>
+                                <h5> <%= order.shippingAddress.name %></h5>
+                                <p><i class="fas fa-map-marker-alt"></i><br><%= order.shippingAddress.address %>,
+                                    <%= order.shippingAddress.city %>,
+                                    <%= order.shippingAddress.district %> <br>
+                                    <%= order.shippingAddress.state %>
+                                    <%= order.shippingAddress.pincode %></p>
+                                <h6><i class="fas fa-phone-alt"></i> <%= order.shippingAddress.phone %></h6>
+                                <form id="cancelForm" class="cancel-form" action="/cancellreson/<%=product._id%>" method="post">
+                                    <div class="form-group">
+                                        <label for="cancelReasonSelect">Cancel Product</label>
+                                        <select class="form-control" id="cancelReasonSelect" name="cancelReason" required>
+                                            <option selected disabled>Select a reason</option>
+                                            <option value="size Not Match">Different variant</option>
+                                            <option value="Change My Mind">Change My Mind</option>
+                                            <option value="Product Damages">Product Damage</option>
+                                            <!-- Add more reasons as needed -->
+                                        </select>
+                                    </div>
+                                    <!-- Error message container -->
+                                    <div id="errorMessage" style="display: none; color: red;">Please select a reason before submitting.</div>
+                                    <button type="submit" class="btn btn-danger">Cancel</button>
+                                </form>
+                            </div>
+                            <!-- Add cancel form if needed -->
+                        </div>
+                        <button class="btn  view-details-btn mt-2" style="color: blue;" onclick="toggleDetails(this)">View Details</button>
                     </div>
-                    <button class="btn  view-details-btn mt-2" style="color: blue;" onclick="toggleDetails(this)">View Details</button>
-             
-                </div>
+                <% }); %>
             <% }); %>
-            <% } else { %>
-                <h2>No orders !</h2>
-                <a class="btn border-secondary rounded-pill py-3 px-5 mt-3" href="/shop/<%= totalCartCount ? totalCartCount : '0' %>">Shop Now</a>
-            <% } %>
-        </div>
+        <% } else { %>
+            <h2>No orders!</h2>
+            <a class="btn border-secondary rounded-pill py-3 px-5 mt-3" href="/shop">Shop Now</a>
+        <% } %>
     </div>
+</div> 
+
+    
 <script>
+    // Add event listener to the form
+   
+
+
     function toggleDetails(button) {
         const additionalInfo = button.parentElement.querySelector('.additional-info');
         if (additionalInfo.style.display === 'none') {

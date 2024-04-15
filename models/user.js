@@ -16,6 +16,7 @@ const addressSchema = new mongoose.Schema({
 const productSchema = new mongoose.Schema({
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
     name: String,
+    category:String,
     qty: { type: Number, default: 1 },
     price: { type: Number,  },
     image: [String],
@@ -49,7 +50,7 @@ const userSchema = new mongoose.Schema({
       quantity: { type: Number, default: 1 },
       disable: Boolean
     }],
-        total: String
+        
     },
     wishlist: [{
         productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },

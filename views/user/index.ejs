@@ -79,7 +79,7 @@
                     <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
                         <div class="navbar-nav mx-auto">
                             <a href="/" class="nav-item nav-link active">Home</a>
-                            <a href="/shop/<%= totalCartCount ? totalCartCount : '0' %>" class="nav-item nav-link">Shop</a>
+                            <a href="/shop" class="nav-item nav-link">Shop</a>
                             <!-- <a href="shop-detail.html" class="nav-item nav-link">Shop Detail</a> -->
                             <!-- <div class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
@@ -145,17 +145,15 @@
 
         <script>
             function validateSearch() {
-                // Get the value of the search input
+                
                 var searchInputValue = document.getElementById('searchInput').value.trim();
         
                 // Check if the input is empty
                 if (searchInputValue === '') {
-                    // Alert the user or perform any other action to indicate that input is required
-                    // alert('Please enter a search query.');
-                    // Prevent form submission
+            
                     return false;
                 }
-                // Allow form submission if input is not empty
+               
                 return true;
             }
         </script>
@@ -205,7 +203,7 @@
         <div class="container-fluid featurs py-5">
             <div class="container py-5">
                 <div class="row g-4">
-                    <div class="col-md-6 col-lg-3">
+                    <div class="col-md-6 col-lg-4">
                         <div class="featurs-item text-center rounded bg-light p-4">
                             <div class="featurs-icon btn-square rounded-circle bg-secondary mb-5 mx-auto">
                                 <i class="fas fa-car-side fa-3x text-white"></i>
@@ -216,7 +214,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6 col-lg-3">
+                    <div class="col-md-6 col-lg-4">
                         <div class="featurs-item text-center rounded bg-light p-4">
                             <div class="featurs-icon btn-square rounded-circle bg-secondary mb-5 mx-auto">
                                 <i class="fas fa-user-shield fa-3x text-white"></i>
@@ -227,7 +225,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6 col-lg-3">
+                    <!-- <div class="col-md-6 col-lg-3">
                         <div class="featurs-item text-center rounded bg-light p-4">
                             <div class="featurs-icon btn-square rounded-circle bg-secondary mb-5 mx-auto">
                                 <i class="fas fa-exchange-alt fa-3x text-white"></i>
@@ -237,8 +235,8 @@
                                 <p class="mb-0">30 day money guarantee</p>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-6 col-lg-3">
+                    </div> -->
+                    <div class="col-md-6 col-lg-4">
                         <div class="featurs-item text-center rounded bg-light p-4">
                             <div class="featurs-icon btn-square rounded-circle bg-secondary mb-5 mx-auto">
                                 <i class="fa fa-phone-alt fa-3x text-white"></i>
@@ -423,7 +421,7 @@
                         .then(function(response) {
                             console.log(response.data);
 
-                            const products = response.data.categor;
+                            const products = response.data.products;
         
                             const container = document.getElementById('productsContainer');
             
@@ -486,7 +484,7 @@
                             <h1 class="display-3 text-white">New Organic products</h1>
                             <p class="fw-normal display-3 text-dark mb-4">in Our Store</p>
                             <!-- <p class="mb-4 text-dark">The generated Lorem Ipsum is therefore always free from repetition injected humour, or non-characteristic words etc.</p> -->
-                            <a href="/shop/<%= totalCartCount ? totalCartCount : '0' %>" class="banner-btn btn border-2 border-white rounded-pill text-dark py-3 px-5">BUY</a>
+                            <a href="/shop" class="banner-btn btn border-2 border-white rounded-pill text-dark py-3 px-5">BUY</a>
                         </div>
                     </div>
                     <!-- <div class="col-lg-6">
@@ -518,7 +516,7 @@
                         <% wishlist.forEach(wishlistItem => { %>
                             <div class="border border-primary rounded position-relative vesitable-item">
                                 <div class="vesitable-img">
-                                    <a href="/productveiw/<%= wishlistItem.productId %>"><img src="<%= wishlistItem.image %>" class="img-fluid w-100 rounded-top" alt=""></a>
+                                    <a href="/productveiw/<%= wishlistItem.productId %>"><img src="<%= wishlistItem.image[0] %>" class="img-fluid w-100 rounded-top" alt=""></a>
                                 </div>
                                 <!-- <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Wishlist</div> -->
                                 <div class="p-4 rounded-bottom">
@@ -910,7 +908,7 @@
                     </div>
                 </div>
                 <div class="row g-5">
-                    <div class="col-lg-3 col-md-6">
+                    <!-- <div class="col-lg-3 col-md-6">
                         <div class="footer-item">
                             <h4 class="text-light mb-3">Why People Like us!</h4>
                             <p class="mb-4">typesetting, remaining essentially unchanged. It was 
@@ -949,7 +947,7 @@
                             <p>Payment Accepted</p>
                             <img src="img/payment.png" class="img-fluid" alt="">
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -966,7 +964,7 @@
                         <!--/*** This template is free as long as you keep the below author’s credit link/attribution link/backlink. ***/-->
                         <!--/*** If you'd like to use the template without the below author’s credit link/attribution link/backlink, ***/-->
                         <!--/*** you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". ***/-->
-                        Designed By <a class="border-bottom" href="https://htmlcodex.com">Ihsan tk</a> Distributed By <a class="border-bottom" href="https://themewagon.com">ThemeWagon</a>
+                        Designed By <a class="border-bottom" href="https://htmlcodex.com">Ihsan tk</a> <a class="border-bottom" href="https://themewagon.com"></a>
                     </div>
                 </div>
             </div>

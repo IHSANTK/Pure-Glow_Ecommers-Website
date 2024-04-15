@@ -35,7 +35,7 @@ router.post('/edit-profile/:id',upload.array('profileImage', 1),userController.e
 router.delete('/delete-profile-image/:userId', userController.deleteProfileImage);
 
 router.post('/edit-password/:id',userController.editpassword)
-router.get('/shop/:count',userController.shoppage)
+router.get('/shop',userController.shoppage)
 
 
 router.get('/getshopproduct/:category', preventBack, userController.getproductdetails);
@@ -87,6 +87,8 @@ router.post('/editAddressFormcheckout/:id',userController.editAddressFormcheckou
 router.get('/getsearchproduct', preventBack, userController.getShopProducts);
 
 router.get('/shopsort/:category',preventBack,userController.shopsorting)
+
+router.post('/saveorder',userController.saveorder)
 
 
 

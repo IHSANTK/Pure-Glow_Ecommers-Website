@@ -330,7 +330,7 @@
                                             <tr>
                                                 <th>Id</th>
                                                 <th>Categorie</th>
-                                                <th>Date</th>
+                                                <!-- <th>Date</th> -->
                                                 <th>Status</th>
                                                 <th>Action</th>
                                             </tr>
@@ -340,7 +340,6 @@
                                                 <tr>
                                                     <td><strong><%= admin.id %></strong></td>
                                                     <td><%= admin.categoryName %></td>
-                                                    <td><%= admin.createdAt.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></td>
                                                     <td><span class="badge bg-success">Published</span></td>
                                                     <td>
                                                         <div class="btn-group" role="group" aria-label="Basic outlined example">

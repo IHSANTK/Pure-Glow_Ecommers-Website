@@ -126,11 +126,11 @@
                             <a href="/cart" class="position-relative me-4 my-auto">
                                 <i class="fa fa-shopping-bag fa-2x"></i>
                               
-                                <% if (cartcount) { %>
+                               
                                     <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">
-                                        <%= cartcount %>
+                                        <%= totalCartCount %>
                                     </span>
-                                <% } %>                            </a>
+                                                            </a>
                             <a href="/profile" class="my-auto">
                                 <i class="fas fa-user fa-2x"></i>
                             </a>
@@ -242,7 +242,7 @@
                                                         <input type="hidden" id="categoryinput" value="<%= product.category %>">                                              
                                                         <button type="submit" class="btn p-0 heart-icon position-absolute top-0 end-0 wishicon" onclick="toggleWishlist('<%= product._id %>')">
 
-                                                            <% if(user !== undefined && user.wishlist.some( wProduct => wProduct.productId.toString() === product._id.toString() )) { %>
+                                                            <% if(user !== undefined && user.wishlist.some( wProduct => wProduct._id.toString() === product._id.toString() )) { %>
                                                                
                                                                     <i id="heartIcon_<%= product._id %>" class="fa fa-heart me-3 mt-2 heart-icon text-danger"></i>
                                                             
@@ -256,7 +256,7 @@
                                                     </div>
                                                     <div class="disabled-overlay position-absolute top-50 ms-5 mt-4 " > <!-- Centering the message -->
                                                         <% if (product.disable) { %>
-                                                            <h5 class="disabled-message text-danger "> Not available now</h5>
+                                                            <h5 class="disabled-message text-danger ms-3"> Not available now</h5>
                                                         <% } %>
                                                     </div>
                                                     <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">
@@ -307,10 +307,10 @@
     })
         .then(function (response) {
             const productsContainer = document.getElementById('productsContainer');
-            const { categor, product, user } = response.data;
+            const { categor, user } = response.data; 
             productsContainer.innerHTML = '';
             categor.forEach(product => {
-                const heartIconClass = user && user.wishlist.some(wProduct => wProduct.productId.toString() === product._id.toString()) ? "text-danger" : "text-dark";
+                const heartIconClass = user && user.wishlist.some(wProduct => wProduct._id.toString() === product._id.toString()) ? "text-danger" : "text-dark";
                 const productElement = `
                     <div class="col-md-6 col-lg-6 col-xl-4">
                         <div class="rounded position-relative fruite-item">
@@ -362,10 +362,10 @@ axios.get(`/shopsort/${encodeURIComponent(category)}`, {
 })
 .then(function (response) {
     const productsContainer = document.getElementById('productsContainer');
-    const { categor, product, user } = response.data;
+    const {  categor, user } = response.data;
     productsContainer.innerHTML = '';
     categor.forEach(product => {
-        const heartIconClass = user && user.wishlist.some(wProduct => wProduct.productId.toString() === product._id.toString()) ? "text-danger" : "text-dark";
+        const heartIconClass = user && user.wishlist.some(wProduct => wProduct._id.toString() === product._id.toString()) ? "text-danger" : "text-dark";
         const productElement = `
             <div class="col-md-6 col-lg-6 col-xl-4">
                 <div class="rounded position-relative fruite-item">
@@ -618,8 +618,8 @@ axios.get(`/shopsort/${encodeURIComponent(category)}`, {
                         </div>
                         <div class="col-lg-6">
                             <div class="position-relative mx-auto">
-                                <input class="form-control border-0 w-100 py-3 px-4 rounded-pill" type="number" placeholder="Your Email">
-                                <button type="submit" class="btn btn-primary border-0 border-secondary py-3 px-4 position-absolute rounded-pill text-white" style="top: 0; right: 0;">Subscribe Now</button>
+                                <!-- <input class="form-control border-0 w-100 py-3 px-4 rounded-pill" type="number" placeholder="Your Email">
+                                <button type="submit" class="btn btn-primary border-0 border-secondary py-3 px-4 position-absolute rounded-pill text-white" style="top: 0; right: 0;">Subscribe Now</button> -->
                             </div>
                         </div>
                         <div class="col-lg-3">
@@ -633,7 +633,7 @@ axios.get(`/shopsort/${encodeURIComponent(category)}`, {
                     </div>
                 </div>
                 <div class="row g-5">
-                    <div class="col-lg-3 col-md-6">
+                    <!-- <div class="col-lg-3 col-md-6">
                         <div class="footer-item">
                             <h4 class="text-light mb-3">Why People Like us!</h4>
                             <p class="mb-4">typesetting, remaining essentially unchanged. It was 
@@ -672,7 +672,7 @@ axios.get(`/shopsort/${encodeURIComponent(category)}`, {
                             <p>Payment Accepted</p>
                             <img src="img/payment.png" class="img-fluid" alt="">
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -683,13 +683,13 @@ axios.get(`/shopsort/${encodeURIComponent(category)}`, {
             <div class="container">
                 <div class="row">
                     <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        <span class="text-light"><a href="#"><i class="fas fa-copyright text-light me-2"></i>Your Site Name</a>, All right reserved.</span>
+                        <span class="text-light"><a href="#"><i class="fas fa-copyright text-light me-2"></i>Pure Glow</a>, All right reserved.</span>
                     </div>
                     <div class="col-md-6 my-auto text-center text-md-end text-white">
                         <!--/*** This template is free as long as you keep the below author’s credit link/attribution link/backlink. ***/-->
                         <!--/*** If you'd like to use the template without the below author’s credit link/attribution link/backlink, ***/-->
                         <!--/*** you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". ***/-->
-                        Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a> Distributed By <a class="border-bottom" href="https://themewagon.com">ThemeWagon</a>
+                        Designed By <a class="border-bottom" href="https://htmlcodex.com">Ihsan tk</a> <a class="border-bottom" href="https://themewagon.com"></a>
                     </div>
                 </div>
             </div>

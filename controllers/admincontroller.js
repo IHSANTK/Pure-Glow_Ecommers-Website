@@ -76,24 +76,50 @@ const admindashbord = async (req, res) => {
                         }
                     ]);
 
-                    console.log( latestOrders);
-            
-                    // console.log(usersWithOrders);
-            
-                    // res.render('admin/order-list', { orders: usersWithOrders }); // Pass orders as a variable to the template
-                
-                // console.log(countUsersWithOrders);
-                // console.log(totalOrdersCount[0].totalOrders);
+                    const latestOrdersforcategory = await User.aggregate([
+                        {
+                            $match: {
+                                orders: { $exists: true, $ne: null } // Filter users with non-empty orders
+                            }
+                        },
+                        {
+                            $unwind: "$orders" // Deconstruct the orders array
+                        },
+                        {
+                            $unwind: "$orders.products" // Deconstruct the products array within each order
+                        },
+                        {
+                            $group: {
+                                _id: "$orders.products.category", // Group by category
+                                count: { $sum: 1 } // Count products for each category
+                            }
+                        }
+                    ]);
+                    
+                    // Initialize an object to hold category-based order counts
+                    let orderCounts = {};
+                    
+                    // Iterate through the latestOrdersforcategory array and assign counts to respective properties in the orderCounts object
+                    latestOrdersforcategory.forEach(category => {
+                        orderCounts[category._id] = category.count;
+                    });
+                    
+                  
+            console.log(orderCounts);
+          
 
                 let product = await Products.findOne();
 
 
-                let productcount = product.products.length
- 
-                console.log(productcount);
+                const count = await Products.countDocuments();
 
-                return res.render('admin/index', { countUsersWithOrders, latestOrders, totalOrdersCount: totalOrdersCount.length > 0 ? totalOrdersCount[0].totalOrders : 0,productcount });
-            }
+                return res.render('admin/index', { 
+                    countUsersWithOrders,
+                    orderCounts , // Serialize the object
+                    latestOrders, 
+                    totalOrdersCount: totalOrdersCount.length > 0 ? totalOrdersCount[0].totalOrders : 0,
+                    productcount: count 
+                });            }
         } catch (error) {
             console.error("Error:", error);
         }
@@ -149,39 +175,51 @@ let renderindexblock =(req, res) => {
     res.render('user/index');
 }
 
-let categorilist = async(req,res)=>{
+let categorilist = async(req, res) => {
+    try {
+        // Find the admin document
+        const admin = await Admin.findOne();
 
-    let products = await Products.find();
-    if(!products ){
-        res.status(400).send('Admin not found');
+        // If admin document not found, send error response
+        if (!admin) {
+            return res.status(400).send('Admin not found');
+        }
+
+        // Extract categories array from the admin document
+        const categories = admin.categories
+
+        console.log( categories);
+
+        // Render the categories list view with the categories data
+        res.render('admin/categorie-list', { data:categories });
+    } catch (error) {
+        console.error("Error fetching categories:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
-    let data= products[0].categories.map(category => category);
-    res.render('admin/categorie-list',{data});
-   
-}
-
+};
 let categoriesadd= async(req,res)=>{ 
 
     res.render('admin/categories-add')
 
 }
-
 const updatecategory = async (req, res) => {
     try {
         const { name } = req.body;
 
-        let product = await Products.findOne();
+        // Find the admin document
+        let admin = await Admin.findOne();
 
-        if (!product) {
+        if (!admin) {
             return res.status(400).send('Admin not found');
         }
 
-       let data =  product.categories.push({ categoryName: name });
-       
-        await product.save();
+        // Push the new category to the categories array
+        admin.categories.push({ categoryName: name });
 
-        res.redirect('/categorie-list')
-           
+        // Save the updated admin document
+        await admin.save();
+
+        res.redirect('/categorie-list');
     
     } catch (error) {
         console.error("Error updating category:", error);
@@ -189,45 +227,66 @@ const updatecategory = async (req, res) => {
     }
 }; 
 
-let categorieedit = async (req, res) => {
+const categorieedit = async (req, res) => {
     try {
         // Access the ID parameter from the URL
         const id = req.params.id;
-   
-        const product = await Products.findOne({ 'categories._id': id });
 
-        if (!product) {
+        // Find the admin document containing the category to edit
+        const admin = await Admin.findOne({ 'categories._id': id });
+
+        // If admin document not found, send error response
+        if (!admin) {
             return res.status(404).json({ error: "Admin not found" });
         }
 
-     const category =  product.categories.find(catgorie => catgorie._id == id);
+        // Find the category to edit in the categories array
+        const category = admin.categories.find(category => category._id == id);
 
-     res.render('admin/categories-edit', { category })
-         
+        // If category not found, send error response
+        if (!category) {
+            return res.status(404).json({ error: "Category not found" });
+        }
+
+        // Render the categories edit page with the category data
+        res.render('admin/categories-edit', { category });
     } catch (error) {
         console.error("Error fetching data:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 };
 
-let categorieeditdatas = async (req, res) => {
+const categorieeditdatas = async (req, res) => {
     try {
+        // Access the category ID from the URL
         const categoryId = req.params.id;
+        // Access the new category name from the request body
         const newName = req.body.newName;
 
-        const product = await Products.findOne({ 'categories._id': categoryId });
+        // Find the admin document
+        const admin = await Admin.findOne();
 
-        if (!product) {
+        // If admin document not found, send error response
+        if (!admin) {
             return res.status(404).json({ error: "Admin not found" });
         }
 
-        const category = product.categories.find(cat => cat._id == categoryId);
+        // Find the category to edit in the categories array
+        const category = admin.categories.find(cat => cat._id == categoryId);
 
+        // If category not found, send error response
+        if (!category) {
+            return res.status(404).json({ error: "Category not found" });
+        }
+
+        // Update the categoryName with the new name
         category.categoryName = newName;
-  
-        await product.save();
 
-       res.redirect('/categorie-list')
+        // Save the modified admin document
+        await admin.save();
+
+        // Redirect to the categories list page
+        res.redirect('/categorie-list');
     } catch (error) {
         console.error("Error updating category:", error);
         res.status(500).json({ error: "Internal server error" });
@@ -239,13 +298,13 @@ let deletecategorie = async (req, res) => {
       
         const categoryId= req.params.id;
        
-        const product = await Products.findOneAndUpdate(
+        const category = await Admin.findOneAndUpdate(
             { 'categories._id': categoryId }, 
             { $pull: { categories: { _id: categoryId } } }, 
             { new: true }
         );
 
-        if (!product) {
+        if (!category) {
             return res.status(404).json({ error: "Product not found" });
         }
         res.redirect('/categorie-list')
@@ -255,46 +314,40 @@ let deletecategorie = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 };
-let productlist = async (req, res) => {
-  
-        try {
-            let product = await Products.findOne();
-            let products = product.products;
+const productlist = async (req, res) => {
+    try {
+        // Find all products from the Products collection
+        const products = await Products.find();
 
-            // Pagination logic
-            const page = parseInt(req.query.page) || 1; // Get page number from query parameter or default to 1
-            const ITEMS_PER_PAGE = 9; // Number of products to display per page
-            const startIndex = (page - 1) * ITEMS_PER_PAGE;
-            const endIndex = page * ITEMS_PER_PAGE;
-            const totalProducts = products.length;
-            const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE);
+        // Pagination logic
+        const page = parseInt(req.query.page) || 1; // Get page number from query parameter or default to 1
+        const ITEMS_PER_PAGE = 9; // Number of products to display per page
+        const startIndex = (page - 1) * ITEMS_PER_PAGE;
+        const endIndex = page * ITEMS_PER_PAGE;
+        const totalProducts = products.length;
+        const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE);
 
-            // Slice products array to get products for the current page
-            const productsForPage = products.slice(startIndex, endIndex);
+        // Slice products array to get products for the current page
+        const productsForPage = products.slice(startIndex, endIndex);
 
-            res.render('admin/product-grid', { products: productsForPage, totalPages, currentPage: page });
-
-            if (!product) {
-                return res.status(404).json({ error: "Product not found" });
-            }
-        } catch (error) {
-            console.log(error);
-            res.render('admin/product-add',{data:req.data})
-        }
-    
+        // Render the product grid list page with the products for the current page
+        res.render('admin/product-grid', { products: productsForPage, totalPages, currentPage: page });
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        res.status(500).render('error', { errorMessage: "Internal Server Error" });
+    }
 };
-
  
  let productadd = async(req,res)=>{
  
-    let data = await Products.findOne();
-  
-      res.render('admin/product-add',{data});
+    let data = await Admin.findOne();
 
+    let category = data.categories
+  
+      res.render('admin/product-add',{category});
+ 
  }
  const AddProductlist = async (req, res) => {
-    // console.log("req.body :", req.body);
-    // console.log("req.files :", req.files);
     const imageData = req.files || [];
     const productData = req.body;
 
@@ -302,190 +355,158 @@ let productlist = async (req, res) => {
         const { ProductName, Price, description, Category } = productData;
         const imageUrls = [];
 
+        // Upload images to cloudinary and get secure URLs
         for (const file of imageData) {
             const result = await cloudinary.uploader.upload(file.path);
             imageUrls.push(result.secure_url);
         }
 
-        // console.log("imageUrls:", imageUrls);
-
-        const newProduct = {
+        // Create a new product object
+        const newProduct = new Products({
             productName: ProductName,
             productPrice: Price,
             description: description,
             category: Category,
-            image: imageUrls
-        };
+            image: imageUrls,
+            addedAt: new Date() // Set the addedAt field to current time
+        });
 
-        let product = await Products.findOne();
-        
-        if (!product) {
-            return res.status(400).send('Product not found');
-        }
+        // Save the new product document
+        await newProduct.save();
 
-        product.products.push(newProduct);
-        await product.save();
-
+        // Redirect to the product list page
         res.redirect('/product-list');
         
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).send('Internal Server Error');
     }
 };
 
-  let productedit = async (req,res)=>{
-            
-   
+const productedit = async (req, res) => {
     try {
-        
+        // Access the product ID from the URL
         const id = req.params.id;
-     
-        const product = await Products.findOne({ 'products._id': id });
 
+        // Find the product document by its ID
+        const product = await Products.findById(id);
+
+        // If product document not found, send error response
         if (!product) {
-            return res.status(404).json({ error: "Admin not found" });
+            return res.status(404).json({ error: "Product not found" });
         }
 
-     const data= product.products.find(product => product._id == id);
-
-     res.render('admin/product-edit', { data })
-         
+        // Render the product edit page with the product details
+        res.render('admin/product-edit', { data: product });
     } catch (error) {
         console.error("Error fetching data:", error);
         res.status(500).json({ error: "Internal server error" });
     }
-  }
+};
    
-  const updateProduct = async (req, res) => {
+const updateProduct = async (req, res) => {
     try {
         const productId = req.params.id;
         const { ProductName, Price, description, category } = req.body;
         const imageData = req.files || [];
 
-        
+        let updateFields = {
+            'productName': ProductName,
+            'productPrice': Price,
+            'description': description,
+            'category': category
+        };
 
-        // Check if new images are uploaded
+        // If new images are uploaded, upload them to Cloudinary and update image URLs
         if (imageData.length > 0) {
             let imageUrls = [];
-
-            // If new images are uploaded, upload them to cloudinary
             for (const file of imageData) {
                 const result = await cloudinary.uploader.upload(file.path);
                 imageUrls.push(result.secure_url);
             }
-
-            // Update product details including images
-            const product = await Products.findOneAndUpdate(
-                { 'products._id': productId },
-                {
-                    $set: {
-                        'products.$.productName': ProductName,
-                        'products.$.productPrice': Price,
-                        'products.$.description': description,
-                        'products.$.category': category,
-                        'products.$.image': imageUrls
-                    }
-                },
-                { new: true }
-            );
-
-            if (!product) {
-                return res.status(404).json({ error: "Product not found" });
-            } 
-
-            res.redirect('/product-list');
-        } else {
-            // If no new images uploaded, update only other product details
-            const product = await Products.findOneAndUpdate(
-                { 'products._id': productId },
-                {
-                    $set: {
-                        'products.$.productName': ProductName,
-                        'products.$.productPrice': Price,
-                        'products.$.description': description,
-                        'products.$.category': category
-                    }
-                },
-                { new: true }
-            );
-
-            if (!product) {
-                return res.status(404).json({ error: "Product not found" });
-            } 
-
-            res.redirect('/product-list');
+            updateFields['image'] = imageUrls;
         }
+
+        // Update product details
+        const product = await Products.findByIdAndUpdate(
+            productId, // Find document by ID
+            updateFields, // Update with new data
+            { new: true } // Return the updated document
+        );
+
+        if (!product) {
+            return res.status(404).json({ error: "Product not found" });
+        }
+
+        res.redirect('/product-list');
     } catch (error) {
         console.error("Error updating product:", error);
         res.status(500).json({ error: "Internal server error" });
     }
-}
+};
 
-const deleteproduct = async (req,res)=>{
-        
+const deleteproduct = async (req, res) => {
     try {
-        const productId= req.params.id;
-       
-        const product = await Products.findOneAndUpdate(
-            { 'products._id': productId }, 
-            { $pull: { products: { _id: productId } } }, 
-            { new: true }
-        );
+        const productId = req.params.id;
 
+        // Find the product by its _id and delete it
+        const product = await Products.findByIdAndDelete(productId);
+
+        // Check if product exists
         if (!product) {
-            return res.status(404).json({ error: "Admin not found" });
+            return res.status(404).json({ error: "Product not found" });
         }
-        res.redirect('/product-list')
-       
+
+        res.redirect('/product-list');
     } catch (error) {
-        console.error("Error deleting category:", error);
+        console.error("Error deleting product:", error);
         res.status(500).json({ error: "Internal server error" });
     }
-}
+};
+
+
+
 const productdisable = async (req, res) => {
     try {
-        let productId = req.params.id;
+        const productId = req.params.id;
+        console.log(productId);
+        // Find the product document containing the product with the given productId
+        const product = await Products.findOne({ '_id': productId });
 
-        let product = await Products.findOne({ products: { $elemMatch: { _id: productId } } });
+        console.log(product);
 
         if (product) {
-            const productIndex = product.products.findIndex(p => p._id.toString() === productId);
-            console.log(productIndex);
-            if (productIndex !== -1) {
-                // Toggle the disable property
-                product.products[productIndex].disable = !product.products[productIndex].disable;
-                await product.save(); // Save the changes
-                res.status(200).json({ message: "Product disabled status updated successfully" });
-            } else {
-                res.status(404).json({ message: "Product not found in array" });
-            }
+                product.disable = !product.disable;
+                // Save the changes to the database
+                await product.save();
+                return res.status(200).json({ message: "Product disabled status updated successfully" });
+          
         } else {
-            res.status(404).json({ message: "Product not found" });
+            return res.status(404).json({ message: "Product not found" });
         }
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal server error" });
     }
-}
+};
+
+
 const adminprofile =(req,res)=>{
        
  res.render('admin/admin-profile')
   
 
 }
+
 const productdetiel = async (req, res) => {
     try {
         let productId = req.params.id;
-        let product = await Products.findOne({ 'products._id': productId });
+        let product = await Products.findOne({ '_id': productId });
 
         if (!product) {
             return res.status(404).send('Product not found');
         }
-        const data= product.products.find(product => product._id == productId);
-
-        console.log(data);
-        res.render('admin/product-detail', { product:data}); 
+        res.render('admin/product-detail', { product}); 
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');

@@ -62,8 +62,8 @@
                       
                         <ul class="sub-menu collapse" id="menu-order">
                             <li><a class="ms-link" href="/orederslist">Orders List</a></li>
-                            <li><a class="ms-link" href="order-details.html">Order Details</a></li>
-                            <li><a class="ms-link" href="order-invoices.html">Order Invoices</a></li>
+                            <!-- <li><a class="ms-link" href="order-details.html">Order Details</a></li>
+                            <li><a class="ms-link" href="order-invoices.html">Order Invoices</a></li> -->
                         </ul>
                     </li>
                     <li class="collapsed">
@@ -357,7 +357,7 @@
                                                             
                                                             <form action="/orederstatus" method="post">
                                                                 <span class="badge bg-success"><%= product.orderStatus %></span>
-                                                                <% if (product.orderStatus === "cancel") { %>
+                                                                <% if (product.orderStatus === "cancelled") { %>
                                                                     <span class="badge bg-success"><%= product.cancelReason %></span>
                                                                 <% } else { %>
                                                                     <select class="status-select" name="newStatus">

@@ -1,51 +1,42 @@
 const mongoose = require('mongoose');
 
-
-const productcheama = new mongoose.Schema({
+const productSchema = new mongoose.Schema({
   productName: {
-      type: String,
-      required: true
+    type: String,
+    required: true
   },
   productPrice: {
-      type: String,
-      required: true
+    type: String,
+    required: true
   },
   description: {
-      type: String,
-      required: true
+    type: String,
+    required: true
   },
   category: {
-      type: String,
-      required: true
+    type: String,
+    
   },
   subcategory: String, // Optional field
   createdAt: {
-      type: Date,
-      default: Date.now
+    type: Date,
+    default: Date.now
   },
   image: {
-      type: [String],
-      required: true
+    type: [String],
+    required: true
   },
-  disable:{
-     type: Boolean, 
-     default: false 
+  disable: {
+    type: Boolean,
+    default: false
   },
-
+  addedAt: {
+    type: Date,
+    default: Date.now // Defaults to current time when the product is added
+  }
 });
 
-
-const adminSchema = new mongoose.Schema({
-    // email: String,
-    // password: String,
-    categories: [{
-        categoryName: { type: String },
-        createdAt: { type: Date, default: Date.now }
-    }],
-    products:[productcheama]
-}, { collection: 'products' });
-
-const Products = mongoose.model('Product', adminSchema);
-
+// Define a separate model for products
+const Products = mongoose.model('Product', productSchema);
 
 module.exports = Products;

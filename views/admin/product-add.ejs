@@ -489,8 +489,8 @@
                                         <div class="card-body">
                                             <label class="form-label">Categories Select</label>
                                             <select class="form-select" name="Category" size="3" aria-label="size 3 select example">
-                                                <% data.categories.forEach(product =>{ %>
-                                                <option value="<%= product.categoryName %>"><%= product.categoryName %></option>
+                                                <% category.forEach(categor =>{ %>
+                                                <option value="<%= categor.categoryName %>"><%= categor.categoryName %></option>
                                                 <% }) %>
                                             </select>
                                         </div>
