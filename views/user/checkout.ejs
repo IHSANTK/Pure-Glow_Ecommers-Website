@@ -291,7 +291,7 @@ function editaddress(addressId) {
                     <button id="addAddressBtn" class="btn btn-primary mb-3" data-toggle="modal" data-target="#addAddressModal">New Address</button>
                   <% } %>
 
-                  <form id="form" action="/placeorder" method="POST">
+                  <form id="form" action="/placeorder" method="POST"  onsubmit="return validateForm()">
                     <div class="row g-5">
                         <div class="col-md-12 col-lg-6 col-xl-7">
                             <!-- Display user's addresses dynamically -->
@@ -317,8 +317,10 @@ function editaddress(addressId) {
                                         <%= address.pincode %>
                                     </p>
                                     <h6><i class="bi bi-telephone" style="margin-right: 10px;"></i><%= address.phone %></h6>
+                                   
                                     <!-- <h6><i class="bi bi-envelope" style="margin-right: 10px;"></i><%= address.email %></h6> -->
                                 </div>
+                                <span id="addressError" class="text-danger"></span>
                                 <div class="modal fade" id="editAddressModal<%= index %>" tabindex="-1" role="dialog" aria-labelledby="editAddressModalLabel<%= index %>" aria-hidden="true">
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
@@ -384,10 +386,7 @@ function editaddress(addressId) {
                                                         ₹<%= product.productPrice %>
                                                     <% } %>
                                                 </td>
-                                                
-                                               
-                                                  
-                                                <!-- Total can be dynamic if required -->
+                                        
                                             </tr>
                                             <% } %>
                                             
@@ -422,11 +421,13 @@ function editaddress(addressId) {
                             <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
                                 <div class="col-12">
                                     <div class="form-check text-start my-3">
-                                        <input type="checkbox" class="form-payment-input bg-primary border-0" id="Delivery-1" value="razorpay" name="selectedPaymentMethod">
-                                        <label class="form-check-label" for="Delivery-1">Online pay</label>
+                                        <input type="checkbox" class="form-payment-input bg-primary border-0" id="Delivery-1" value="Prepaid" name="selectedPaymentMethod">
+                                        <label class="form-check-label" for="Delivery-1">Prepaid</label>
                                     </div>
                                 </div>
                             </div>
+                            <span id="paymentError" class="text-danger"></span>
+                           
                             <div class="row g-4 text-center align-items-center justify-content-center pt-4">
                                 <button type="submit" class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">Place Order</button>
                             </div>
@@ -435,6 +436,29 @@ function editaddress(addressId) {
                 </form>
             </div>
         </div>
+        <script>
+            function validateForm() {
+                var selectedAddress = document.querySelectorAll('input[name="selectedAddressId"]:checked');
+                var selectedPaymentMethod = document.querySelectorAll('input[name="selectedPaymentMethod"]:checked');
+        
+                if (selectedAddress.length === 0) {
+                    document.getElementById('addressError').innerText = "Please select an address.";
+                    return false;
+                } else {
+                    document.getElementById('addressError').innerText = "";
+                }
+        
+                if (selectedPaymentMethod.length === 0) {
+                    document.getElementById('paymentError').innerText = "Please select a Payment method.";
+                    return false;
+                }else{
+                    document.getElementById('paymentError').innerText = "";
+                    return true
+                }
+        
+                return true;
+            }
+        </script>
         <!-- Checkout Page End -->
 
 <!-- Add this before the closing </body> tag in your HTML file -->
@@ -462,49 +486,49 @@ function editaddress(addressId) {
             console.log("Response:", response.data);
 
             // Handle further logic based on server response
-            if (selectedPaymentMethod === 'razorpay') {
+            if (selectedPaymentMethod === 'Prepaid') {
                 const razorpayOrder = response.data.razorpayResponse;
                 const exactProducts = response.data.exactProducts;
                 const exactAddress = response.data.exactAddress;
                 const sanitizedTotalAmount = response.data.sanitizedTotalAmount;
-
+                const quantity = response.data.quantity;
 
                 // Initiate Razorpay Checkout
                 const options = {
-                key: 'rzp_test_97NF7SboryYNH9', // Your Razorpay Key ID
-                amount: razorpayOrder.amount,
-                currency: razorpayOrder.currency,
-                order_id: razorpayOrder.id,
-                name: 'Pure Glow',
-                description: 'Payment for your order',
-                handler: function (response) {
-                    console.log("Payment successful");
-                    $('#successModal').modal('show'); // Show success modal
-                    setTimeout(function () {
-                        $('#successModal').modal('hide'); // Hide the modal after a delay
-                        axios.post('/saveorder', {
-                            exactProducts,
-                            exactAddress,
-                            sanitizedTotalAmount,
-                            selectedPaymentMethod
-                           
-                        }).then(response => {
-                            console.log("Order saved successfully");
-                            // Redirect to another page or perform further actions if needed
-                        }).catch(error => {
-                            console.error('Error saving order:', error); // Log any errors
-                        });
-                    }, 5000);
-                },
-                prefill: {
-                    name: response.name,
-                    email: response.name,
-                    contact: response.number
-                },
-                theme: {
-                    color: '#F37254' // Customize color if needed
-                }
-            };
+                    key: 'rzp_test_97NF7SboryYNH9', // Your Razorpay Key ID
+                    amount: razorpayOrder.amount,
+                    currency: razorpayOrder.currency,
+                    order_id: razorpayOrder.id,
+                    name: 'Pure Glow',
+                    description: 'Payment for your order',
+                    handler: function (response) {
+                        console.log("Payment successful");
+                        $('#successModal').modal('show'); // Show success modal
+                        setTimeout(function () {
+                            $('#successModal').modal('hide'); // Hide the modal after a delay
+                            axios.post('/saveorder', {
+                                exactProducts,
+                                exactAddress,
+                                sanitizedTotalAmount,
+                                selectedPaymentMethod,
+                                quantity,
+                            }).then(response => {
+                                console.log(response.data);
+                                window.location.href = '/orders';
+                            }).catch(error => {
+                                console.error('Error saving order:', error); // Log any errors
+                            });
+                        }, 2000);
+                    },
+                    prefill: {
+                        name: response.name,
+                        email: response.name,
+                        contact: response.number
+                    },
+                    theme: {
+                        color: '#F37254' // Customize color if needed
+                    }
+                };
 
                 const rzp = new Razorpay(options);
                 rzp.open();
@@ -514,7 +538,8 @@ function editaddress(addressId) {
                     $('#successModal').modal('show');
                     setTimeout(function () {
                         $('#successModal').modal('hide'); // Hide the modal
-                    }, 5000);
+                        window.location.href = '/orders'; // Redirect to the order management page
+                    }, 2000);
                 }
             }
         }).catch(error => {

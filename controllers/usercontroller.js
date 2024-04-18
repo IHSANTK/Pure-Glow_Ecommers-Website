@@ -24,7 +24,7 @@ const Homepage = async (req, res) => {
         // Create a Set to ensure uniqueness and spread it into an array
         const uniqueCategories = [...new Set(categories)];
 
-        console.log("Unique categories:", uniqueCategories);
+        // console.log("Unique categories:", uniqueCategories);
 
         // Fetch latest product from each category
         const latestProducts = [];
@@ -41,7 +41,7 @@ const Homepage = async (req, res) => {
             latestProducts.push(categoryProducts[0]);
         });
 
-        console.log("Latest products by category:", latestProducts);
+        // console.log("Latest products by category:", latestProducts);
         let userWishlist = [];
         let totalCartCount = "";
 
@@ -85,7 +85,7 @@ const Homepage = async (req, res) => {
                 if (error instanceof jwt.TokenExpiredError) {
                     // Handle token expiration only if redirection hasn't already occurred
                     if (!res.locals.tokenExpiredHandled) {
-                        console.error("Token has expired:", error);
+                        console.error("Token has expired:", error); 
                         res.locals.tokenExpiredHandled = true; // Set flag to indicate that redirection has occurred
                         return res.render('user/index', { uniqueCategories, categor: latestProducts, wishlist: userWishlist, totalCartCount:totalCartCount });
                     }  
@@ -97,7 +97,7 @@ const Homepage = async (req, res) => {
             }
         }
 
-        console.log("ooooofdf",userWishlist);
+        // console.log("ooooofdf",userWishlist);
 
 
         res.render('user/index', { uniqueCategories, categor: latestProducts, wishlist: userWishlist, totalCartCount:totalCartCount });
@@ -1300,8 +1300,6 @@ const editAddressFormcheckout = async (req, res) => {
 const placeholder = async (req, res) => {
     const { selectedAddressId, selectedPaymentMethod, productIds } = req.body;
 
-
-    
     console.log(productIds);
 
     try {  
@@ -1353,64 +1351,52 @@ const placeholder = async (req, res) => {
 
         if(productIds.length === 1){
            cartProduct = user.cart.products.find(p => p.productId.toString() === productIds[0]);
- 
-           
 
-           console.log("cartProduct",cartProduct);
+        //    console.log("cartProduct",cartProduct);
         }else{
 
             cartProduct =  user.cart.products.filter(product => productIds.includes(product.productId.toString()));
 
-            console.log("mathedall", cartProduct);
+            // console.log("mathedall", cartProduct);
         }
         if (!cartProduct) { 
 
             console.log("doooooi");
-            const productId = productIds[0]; // Assuming productIds is an array containing the IDs of products to match
+            const productId = productIds[0]; 
 
             for (const product of products) {
-                // Check if the current product's ID matches the desired productId
+            
                 if (product._id.toString() === productId) {
-                    // If there's a match, push the product into exactProducts array
+                 
                     exactProducts.push(product);
                     totalAmount += product.productPrice;
                     break;
                 }
             } 
         } else {
-            // Assuming user.cart.products is where the user's cart items are stored
+           
             for (const productId of productIds) {
-                // Check if the product exists in the user's cart
+            
                 const cartProduct = user.cart.products.find(p => p.productId.toString() === productId);
                 
                 if (cartProduct) {
-                    // If the product is found in the cart, find it in the Products collection and add it to exactProducts
                     const product = await Products.findById(productId);
-                    console.log("aaaaaaaaaaaaaaaaa");
+                    // console.log("aaaaaaaaaaaaaaaaa");
                     if (product && !product.disable) {
                         exactProducts.push(product);
                         
-                        // Find the quantity of the product in the cart
                         const cartQuantity = cartProduct.quantity;
 
                         quantity.push(cartQuantity);
                         
-                        // Calculate the total price for the product based on quantity
                         const productTotalPrice = product.productPrice * cartQuantity;
 
-                        
                         totalPrice.push(productTotalPrice);
-                       
-                        // return totalAmount += (parseFloat(totalPrice) * cartItem.quantity);
-                       
+
                     } 
                     
                 } else {
-                    // If the product is not found in the cart, directly find it in the Products collection and add it to exactProducts
                     const product = await Products.findById(productId);
-
-                    // console.log(product );
-                     
                     if (product && !product.disable) {
                         exactProducts.push(product);
                        
@@ -1418,39 +1404,22 @@ const placeholder = async (req, res) => {
                 }
             }
 
-            
-
-           
-
             totalAmount = totalPrice.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 
-           
-           
         }
 
-        // Calculate total amount based on the found products
-  
-
-        // Ensure totalAmount is a number, if it's NaN set it to 0
-          console.log("hhhhhhhhhh",totalAmount);
-          console.log(quantity);
+        //   console.log("hhhhhhhhhh",totalAmount);
+          console.log(selectedPaymentMethod);
 
         const sanitizedTotalAmount = isNaN(totalAmount) ? 0 : totalAmount;
 
-        // console.log(sanitizedTotalAmount);
 
-        // console.log(selectedPaymentMethod);
-
-    
-console.log(exactProducts);
+// console.log(exactProducts);
         
-        
-       
-
-if (selectedPaymentMethod === 'razorpay') {
+if (selectedPaymentMethod === 'Prepaid') {
     try {
         // Generate Razorpay order (assuming this function returns the order details)
-
+console.log("ooooooooooooooooooooooooooook");
         const razorpayResponse = await helpers.generateRazorpay(user._id,sanitizedTotalAmount);
 
         // Sending response with necessary data to client
@@ -1460,6 +1429,7 @@ if (selectedPaymentMethod === 'razorpay') {
             exactAddress: exactAddress,
             selectedPaymentMethod: selectedPaymentMethod,
             sanitizedTotalAmount:sanitizedTotalAmount,
+            quantity:quantity,
             
         });
     } catch (error) {
@@ -1503,11 +1473,13 @@ const saveorder =  async (req, res) => {
 
 console.log("ooook");
 
-    const { exactProducts, exactAddress, sanitizedTotalAmount,selectedPaymentMethod } = req.body;
+    const { exactProducts, exactAddress, sanitizedTotalAmount,selectedPaymentMethod,quantity } = req.body;
 
     console.log('Exact Products:', exactProducts);
     console.log('Exact Address:', exactAddress);
     console.log('Sanitized Total Amount:', sanitizedTotalAmount);
+    console.log('quantity:', quantity);
+
 
     const token = req.cookies.user_jwt;
 
@@ -1515,7 +1487,6 @@ console.log("ooook");
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    // Verify the JWT token to get user ID
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded || !decoded.id) {
         return res.status(401).json({ error: 'Unauthorized' });
@@ -1525,11 +1496,11 @@ console.log("ooook");
     console.log(user);
 
     user.orders.push({
-        products: exactProducts.map((product) => ({
+        products: exactProducts.map((product, index) => ({
             productId: product._id,
             name: product.productName,
-            qty: 1, // Use quantity from the quantities array
             category: product.category,
+            qty: quantity[index], // Use quantity from the quantities array
             price: product.productPrice,
             image: product.image,
             orderStatus: "Pending",
@@ -1545,10 +1516,7 @@ console.log("ooook");
     await user.save();
 
 
-
-    
-
-    res.sendStatus(200); // Send a success response
+ res.json(true); // Send a success response
 };
 
 
@@ -1558,6 +1526,8 @@ console.log("ooook");
 
 const ordermanage = async (req, res) => {
     const token = req.cookies.user_jwt;
+
+    console.log("kkkkk");
 
     if (!token) {
         return res.redirect('/login');
@@ -1585,11 +1555,8 @@ const ordermanage = async (req, res) => {
         };
     });
 
-    console.log( "orders",userOrders);
-
-    
-
-    // const ordersdata =user.orders;
+    console.log( "orders ooook",);
+   
     if (user) {  
         totalCartCount = user.cart.products.length;
      
@@ -1597,8 +1564,11 @@ const ordermanage = async (req, res) => {
            totalCartCount = "";
       }
 
+    // Render the order page after all necessary data is processed
     res.render('user/orders', { products:userProducts,userOrders,totalCartCount:totalCartCount});
-}
+} 
+ 
+
 
 const cancellreson = async (req, res) => {
     try {
@@ -1656,37 +1626,28 @@ const cancellreson = async (req, res) => {
 const getShopProducts = async (req, res) => {
     try {
         const { search } = req.query;
+        const sortingOption = req.query.sorting;
 
-        const sortingOption =req.query.sorting;
+        let categorProducts = [];
+        let uniqueCategories = [];
 
-        // Extract category from search input
-        const category = await getCategoryFromSearchInput(search);
+        if (search && search.length >= 3) {
+            // Fetch data from the database
+            const data = await Products.find();
 
-        console.log(category);
+            // Extract unique categories from all products
+            uniqueCategories = [...new Set(data.map(product => product.category))];
 
-        const data = await Products.findOne();
-        const uniqueCategories = [...new Set(data.products.map(product => product.category))];
+            // Filter products based on search input
+            categorProducts = data.filter(product =>
+                product.category.toLowerCase().includes(search.toLowerCase()) || 
+                product.productName.toLowerCase().includes(search.toLowerCase())
+            );
 
-        console.log(uniqueCategories)
-
-        let categorProducts = []; 
-
-        if (category) {
-          
-            const products = await Products.find({ 'products.category': category });
-
-          
-            products.forEach(product => {
-                
-                const filteredProducts = product.products.filter(produ => produ.category === category);
-                // Concatenate the filtered products to categorProducts array
-                categorProducts = categorProducts.concat(filteredProducts);
-            });
-        }else{
-            res.render('user/error404',{errormessage:'Products Not found '})
+            console.log(categorProducts);
+        } else {
+            return res.render('user/error404', { errormessage: 'Products Not found ' });
         }
-        
-        console.log(categorProducts);
 
         let user = undefined;
         if (req.cookies.user_jwt) {
@@ -1695,56 +1656,35 @@ const getShopProducts = async (req, res) => {
                     req.user = decodedToken;
                     user = await User.findOne({ _id: req.user.id });
                 }
-                return res.render('user/shop', { categor: categorProducts, uniqueCategories:uniqueCategories, cartcount:req.cartcount, user });
+                if(categorProducts.length > 0){
+                return res.render('user/shop', { categor: categorProducts, uniqueCategories, cartcount: req.cartcount, user, totalCartCount: req.totalCartCount });
+                }else{
+                    return res.render('user/error404', { errormessage: 'Products Not found ' });  
+                }
+           
             });
         } else {
-          
-        
-
-        if(categorProducts.length > 0){
-        
-        return res.render('user/shop', { categor: categorProducts, uniqueCategories:uniqueCategories, cartcount:req.cartcount, user });
-        }else{
-            res.render('user/error404',{errormessage:'Products Not found '})
+            if (categorProducts.length > 0) {
+                return res.render('user/shop', { categor: categorProducts, uniqueCategories, cartcount: req.cartcount, user });
+            } else {
+                return res.render('user/error404', { errormessage: 'Products Not found ' });
+            }
         }
-
-    }
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 };
 
-async function getCategoryFromSearchInput(search) {
-    try {
 
-        if (search.length < 3) {
-            return null;
-        }
 
-        // Fetch data from the database
-        const data = await Products.findOne();
 
-  
-        const uniqueCategories = [...new Set(data.products.map(product => product.category))];
 
-        console.log("hi");
 
-       
-        const formattedSearch = search.replace(/\s+/g, '').toLowerCase();
 
-      
-        const matchedCategory = uniqueCategories.find(category =>
-            category.replace(/\s+/g, '').toLowerCase().includes(formattedSearch)
-        );
 
-        return matchedCategory ? matchedCategory : null;
 
-    } catch (error) {
-        console.error(error);
-        return null; // Handle errors appropriately
-    }
-}
+
 
 
 const shopsorting = async (req, res) => {
@@ -1911,7 +1851,7 @@ async function succesGoogleLogin(req, res) {
         console.log(newUser);
 
         // Generate JWT token
-        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
         res.cookie('user_jwt', token, { httpOnly: true });
 
         return res.redirect('/'); // Redirect to the profile page after successful login
