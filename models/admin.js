@@ -9,6 +9,13 @@ const adminSchema = new mongoose.Schema({
             type: Date,
             default: Date.now
         }
+    }],
+    coupons:[{
+        couponsStatus:String,
+        endDate:String,
+        couponCode:String,
+        couponType:String,
+        discountValue:String,
     }]
 }, { collection: 'admin' });
 

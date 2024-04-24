@@ -296,7 +296,7 @@ function editaddress(addressId) {
                         <div class="col-md-12 col-lg-6 col-xl-7">
                             <!-- Display user's addresses dynamically -->
                             <% userAddresse.forEach((address, index) => { %>
-                              
+                                <span id="addressError" class="text-danger"></span>
                                 <div class="form-item w-100 address-item" style="background-color: rgb(218, 226, 223); padding: 15px; border-radius: 20px; margin-top: 10px; position: relative;">
                                     <button type="button" class="btn btn-sm edit-address " style="position: absolute; top: 5px; left: 5px;" data-toggle="modal" data-target="#editAddressModal<%= index %>">
                                         <i class="bi bi-pencil-square" style="font-size: 20px;"></i>
@@ -320,7 +320,7 @@ function editaddress(addressId) {
                                    
                                     <!-- <h6><i class="bi bi-envelope" style="margin-right: 10px;"></i><%= address.email %></h6> -->
                                 </div>
-                                <span id="addressError" class="text-danger"></span>
+                                
                                 <div class="modal fade" id="editAddressModal<%= index %>" tabindex="-1" role="dialog" aria-labelledby="editAddressModalLabel<%= index %>" aria-hidden="true">
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
@@ -330,7 +330,7 @@ function editaddress(addressId) {
                                             </div>
                                             <div class="modal-body">
                                                 <!-- Edit Address Form -->
-                                                <form id="editAddressForm<%= address._id %>" onsubmit="event.preventDefault(); editaddress('<%= address._id %>')">
+                                                <form id="editAddressForm<%= address._id %>" onsubmit="">
                                                     <input type="text" id="nameedit<%= address._id %>" name="name" placeholder="Name" class="form-control" value="<%= address.name %>" required><br>
                                                     <input type="tel" id="phoneedit<%= address._id %>" name="phone" placeholder="Phone number" class="form-control" value="<%= address.phone %>" required pattern="[0-9]{10}" title="Please enter a 10-digit phone number"><br>
                                                     <input type="text" id="addressedit<%= address._id %>" name="address" placeholder="Address" class="form-control" value="<%= address.address %>" required><br>
@@ -339,13 +339,28 @@ function editaddress(addressId) {
                                                     <input type="text" id="stateedit<%= address._id %>" name="state" placeholder="State" class="form-control" value="<%= address.state %>" required><br>
                                                     <input type="tel" id="pincodeedit<%= address._id %>" name="pincode" placeholder="Pincode" class="form-control" value="<%= address.pincode %>" required pattern="[0-9]{6}" title="Please enter correct pincode"><br>
                                                     <input type="email" id="emailedit<%= address._id %>" name="email" placeholder="Email" class="form-control" value="<%= address.email %>" required><br>
-                                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                    <button type="button" onclick="event.preventDefault(); editaddress('<%= address._id %>')" class="btn btn-primary">Save Changes</button>
                                                 </form>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                
                             <% }); %>
+                        
+                            <div class="mt-5">
+                                <select id="couponCodeInput" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
+                                    <option value="" selected disabled>Select Coupon Code</option>
+                                    
+                                    <% coupons.forEach(function(coupon) { %>
+                                        <option value="<%= coupon %>"><%= coupon %></option>
+                                    <% }); %>
+                                </select>
+                                <button id="applyCouponBtn" class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="button">Apply Coupon</button>
+                                <button id="removeCouponBtn" class="btn border-secondary rounded-pill px-4 py-3 text-danger d-none" type="button">Remove Coupon</button>
+                                <br><span id="couponError" class="text-danger"></span>
+                            </div>
+
                         </div>
 
                         <div class="col-md-12 col-lg-6 col-xl-5">
@@ -399,14 +414,13 @@ function editaddress(addressId) {
                             <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
                                 <div class="col-12">
                                     <% if (cartTotal) { %>
-                                        <p class="text-start text-dark">Total:<strong style="margin-left: 30px;">₹<%= cartTotal %></strong></p>
+                                        <p class="text-start text-dark">Total:₹<strong style="margin-left: 10px;" id="totalamout"><%= cartTotal %></strong></p>
                                     <% } else if (products.length > 0) { %>
-                                        <p class="text-start text-dark">Total:<strong style="margin-left: 30px;">₹<%= products[0].productPrice %></strong></p>
+                                        <p class="text-start text-dark">Total:₹<strong style="margin-left: 30px;" id="amount"><%= products[0].productPrice %></strong></p>
                                     <% } else { %>
                                         <p class="text-start text-dark">Total:<strong style="margin-left: 30px;">₹</strong></p>
                                     <% } %>
                                 </div>
-                            </div>
                             <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
                                
                             </div>
@@ -436,6 +450,59 @@ function editaddress(addressId) {
                 </form>
             </div>
         </div>
+
+        <script>
+            document.getElementById('applyCouponBtn').addEventListener('click', function() {
+                const selectedCoupon = document.getElementById('couponCodeInput').value;
+            
+                if (!selectedCoupon) {
+                    document.getElementById('couponError').innerText = 'Please select a coupon code.';
+                } else {
+                    document.getElementById('couponError').innerText = '';
+            
+                    let checkouttotalamout = '<%= cartTotal %>';
+                    let amount = '<%= products[0].productPrice %>';
+                    let totalamout;
+            
+                    if (checkouttotalamout) {
+                        totalamout = checkouttotalamout;
+                    } else {
+                        totalamout = amount;
+                    }
+            
+                    axios.post('/coupenmanage', {
+                        selectedCoupon,
+                        totalamout
+                    })
+                    .then(function(response) {
+                        if (checkouttotalamout) {
+                            document.getElementById('totalamout').innerText = response.data.adjustedTotalAmount;
+                        } else {
+                            document.getElementById('amount').innerText = response.data.adjustedTotalAmount;
+                        }
+                        document.getElementById('applyCouponBtn').classList.add('d-none');
+                        document.getElementById('removeCouponBtn').classList.remove('d-none');
+                    })
+                    .catch(function(error) {
+                        console.error(error);
+                        alert('An error occurred while applying the coupon.');
+                    });
+                }
+            });
+            
+            document.getElementById('removeCouponBtn').addEventListener('click', function() {
+                let totalamout = '<%= cartTotal || products[0].productPrice %>';
+                if (document.getElementById('totalamout')) {
+                    document.getElementById('totalamout').innerText = totalamout;
+                } else {
+                    document.getElementById('amount').innerText = totalamout;
+                }
+                document.getElementById('removeCouponBtn').classList.add('d-none');
+                document.getElementById('applyCouponBtn').classList.remove('d-none');
+                document.getElementById('couponCodeInput').value = ""; 
+            });
+        </script>
+
         <script>
             function validateForm() {
                 var selectedAddress = document.querySelectorAll('input[name="selectedAddressId"]:checked');
@@ -476,11 +543,35 @@ function editaddress(addressId) {
         const selectedPaymentMethod = formData.get('selectedPaymentMethod');
         const productIds = formData.getAll('productIds[]'); // Use getAll to get all values of an array-like field
 
+        const selectedCoupon = document.getElementById('couponCodeInput').value;
+
+        console.log(selectedCoupon);
+
+        let checkouttotalamout ='<%= cartTotal %>';
+        let amount='<%= products[0].productPrice %>'
+
+        let totalamout;
+
+        if(checkouttotalamout){
+
+            totalamout = document.getElementById('totalamout').innerText.trim();
+        }else{
+            totalamout= document.getElementById('amount').innerText.trim();
+        }
+             
+
+        console.log(selectedPaymentMethod);
+
+      
+        
         // Send data to server using Axios
         axios.post('/placeorder', {
             selectedAddressId,
             selectedPaymentMethod,
-            productIds
+            productIds,
+            totalamout,
+            selectedCoupon,
+           
         }).then(response => {
             // Log response from server
             console.log("Response:", response.data);
@@ -534,12 +625,12 @@ function editaddress(addressId) {
                 rzp.open();
             } else {
                 // Handle other payment methods (e.g., Cash On Delivery)
-                if (response.data === true) {
+                if (response.data.message === true) {
                     $('#successModal').modal('show');
                     setTimeout(function () {
                         $('#successModal').modal('hide'); // Hide the modal
                         window.location.href = '/orders'; // Redirect to the order management page
-                    }, 2000);
+                    }, 4000);
                 }
             }
         }).catch(error => {

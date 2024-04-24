@@ -136,51 +136,138 @@
         </div>
     
         <div id="edit-profile" class="profile-edit col-lg-5 col-sm-12 mt-3">
+          <div id="loader" style="display: none;">Loading...</div>
           <form action="/edit-profile/<%= userId %>" method="POST" onsubmit="return validateForm()" enctype="multipart/form-data">
-              <div class="form-group">
+            <div class="form-group">
                 <% if (profileImage) { %>
-                  <label for="profileImage">
-                    <!-- <i class="bi bi-pencil-square"></i> -->
-                      <img src="<%= profileImage %>" alt="Profile Image" style="cursor: pointer; width: 60px; height: 60px; border-radius: 50%;">
-
-                  </label>
-              <% } else { %>
-                  <label for="profileImage">
-                      <img src="https://cdn4.iconfinder.com/data/icons/social-communication/142/add_user-512.png" alt="Default Avatar" style="cursor: pointer;width: 60px; height: 60px; border-radius: 50%;">
-                      Add Profile
-                  </label>
-              <% } %>
-                  <input type="file" class="form-control-file d-none" id="profileImage" name="profileImage">
-                  <span id="imageError" style="color: red;"></span> <!-- Error message for image -->
-                  <% if (profileImage) { %>
-                      <!-- Display the existing profile image as a preview -->
-                      <!-- <img src="<%= profileImage %>" alt="Profile Image" style="width: 60px; height: 60px; border-radius: 50%;"> -->
-                      <!-- Delete button for profile image -->
-                      <button type="button" class="btn btn-sm delete-profile-image">
+                    <label for="profileImage">
+                        <img src="<%= profileImage %>" alt="Profile Image" style="cursor: pointer; width: 60px; height: 60px; border-radius: 50%;">
+                    </label>
+                <% } else { %>
+                    <label for="profileImage">
+                        <img src="https://cdn4.iconfinder.com/data/icons/social-communication/142/add_user-512.png" alt="Default Avatar" style="cursor: pointer;width: 60px; height: 60px; border-radius: 50%;">
+                        Add Profile
+                    </label>
+                <% } %>
+                <input type="file" class="form-control-file d-none" id="profileImage" name="profileImage">
+                <span id="imageError" style="color: red;"></span>
+                <% if (profileImage) { %>
+                    <button type="button" class="btn btn-sm delete-profile-image">
                         <i class="bi bi-trash3" style="font-size: 20px;"></i>
                     </button>
-                  <% } %>
-              </div>
-              <!-- Rest of the form -->
-              <div class="form-group">
-                  <label for="fullName">Full Name</label>
-                  <input type="text" class="form-control" id="fullName" name="userName" value="<%= userName %>">
-                  <span id="nameError" style="color: red;"></span> <!-- Error message for name -->
-              </div>
-              <!-- <div class="form-group">
-                  <label for="email">Email</label>
-                  <input type="text" class="form-control" id="email" name="email" value="<%= email %>">
-                  <span id="emailError" style="color: red;"></span> Error message for email
-              </div> -->
-              <div class="form-group">
-                  <label for="phoneNumber">Phone Number</label>
-                  <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" value="<%= phoneNumber %>">
-                  <span id="phoneError" style="color: red;"></span> <!-- Error message for phone number -->
-              </div>
-              <button type="submit" class="btn btn-primary">Save Changes</button>
-          </form>
+                <% } %>
+            </div>
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" class="form-control" id="fullName" name="userName" value="<%= userName %>">
+               
+            </div>
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number</label>
+                <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" value="<%= phoneNumber %>">
+               
+            </div>
+            <span id="nameError" style="color: rgb(216, 57, 57);"></span><br><br>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+      </div>
+      <% if (showEditProfile === 'Profile Updated') { %>
+        <script>
+          $(document).ready(function() {
+            $("#edit-profile").show();
+            $(".profile-top").hide();
+            $("#manage-address").hide();
+          });
+        </script>
+      <% } else if (showEditProfile === 'password update sccesfully') { %>
+        <script>
+          $(document).ready(function() {
+            $("#edit-profile").hide();
+            $(".profile-top").show();
+            $("#manage-address").hide();
+          });
+        </script>
+      <% } else if (showEditProfile === 'address added successfully' || showEditProfile === 'address updated successfully' || showEditProfile === 'Address deleted') { %>
+        <script>
+          $(document).ready(function() {
+            $("#edit-profile").hide();
+            $(".profile-top").hide();
+            $("#manage-address").show();
+          });
+        </script>
+      <% } else { %>
+        <script>
+          $(document).ready(function() {
+            $(".profile-top").show();
+           
+          });
+        </script>
+      <% } %> 
+      <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+      <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script> -->
+      
+      
+      <div class="modal fade" id="Modal" tabindex="-1" aria-labelledby="wishlistModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: rgb(5, 5, 4); width: 60%; margin-left: 21%;height: 55px;">
+                <div class="modal-body" id="ModalBody" style="margin: auto; color: rgb(255, 255, 255);">
+                  
+                </div>
+            </div>
+        </div>
       </div>
       
+      <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          const ModalBody = document.getElementById('ModalBody');
+          const messege = `<%= successMessage %>`
+          if(messege){
+          ModalBody.innerHTML = messege;
+          $('#Modal').modal('show');
+          setTimeout(function() {
+              $('#Modal').modal('hide');
+          }, 2000); // 2000 milliseconds = 2 seconds
+        }
+      });
+    
+      </script>
+        
+
+
+
+
+
+
+      <script>
+
+        function validateForm() {
+    var fullName = $("#fullName").val();
+    var phoneNumber = $("#phoneNumber").val();
+
+    // Check if any field is empty
+    if (fullName === "" || phoneNumber === "") {
+        $("#nameError").text("Please fill in all fields.");
+        $("#loader").hide(); // Hide loader if form is invalid
+        return false;
+    } else {
+        $("#nameError").text(""); // Clear error message if fields are filled
+    } 
+
+    // Check if phone number length is not 10 digits
+    if (phoneNumber.length !== 10) {
+      $("#nameError").text("Phone number must be 10 digits.");// Show error message
+        $("#loader").hide(); // Hide loader if form is invalid
+        return false;
+    } else {
+        $("#phoneError").text(""); // Clear error message if phone number length is correct
+    }
+
+    $("#loader").show();
+
+    return true; // Form is valid
+}
+    </script>
       <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
       <script>
           // Function to handle deleting the profile image
@@ -192,8 +279,8 @@
                       if (confirm("Are you sure you want to delete your profile image?")) {
                           axios.delete('/delete-profile-image/<%= userId %>')
                               .then(function(response) {
-                                  // Reload the page or update the UI as needed
-                                  location.reload();
+                                  location.reload()
+                                  
                               })
                               .catch(function(error) {
                                   console.error('Error deleting profile image:', error);
@@ -227,18 +314,10 @@
     </form>
 </div>
 
-      
+
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-      $(document).ready(function() {
-          var successMessage = "<%= successMessage %>";
-          console.log(successMessage);
-          if (successMessage) {
-             alert(successMessage)
-          }
-      });
-    </script>
+  
       
       <div class="container-fluid">
         <div id="manage-address" class="profile-edit">
@@ -317,7 +396,7 @@
             </div>
             <div class="modal-body">
               <!-- Address form -->
-              <form id="addressForm" action="/manageaddress" method="POST" onsubmit="return validateForm()">
+              <form id="addressForm" action="/manageaddress" method="POST" >
                 <div class="form-group">
                     <input type="text" class="form-control" id="addressLine" name="name" placeholder="Name" required>
                 </div>
@@ -348,19 +427,7 @@
           </div>
         </div>
       </div>
-      
-      <!-- <script>
-        function validateForm() {
-            var inputs = document.getElementById('addressForm').querySelectorAll('input');
-            for (var i = 0; i < inputs.length; i++) {
-                if (!inputs[i].value.trim()) {
-                    alert("Please fill in all fields.");
-                    return false;
-                }
-            }
-            return true;
-        }
-    </script> -->
+    
 
       <div class="modal fade" id="wishlistModal" tabindex="-1" aria-labelledby="wishlistModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -386,11 +453,12 @@ function addressedit(addressId){
      axios.post(`/addressdelete/${addressId}`)
           .then(function (response) {
           let  message =response.data.message
-           console.log(message);
-          
-           showWishlistStatusMessage( message);
+
+          location.reload();
+
+          //  showWishlistStatusMessage( message);
         //    setTimeout(function() {
-            location.reload();
+            // location.reload();
         //  }, 2000);
 
         })
@@ -418,63 +486,54 @@ function addressedit(addressId){
       <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     
 
-  <script>
-    $(document).ready(function(){
-        $(".profile-btn").click(function(e){
-            var target = $(this).data("target");
-            if (!target) {
-                return; // Allow default navigation for links without data-target
-            }
-            e.preventDefault();
-            $(".profile-edit").removeClass("active");
-            $("#" + target).addClass("active");
-            $(".profile-top").hide(); // Hide profile information
+      <script>
+        $(document).ready(function(){
+            $(".profile-btn").click(function(e){
+                var target = $(this).data("target");
+                if (!target) {
+                    return; // Allow default navigation for links without data-target
+                }
+                e.preventDefault();
+                $(".profile-edit").removeClass("active");
+                $("#" + target).addClass("active");
+                $(".profile-top").hide(); // Hide profile information
+            });
+    
+            // JavaScript validation for password length and matching passwords
+            $("#updatePassword").click(function() {
+                var newPassword = $("#newPassword").val();
+                var confirmPassword = $("#confirmPassword").val();
+                var currentPassword = $("#currentPassword").val();
+                
+                // Check if any field is empty
+                if (newPassword === "" || confirmPassword === "" || currentPassword === "") {
+                    $("#passwordError").text("Please fill in all fields.");
+                    $("#currentError").text("Please fill in all fields.");
+                    $("#confirmError").text("Please fill in all fields.");
+                    return false;
+                } else {
+                    $("#passwordError").text("");
+                    $("#currentError").text("");
+                    $("#confirmError").text("");
+                }
+    
+                if (newPassword.length < 6) {
+                    $("#passwordError").text("Password must be at least 6 characters long.");
+                    return false;
+                } else {
+                    $("#passwordError").text("");
+                }
+                if (newPassword !== confirmPassword) {
+                    $("#confirmError").text("Passwords do not match.");
+                    return false;
+                } else {
+                    $("#confirmError").text("");
+                }
+            });
+    
+            // Form validation function
+           
         });
-
-        // JavaScript validation for password length and matching passwords
-        $("#updatePassword").click(function() {
-            var newPassword = $("#newPassword").val();
-            var confirmPassword = $("#confirmPassword").val();
-            var currentPassword = $("#currentPassword").val();
-            
-            // Check if any field is empty
-            if (newPassword === "" || confirmPassword === "" || currentPassword === "") {
-                $("#passwordError").text("Please fill in all fields.");
-                $("#currentError").text("Please fill in all fields.");
-                $("#confirmError").text("Please fill in all fields.");
-                return false;
-            } else {
-                $("#passwordError").text("");
-                $("#currentError").text("");
-                $("#confirmError").text("");
-            }
-
-            if (newPassword.length < 6) {
-                $("#passwordError").text("Password must be at least 6 characters long.");
-                return false;
-            } else {
-                $("#passwordError").text("");
-            }
-            if (newPassword !== confirmPassword) {
-                $("#confirmError").text("Passwords do not match.");
-                return false;
-            } else {
-                $("#confirmError").text("");
-            }
-        });
-        $(".profile-btn").click(function(e){
-        var target = $(this).data("target");
-        if (target === "orders") {
-            // Show the orders section when "My Orders" button is clicked
-            $("#orders").show();
-        } else {
-            // Hide the orders section for other buttons
-            $("#orders").hide();
-        }
-        // Rest of your code...
-    });
-
-    });
-</script>
+    </script>
 </body>
 </html>

@@ -352,7 +352,9 @@ const productlist = async (req, res) => {
     const productData = req.body;
 
     try {
-        const { ProductName, Price, description, Category } = productData;
+        const { ProductName, Price, description, Category,Stockcount } = productData;
+
+        console.log(Stockcount);
         const imageUrls = [];
 
         // Upload images to cloudinary and get secure URLs
@@ -368,6 +370,7 @@ const productlist = async (req, res) => {
             description: description,
             category: Category,
             image: imageUrls,
+            stockcount:Stockcount,
             addedAt: new Date() // Set the addedAt field to current time
         });
 
@@ -551,6 +554,8 @@ const orederstatus = async (req, res) => {
 
         // Extract order ID, product ID, and new status from request parameters and body
         const { orderId, productId, newStatus } = req.body;
+
+        console.log(newStatus);
         console.log("orderid", orderId, "productid", productId, newStatus);
 
         // Find the user based on the order ID
@@ -589,6 +594,144 @@ const orederstatus = async (req, res) => {
     }
 };
 
+const couponmanage = async (req, res) => {
+    try {
+        console.log("hi");
+        
+        // Find all coupons from the Admin collection
+        const admin = await Admin.findOne({}, 'coupons');
+
+        // Extract the coupons array from the admin document
+        const coupons = admin ? admin.coupons : [];
+
+        // Render the coupon list page and pass the coupons array
+        res.render('admin/coupons-list', { coupons });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error retrieving coupon data.');
+    }
+};
+
+const addcoupon =(req,res)=>{
+
+    res.render('admin/coupon-add')
+}
+
+const addcoupondatas = async (req, res) => {
+   
+
+    // Access form data from req.body
+    const formData = {
+        couponsStatus: req.body.couponsstatus,
+        endDate: req.body.enddate,
+        couponCode: req.body.couponcode,
+        couponType: req.body.couponstype,
+        discountValue: req.body.discountvalue
+    };
+
+    try {
+        // Directly push the form data into the coupons array of the specific admin document
+        await Admin.updateOne(
+            { /* Add your conditions to find the specific admin document */ },
+            { $push: { coupons: formData } }
+        );
+
+        console.log('Coupon data saved successfully.');
+
+        // Fetch all coupons from the database
+        
+
+        res.redirect('/coupon-manage');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error saving coupon data.');
+    }
+};
+
+const editcoupon = async (req, res) => {
+    try {
+        const id = req.params.id;
+        console.log("oook");
+
+        const admin = await Admin.findOne({ 'coupons._id': id }, 'coupons');
+
+        const coupon = admin.coupons.find(coupon => coupon._id == id);
+
+       
+
+        if (!coupon) {
+            return res.status(404).send('Coupon not found.');
+        }
+
+        // Pass the found coupon data to the edit page
+        res.render('admin/coupon-edit', { coupon });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error fetching coupon data.');
+    } 
+};
+const updateeditcoupon = async (req, res) => {
+    try {
+        const id = req.params.id;
+        
+
+        // Extract form data from request body
+        const formData = {
+            couponsStatus: req.body.couponsstatus,
+            endDate: req.body.enddate,
+            couponCode: req.body.couponcode,
+            couponType: req.body.couponstype,
+            discountValue: req.body.discountvalue
+        };
+
+        
+
+        // Update the coupon data within the admin document
+        const result = await Admin.updateOne(
+            { 'coupons._id': id }, // Filter to find the admin document containing the specific coupon
+            {
+                $set: {
+                    'coupons.$.couponsStatus': formData.couponsStatus,
+                    'coupons.$.endDate': formData.endDate,
+                    'coupons.$.couponCode': formData.couponCode,
+                    'coupons.$.couponType': formData.couponType,
+                    'coupons.$.discountValue': formData.discountValue
+                }
+            }
+        );
+
+        if (result.nModified === 0) {
+            return res.status(404).send('Coupon not found.');
+        }
+
+        res.redirect('/coupon-manage');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error updating coupon data.');
+    }
+};
+
+const deletecoupon = async (req, res) => {
+    try {
+        const id = req.params.id;
+        console.log(id);
+
+        // Delete the coupon from the coupons array in the Admin collection
+        const result = await Admin.updateOne(
+            { 'coupons._id': id }, 
+            { $pull: { coupons: { _id: id } } } 
+        );
+
+        if (result.nModified === 0) {
+            return res.status(404).send('Coupon not found.');
+        }
+
+        res.redirect('/coupon-manage');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error deleting coupon.');
+    }
+};
 
 
 
@@ -621,6 +764,12 @@ module.exports={
     productdetiel,
     orderslist,
     orederstatus,
+    couponmanage,
+    addcoupon,
+    addcoupondatas,
+    editcoupon,
+    updateeditcoupon,
+    deletecoupon,
     adminlogout,
     
 }

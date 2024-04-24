@@ -78,9 +78,24 @@
         background-color: #e9ecef;
     }
 
+
+.search-form {
+    position: absolute;
+   left: 250px;
+}
+
+/* Adjust margin or padding as needed */
+#searchInput {
+    margin-right: 45px; /* Add spacing between input and button */
+} 
+#button{
+    position: absolute;
+   top: 0;
+   right: 70px;
+}
     </style>
 
-    <body>
+    <body style="background-color: #eeeeee;">
 
         <!-- Spinner Start -->
         <!-- <div id="spinner" class="show w-100 vh-100 bg-white position-fixed translate-middle top-50 start-50  d-flex align-items-center justify-content-center">
@@ -104,12 +119,29 @@
                     </div>
                 </div> -->
              </div>
+             <script>
+              function validateSearch() {
+    var searchInputValue = document.getElementById('searchInput').value.trim();
+
+  
+    if (searchInputValue === '') {
+        return false; 
+    }
+    return true; 
+}
+            </script>
             <div class="container px-0 ">
                 <nav class="navbar navbar-ligh bg-white navbar-expand-xl  ps-4 pe-4">
                     <a href="index.html" class="navbar-brand"><h1 class="text-primary display-6">Pure Glow</h1></a>
                     <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                         <span class="fa fa-bars text-primary"></span>
                     </button>
+                    
+                    <form id="searchForm" action="/getsearchproduct" method="get" class="search-form" onsubmit="return validateSearch()">
+                        <input id="searchInput" class="form-control border-2 border-secondary w-75 h-50 py-3 px-4" name="search" type="text" placeholder="Search">
+                        <button type="submit" id="button" class="btn btn-primary border-2 border-secondary py-3 px-4 text-white" style="height: 55px;"><i class="bi bi-search"></i></button>
+                    </form>
+                    
                     <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
                         <div class="navbar-nav mx-auto">
                             <a href="/" class="nav-item nav-link">Home</a>
@@ -181,6 +213,7 @@
                 <div class="row g-4">
                     <div class="col-lg-12">
                         <div class="row g-4">
+                            
                             <!-- <div class="col-xl-3">
                                 <div class="input-group w-100 mx-auto d-flex">
                                     <input type="search" class="form-control p-3" placeholder="keywords" aria-describedby="search-icon-1">
@@ -202,10 +235,13 @@
                         </div>
                       
                         <div class="row g-4 mt-2">
+                            <% if (errorMessage !== "Product Not Found") { %>
                             <div class="col-lg-3 ">
+                               
                                 <div class="row g-4">
                                     <div class="col-lg-12 col-6">
                                         <div class="mb-3">
+                                            
                                             <select class="form-select" id="categorySelect" onchange="shopProduct()">
                                                 <option value="" selected  id="categoryPlaceholder">Select Category</option>
                                                 <% uniqueCategories.forEach(category => { %>
@@ -226,7 +262,25 @@
                                     </div>
                                 </div>
                             </div>
-                        
+                            <% }else{%>
+                                <div class="col-lg-3 ">
+                               
+                                    <div class="row g-4">
+                                        <div class="col-lg-12 col-6">
+                                            <div class="mb-3">
+                                                
+                                                
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 col-6 d-flex  justify-content-center">
+                                            <div class="mb-3 " >
+                                                <span style="font-size:xx-large"><%=errorMessage%></span>
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% } %>
                             
                             <div class="col-lg-9">
                                 <div class="row g-4 justify-content-center" id="productsContainer">
@@ -606,6 +660,7 @@ axios.get(`/shopsort/${encodeURIComponent(category)}`, {
 
 
         <!-- Footer Start -->
+        <% if (errorMessage !== "Product Not Found") { %>
         <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
             <div class="container py-5">
                 <div class="pb-4 mb-4" style="border-bottom: 1px solid rgba(226, 175, 24, 0.5) ;">
@@ -679,6 +734,7 @@ axios.get(`/shopsort/${encodeURIComponent(category)}`, {
         <!-- Footer End -->
 
         <!-- Copyright Start -->
+      
         <div class="container-fluid copyright bg-dark py-4">
             <div class="container">
                 <div class="row">
@@ -694,6 +750,8 @@ axios.get(`/shopsort/${encodeURIComponent(category)}`, {
                 </div>
             </div>
         </div>
+        <% }%>
+           
         <!-- Copyright End -->
 
 

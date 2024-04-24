@@ -31,6 +31,19 @@ router.get('/orederslist',adminMiddleware, authenticateJWT, admincontroller.orde
 
 router.post('/orederstatus', adminMiddleware, authenticateJWT,admincontroller.orederstatus);
 
+router.get('/coupon-manage',adminMiddleware, authenticateJWT,admincontroller.couponmanage)
+router.get('/add-coupon',adminMiddleware, authenticateJWT,admincontroller.addcoupon)
+router.post('/add-coupon',adminMiddleware, authenticateJWT,admincontroller.addcoupondatas)
+
+router.get('/edit-coupon/:id',adminMiddleware, authenticateJWT,admincontroller.editcoupon)
+router.post('/update-coupon/:id',adminMiddleware, authenticateJWT,admincontroller.updateeditcoupon)
+
+router.get('/deletecoupon/:id',adminMiddleware, authenticateJWT,admincontroller.deletecoupon)
+
+
+
+
+
 router.get('/admin-logout',adminMiddleware, authenticateJWT, admincontroller.adminlogout);
 
 module.exports = router;

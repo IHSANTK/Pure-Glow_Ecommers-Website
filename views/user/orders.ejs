@@ -36,6 +36,8 @@
         /* Your custom styles here */
         .order-container {
             display: flex;
+            justify-content: center;
+            
             flex-direction: column;
            
        
@@ -214,6 +216,7 @@
                                     <%= order.shippingAddress.state %>
                                     <%= order.shippingAddress.pincode %></p>
                                 <h6><i class="fas fa-phone-alt"></i> <%= order.shippingAddress.phone %></h6>
+                                <% if (product.orderStatus !== 'delivered') { %>
                                 <form id="cancelForm" class="cancel-form" action="/cancellreson/<%=product._id%>" method="post">
                                     <div class="form-group">
                                         <label for="cancelReasonSelect">Cancel Product</label>
@@ -229,6 +232,7 @@
                                     <div id="errorMessage" style="display: none; color: red;">Please select a reason before submitting.</div>
                                     <button type="submit" class="btn btn-danger">Cancel</button>
                                 </form>
+                                <% } %>
                             </div>
                         </div>
                         <button class="btn view-details-btn mt-2" style="color: blue;" onclick="toggleDetails(this)">View Details</button>
@@ -236,7 +240,7 @@
                 <% }); %>
             <% }); %>
         <% } else { %>
-            <h2>No orders!</h2>
+            
             <a class="btn border-secondary rounded-pill py-3 px-5 mt-3" href="/shop">Shop Now</a>
         <% } %>
     </div>

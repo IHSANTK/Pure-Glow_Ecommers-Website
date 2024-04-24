@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
+const Admin = require('../models/admin');
 const jwt = require('jsonwebtoken');
 const Products = require('../models/Products');
 const passport = require('passport');
@@ -8,6 +9,7 @@ const upload = require('../config/multer.js');
 const otpService = require('../services/otpService');
 const helpers = require('../helpers/userHelpers');
 const { response } = require('express');
+const nodemailer = require('nodemailer');
 
 const Homepage = async (req, res) => {
     try {
@@ -112,6 +114,8 @@ const Homepage = async (req, res) => {
 const userprofilepage = async (req, res) => {
     let message = req.query.passwordUpdate;
 
+    console.log(message);
+
     try {
         const token = req.cookies.user_jwt;
         if (!token) {
@@ -129,9 +133,10 @@ const userprofilepage = async (req, res) => {
         }
 
         // Check if the URL contains an anchor for the edit profile section
-        const showEditProfile = req.url.includes('#edit-profile');
+         // Assuming you always want to show the edit profile section after rendering
 
         res.render('user/profile', {
+            showEditProfile:message,
             userName: user.name,
             email: user.email,
             phoneNumber: user.phoneNumber,
@@ -139,8 +144,8 @@ const userprofilepage = async (req, res) => {
             userId: user._id,
             errorMessage: req.errorMessage,
             successMessage: message,
-            addrress:user.address,
-            showEditProfile: showEditProfile // Pass a variable to indicate whether to show the edit profile section
+            addrress: user.address,
+            // Pass a boolean to indicate whether to show the edit profile section
         });
     } catch (error) {
         console.error('Error fetching user profile:', error);
@@ -270,9 +275,9 @@ const editpassword = async (req, res) => {
 
         user.password = hashedPassword;
         await user.save();
-
+ 
         
-        res.redirect('/profile?passwordUpdate= password update sccesfully');
+        res.redirect('/profile?passwordUpdate=password update sccesfully');
 
     } catch (error) {
         console.error("Error updating password:", error);
@@ -323,13 +328,13 @@ const editprofile = async (req, res) => {
         }
 
         // Save the updated user data
-        await user.save();
+        await user.save(); 
 
         // Update the JWT token with new user information
         const newToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
         res.cookie('user_jwt', newToken, { httpOnly: true });
 
-        res.redirect('/profile#edit-profile');
+        res.redirect('/profile?passwordUpdate=Profile Updated');
 
     } catch (error) {
         console.error("Error updating profile:", error);
@@ -359,7 +364,7 @@ const deleteProfileImage = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-
+ 
         // Remove the profile image field from the user document
         user.image = undefined;
         await user.save();
@@ -370,41 +375,6 @@ const deleteProfileImage = async (req, res) => {
         return res.status(500).json({ error: 'Internal Server Error' });
     }
 };
-
-const contactpage = async (req,res)=>{
-    const token = req.cookies.user_jwt;
-   try{
-        if (!token) {
-            return res.redirect('/login');
-        }
-
-        // Verify the JWT token to get user ID
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        if (!decoded || !decoded.id) {
-            return res.json({ message: 'Please Login' });
-        }
-        const user = await User.findById(decoded.id);
-        if (user) {  
-            totalCartCount = user.cart.products.length;
-         
-          }else{
-               totalCartCount = "";
-          }
-        res.render('user/contact',{cartcount:req.cartcount,talCartCount: totalCartCount})
-     
-    }catch (error) {
-        // Handle error, including token expiration
-        console.error(error);
-        if (error instanceof jwt.TokenExpiredError) {
-            // Redirect to login page if token has expired
-            return res.redirect('/login');
-        } else {
-            // Handle other errors
-            res.status(500).send('Internal Server Error');
-        }
-    }
-
-}
 
 
 const shoppage = async (req, res) => {
@@ -419,32 +389,68 @@ const shoppage = async (req, res) => {
 
         const uniqueCategories = [...new Set(products.map(product => product.category))];
 
-        console.log(uniqueCategories);
+     
 
         let totalCartCount =""
         
         if (req.cookies.user_jwt) {
             jwt.verify(req.cookies.user_jwt, process.env.JWT_SECRET, async (err, decodedToken) => {
                 if (err) {
-                    return res.render('user/shop', { categor: products, uniqueCategories,user: undefined,totalCartCount:totalCartCount });
+                    return res.render('user/shop', { categor: products, uniqueCategories,user: undefined,totalCartCount:totalCartCount,errorMessage:req.errorMessage });
                 } else {
                     req.user = decodedToken;
                     const user = await User.findOne({ _id: req.user.id });
+
+                    
                     if (user) {
                        
                         totalCartCount = user.cart.products.length;
                     }
                     console.log(user);
-                    return res.render('user/shop', { categor: products, uniqueCategories, user,totalCartCount:totalCartCount });
+                    return res.render('user/shop', { categor: products, uniqueCategories, user,totalCartCount:totalCartCount,errorMessage:req.errorMessage });
                 }
             });  
         } else {
-            return res.render('user/shop', { categor: products, uniqueCategories, user: undefined,totalCartCount:totalCartCount });
+            return res.render('user/shop', { categor: products, uniqueCategories, user: undefined,totalCartCount:totalCartCount,errorMessage:req.errorMessage });
         }
 
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+const newproducts = async (req, res) => {
+    try {
+        let uniqueCategories =[]
+        // Fetch the latest 10 products sorted by createdAt in descending order
+        const products = await Products.find().sort({ createdAt: -1 }).limit(9);
+
+        console.log("kkkkk");
+        console.log(products);
+
+
+        uniqueCategories = await Products.distinct('category');
+        if (req.cookies.user_jwt) {
+            jwt.verify(req.cookies.user_jwt, process.env.JWT_SECRET, async (err, decodedToken) => {
+                if (err) {
+                    return res.render('user/shop', { categor: products, uniqueCategories, user: undefined, totalCartCount: req.totalCartCount,errorMessage:req.errorMessage});
+                } else {
+                    req.user = decodedToken;
+                    const user = await User.findOne({ _id: req.user.id });
+                    if (user) {
+                        totalCartCount = user.cart.products.length;
+                    }
+                   
+                    return res.render('user/shop', { categor: products, uniqueCategories, user, totalCartCount:  req.totalCartCount,errorMessage:req.errorMessage });
+                }
+            });
+        } else {
+            return res.render('user/shop', { categor: products, uniqueCategories, user: undefined, totalCartCount: req.totalCartCount,errorMessage:req.errorMessage });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 }
 
@@ -454,27 +460,25 @@ const getproductdetails = async (req, res) => {
         const category = req.params.category;
         const sortingOption = req.query.sorting;
 
+        console.log("yes");
+
+        // Define the filter based on category
+        const filter = { 'category': category };
+
         
+        const sortCriteria = {};
+        if (sortingOption === 'lowToHigh') {
+            sortCriteria.productPrice = 1; // Ascending order
+        } else if (sortingOption === 'highToLow') {
+            sortCriteria.productPrice = -1; // Descending order
+        }
 
-        // Retrieve products based on the category
-        const products = await Products.find({ 'category': category });
+       
+        const products = await Products.find(filter).sort(sortCriteria);
 
-        console.log(products);
-
-        if (!products) { 
+        if (!products || products.length === 0) { 
             return res.render('user/error404', { error: "Product Not Available Now !!" });
         }  
-
-        // Filter products based on the category
-        // const categorProducts = products.filter(produ => produ.category === category);
-
-        // Sort products based on the sorting option
-        
-        if (sortingOption === 'lowToHigh') {
-            products.sort((a, b) => a.productPrice - b.productPrice);
-        } else if (sortingOption === 'highToLow') {
-            products.sort((a, b) => b.productPrice - a.productPrice);
-        }
 
         // Get user information if available
         let user = undefined;
@@ -484,14 +488,15 @@ const getproductdetails = async (req, res) => {
                     req.user = decodedToken;
                     user = await User.findOne({ _id: req.user.id });
                 }
-                res.json({ categor:products, user });
+                res.json({ categor: products, user });
             });
         } else {
-            res.json({ categor:products,user }); 
+            res.json({ categor: products, user }); 
         }
-    } catch (error) {
+    } catch (error) { 
         console.error("Error:", error);
-        res.render('user/error404', { errormessage: "Product Not Available" });
+        res.render('user/shop', {errorMessage:"Product Not Found",categor: categorProducts, uniqueCategories, cartcount: req.cartcount, user:req.user, totalCartCount: req.totalCartCount });
+
     }
 }
 
@@ -1001,26 +1006,21 @@ const checkoutfromcart = async (req, res) => {
             return res.status(401).json({ error: 'Unauthorized' });
         }
 
-        // Find the user by ID
         const user = await User.findById(decoded.id);
        
-        // If user not found, send 404 error
         if (!user) {
             return res.status(404).send('User not found');
         }
 
-        // Extract the cart data from the user document
         const cart = user.cart; 
 
-        // Get the IDs of all products in the cart that are not disabled
         const productIds = cart.products.map(product => product.productId);
 
-        // Find all non-disabled products in the Products collection whose IDs are in the cart
         const productsInCart = await Products.find({ '_id': { $in: productIds }, 'disable': { $ne: true } });
 
-        // Calculate the total price for non-disabled products in the cart
+
         const cartTotalNonDisabled = productsInCart.reduce((total, product) => {
-            // Find the corresponding item in the cart
+    
             const cartItem = cart.products.find(item => item.productId.toString() === product._id.toString());
             if (cartItem) {
                 return total + (parseFloat(product.productPrice) * cartItem.quantity);
@@ -1028,19 +1028,44 @@ const checkoutfromcart = async (req, res) => {
                 return total;
             } 
         }, 0);   
- 
-        console.log(productsInCart);
 
-        // Get the total number of products in the cart
         const totalCartCount = cart.products.length;
 
-        // Render the checkout page with the relevant information
-        res.render('user/checkout', { products: productsInCart,cart, cartTotal: cartTotalNonDisabled, totalCartCount, userAddresse: user.address });
+        const couponCodes =  await Admin.aggregate([
+            {
+              $unwind: '$coupons' // Deconstruct the array field 'coupons'
+            },
+            {
+              $match: {
+                'coupons.couponsStatus': 'Active' // Match documents where couponStatus is 'Active'
+              }
+            },
+            {
+              $project: {
+                _id: 0, // Exclude the ID field
+                couponCode: '$coupons.couponCode' // Project only the coupon code field
+              }
+            }
+          ]);
+          const allCoupons = couponCodes.map(coupon => coupon.couponCode);
+       console.log(allCoupons);
+
+        res.render('user/checkout', { 
+            products: productsInCart,
+            cart,
+            cartTotal: cartTotalNonDisabled,
+            totalCartCount,
+            userAddresse: user.address,
+            coupons: allCoupons  
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
 };
+
+
+
 
 
 const checkoutpage = async (req, res) => {
@@ -1076,9 +1101,9 @@ const checkoutpage = async (req, res) => {
         if (!product) {
             return res.status(404).send('Product not found');
         }
-
+        const allCoupons = await Admin.distinct('coupons.couponCode');
         // Render the checkout page with the exact product and user's address
-        res.render('user/checkout', { products: [product], cartcount: req.cartcount, cart:req.cart, totalCartCount: req.totalCartCount, cartTotal: req.cartTotal, userAddresse: address });
+        res.render('user/checkout', { products: [product], cartcount: req.cartcount, cart:req.cart, totalCartCount: req.totalCartCount, cartTotal: req.cartTotal, userAddresse: address,   coupons: allCoupons   });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
@@ -1189,19 +1214,19 @@ const addressdelete = async (req, res) => {
     try {
         const addressId = req.params.id;
 
-        // Find the user and pull the matched address from the address array
+
         const user = await User.findOneAndUpdate(
             { 'address._id': addressId },
             { $pull: { address: { _id: addressId } } }, 
             { new: true }
         );
 
-        // Check if the user was found and updated
         if (!user) {
             return res.status(404).send('User not found');
         }
-        // Redirect to the profile page with a success message
-        return res.json({message:'Address deleted'})
+
+        return res.redirect('/profile?passwordUpdate=Address deleted');
+
 
     } catch (error) {
         console.error('Error deleting address:', error);
@@ -1213,14 +1238,9 @@ const editaddress = async (req, res) => {
     try {
         const addressId = req.params.id;
 
-        console.log("hooooooil");
-
-        // Capture the new address data from the request body
         const { name, phone, address, city, district, state, pincode,email  } = req.body;
 
         
-
-        // Find the user and pull the matched address from the address array
         const user = await User.findOneAndUpdate(
             { 'address._id': addressId },
             {
@@ -1298,9 +1318,10 @@ const editAddressFormcheckout = async (req, res) => {
  
 
 const placeholder = async (req, res) => {
-    const { selectedAddressId, selectedPaymentMethod, productIds } = req.body;
+    const { selectedAddressId, selectedPaymentMethod, productIds, totalamout } = req.body;
 
-    console.log(productIds);
+    
+    
 
     try {  
         const token = req.cookies.user_jwt;
@@ -1308,23 +1329,21 @@ const placeholder = async (req, res) => {
         if (!token) { 
             return res.status(401).json({ error: 'Unauthorized' });
         }
- 
-        // Verify the JWT token to get user ID
+
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        if (!decoded || !decoded.id) {
+        if (!decoded || !decoded.id) { 
             return res.status(401).json({ error: 'Unauthorized' });
         }
 
-        // Find the exact user matching the decoded user ID
+ 
         const user = await User.findById(decoded.id);
 
-        // console.log(user);
+
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // Find the address matching the selected address ID within the user's addresses
         const exactAddress = user.address.find(addr => addr._id.toString() === selectedAddressId);
 
         if (!exactAddress) {
@@ -1345,7 +1364,7 @@ const placeholder = async (req, res) => {
         let exactProducts = [];
         let cartProduct = null;
 
-        let totalAmount ='' ;
+        // let totalAmount ='' ;
         let totalPrice =[];
         let quantity =[];
 
@@ -1369,7 +1388,7 @@ const placeholder = async (req, res) => {
                 if (product._id.toString() === productId) {
                  
                     exactProducts.push(product);
-                    totalAmount += product.productPrice;
+                    // totalAmount += product.productPrice;
                     break;
                 }
             } 
@@ -1389,9 +1408,9 @@ const placeholder = async (req, res) => {
 
                         quantity.push(cartQuantity);
                         
-                        const productTotalPrice = product.productPrice * cartQuantity;
+                        // const productTotalPrice = product.productPrice * cartQuantity;
 
-                        totalPrice.push(productTotalPrice);
+                        // totalPrice.push(productTotalPrice);
 
                     } 
                     
@@ -1404,19 +1423,21 @@ const placeholder = async (req, res) => {
                 }
             }
 
-            totalAmount = totalPrice.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+          
 
         }
 
-        //   console.log("hhhhhhhhhh",totalAmount);
+     
           console.log(selectedPaymentMethod);
 
-        const sanitizedTotalAmount = isNaN(totalAmount) ? 0 : totalAmount;
+        const sanitizedTotalAmount = isNaN( totalamout) ? 0 :  totalamout;
+
+        console.log(sanitizedTotalAmount);
 
 
 // console.log(exactProducts);
         
-if (selectedPaymentMethod === 'Prepaid') {
+if (selectedPaymentMethod === 'Prepaid') { 
     try {
         // Generate Razorpay order (assuming this function returns the order details)
 console.log("ooooooooooooooooooooooooooook");
@@ -1444,12 +1465,12 @@ console.log("ooooooooooooooooooooooooooook");
                     name: product.productName,
                     category: product.category,
                     qty: quantity[index], // Use quantity from the quantities array
-                    price: product.productPrice,
+                    price: sanitizedTotalAmount,
                     image: product.image,
                     orderStatus: "Pending",
                     cancelReason: null
                 })),
-                totalAmount: sanitizedTotalAmount,
+                totalAmount:sanitizedTotalAmount,
                 orderDate: new Date(),
                 shippingAddress: exactAddress,
                 paymentMethod: selectedPaymentMethod,
@@ -1458,7 +1479,14 @@ console.log("ooooooooooooooooooooooooooook");
             // Save the updated user document
             await user.save();
 
-            res.json(true);
+            // await sendOrderConfirmationEmail(exactAddress.email, {
+            //     orderId:user.orders[user.orders.length - 1]._id, // You can use actual order ID
+            //     totalAmount: sanitizedTotalAmount,
+            //     paymentMethod: selectedPaymentMethod,
+            //     shippingAddress: exactAddress.address, // Modify this according to your address structure
+            // });
+
+            res.json({message:true});
         } else {
             return res.status(400).json({ error: 'Invalid payment method' });
         }
@@ -1470,16 +1498,7 @@ console.log("ooooooooooooooooooooooooooook");
 
 const saveorder =  async (req, res) => {
 
-
-console.log("ooook");
-
     const { exactProducts, exactAddress, sanitizedTotalAmount,selectedPaymentMethod,quantity } = req.body;
-
-    console.log('Exact Products:', exactProducts);
-    console.log('Exact Address:', exactAddress);
-    console.log('Sanitized Total Amount:', sanitizedTotalAmount);
-    console.log('quantity:', quantity);
-
 
     const token = req.cookies.user_jwt;
 
@@ -1493,7 +1512,7 @@ console.log("ooook");
     }
     const user = await User.findById(decoded.id);
 
-    console.log(user);
+    // console.log(user);
 
     user.orders.push({
         products: exactProducts.map((product, index) => ({
@@ -1515,6 +1534,13 @@ console.log("ooook");
     // Save the updated user document
     await user.save();
 
+    // await sendOrderConfirmationEmail(exactAddress.email, {
+    //     orderId:user.orders[user.orders.length - 1]._id, // You can use actual order ID
+    //     totalAmount: sanitizedTotalAmount,
+    //     paymentMethod: selectedPaymentMethod,
+    //     shippingAddress: exactAddress.address, // Modify this according to your address structure
+    // });
+
 
  res.json(true); // Send a success response
 };
@@ -1522,12 +1548,79 @@ console.log("ooook");
 
 
 
+// async function sendOrderConfirmationEmail(userEmail, orderDetails, orderStatus) {
+//     try { 
+//         // Create a Nodemailer transporter using SMTP
+//         console.log("ook");
+//         const subject = orderStatus ? `${orderStatus} Your Order Details` : 'Your Order Details';
+
+//         let transporter = nodemailer.createTransport({
+//             service: 'gmail',
+//             auth: {
+//                 user: 'your_email@gmail.com',
+//                 pass: 'your_password',
+//             },
+//         });
+
+//         // Send mail with defined transport object
+//         let info = await transporter.sendMail({
+//             from: '"Pure Glow" <ihsantk786313@gmail.com>',
+//             to: userEmail,
+//             subject: subject,
+//             html: `<h1>${orderStatus ? orderStatus : ''} Your Order Details</h1>
+//                 <p>Thank you for your order!</p>
+//                 <p>Order ID: ${orderDetails.orderId}</p>
+//                 <p>Total Amount: ${orderDetails.totalAmount}</p>
+//                 <p>Payment Method: ${orderDetails.paymentMethod}</p>
+//                 <p>Shipping Address: ${orderDetails.shippingAddress}</p>
+//                 <p>...</p>`,
+//         });
+
+//         console.log('Message sent: %s', info.messageId);
+//     } catch (error) {
+//         console.error('Error sending email:', error);
+//     }
+// }
 
 
+const coupenmanage = async (req, res) => {
+    try {
+       let { selectedCoupon, totalamout } = req.body;
+
+        console.log(selectedCoupon);
+        const couponDetails = await Admin.findOne({ 'coupons.couponCode': selectedCoupon }, 'coupons.$');
+
+         
+        
+        if (!couponDetails) {
+            return res.status(404).json({ success: false, message: 'Coupon not found' });
+        }
+
+        // Access the matched coupon details from couponDetails.coupons[0]
+        const matchedCoupon = couponDetails.coupons[0];
+
+        console.log(matchedCoupon);
+
+        // Check the coupon type (Fixed Amount or Percentage)
+        if (matchedCoupon.couponType === 'Fixed Amount') {
+           
+            totalamout -= matchedCoupon.discountValue;
+
+        } else if (matchedCoupon.couponType === 'Percentage') {
+            // If the coupon type is Percentage, calculate the discount amount based on the percentage and deduct it from the total amount
+            const discountAmount = (totalamout * matchedCoupon.discountValue) / 100;
+            totalamout -= discountAmount;
+        }
+
+       console.log(totalamout);
+        res.json({ success: true, message: 'Coupon applied successfully', adjustedTotalAmount: totalamout });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+};
 const ordermanage = async (req, res) => {
     const token = req.cookies.user_jwt;
-
-    console.log("kkkkk");
 
     if (!token) {
         return res.redirect('/login');
@@ -1540,11 +1633,17 @@ const ordermanage = async (req, res) => {
     }
     const user = await User.findById(decoded.id);
 
+    if (!user) {
+        return res.redirect('/login'); // Redirect if user not found
+    }
+
     // Extracting products from each order
     const userProducts = user.orders.map(order => order.products).flat();
 
+    // Sort user orders by orderDate in descending order
+    const sortedUserOrders = user.orders.sort((a, b) => b.orderDate - a.orderDate);
 
-    const userOrders = user.orders.map(order => {
+    const userOrders = sortedUserOrders.map(order => {
         return {
             products: order.products,
             totalAmount: order.totalAmount,
@@ -1555,18 +1654,12 @@ const ordermanage = async (req, res) => {
         };
     });
 
-    console.log( "orders ooook",);
-   
-    if (user) {  
-        totalCartCount = user.cart.products.length;
-     
-      }else{
-           totalCartCount = "";
-      }
+    // Count total items in the cart
+    const totalCartCount = user.cart.products.length;
 
     // Render the order page after all necessary data is processed
-    res.render('user/orders', { products:userProducts,userOrders,totalCartCount:totalCartCount});
-} 
+    res.render('user/orders', { products: userProducts, userOrders, totalCartCount });
+}
  
 
 
@@ -1613,7 +1706,10 @@ const cancellreson = async (req, res) => {
         console.log(cancelReason);
 
         await user.save();
-        // You can do further operations with the found product and cancel reason here
+        // const userEmail = user.orders.find(order => order.products.some(product => product._id.toString() === productId)).shippingAddress.email;
+
+        // Send cancellation email
+        // await sendCancellationEmail(userEmail, foundProduct.name, cancelReason);
 
         res.redirect('/orders');
     } catch (error) {
@@ -1628,25 +1724,29 @@ const getShopProducts = async (req, res) => {
         const { search } = req.query;
         const sortingOption = req.query.sorting;
 
+        console.log(search);
+
+        console.log(sortingOption);
+        console.log("oook");
+
         let categorProducts = [];
         let uniqueCategories = [];
 
-        if (search && search.length >= 3) {
-            // Fetch data from the database
-            const data = await Products.find();
+        if (search && search.trim().length >= 3) { 
+            const searchTerm = new RegExp(search, 'i'); // Case-insensitive search term
 
-            // Extract unique categories from all products
-            uniqueCategories = [...new Set(data.map(product => product.category))];
+            const data = await Products.find({
+                $or: [
+                    { category: searchTerm },
+                    { productName: searchTerm }
+                ]
+            }); 
 
-            // Filter products based on search input
-            categorProducts = data.filter(product =>
-                product.category.toLowerCase().includes(search.toLowerCase()) || 
-                product.productName.toLowerCase().includes(search.toLowerCase())
-            );
+            uniqueCategories = await Products.distinct('category');
 
-            console.log(categorProducts);
-        } else {
-            return res.render('user/error404', { errormessage: 'Products Not found ' });
+            categorProducts = data;
+        } else { 
+            return res.render('user/shop', {errorMessage:"Product Not Found",categor: categorProducts, uniqueCategories, cartcount: req.cartcount, user:req.user, totalCartCount: req.totalCartCount });
         }
 
         let user = undefined;
@@ -1656,18 +1756,17 @@ const getShopProducts = async (req, res) => {
                     req.user = decodedToken;
                     user = await User.findOne({ _id: req.user.id });
                 }
-                if(categorProducts.length > 0){
-                return res.render('user/shop', { categor: categorProducts, uniqueCategories, cartcount: req.cartcount, user, totalCartCount: req.totalCartCount });
-                }else{
-                    return res.render('user/error404', { errormessage: 'Products Not found ' });  
+                if (categorProducts.length > 0) {
+                    return res.render('user/shop', { categor: categorProducts, uniqueCategories, cartcount: req.cartcount, user, totalCartCount: req.totalCartCount,errorMessage:req.errorMessage });
+                } else {
+                    return res.render('user/shop', {errorMessage:"Product Not Found", categor: categorProducts, uniqueCategories, cartcount: req.cartcount, user, totalCartCount: req.totalCartCount });
                 }
-           
             });
         } else {
             if (categorProducts.length > 0) {
-                return res.render('user/shop', { categor: categorProducts, uniqueCategories, cartcount: req.cartcount, user });
+                return res.render('user/shop', { categor: categorProducts, uniqueCategories, totalCartCount: req.totalCartCount, cartcount: req.cartcount, user });
             } else {
-                return res.render('user/error404', { errormessage: 'Products Not found ' });
+                return res.render('user/shop', { errorMessage:"Product Not Found",categor: categorProducts, uniqueCategories, cartcount: req.cartcount, user, totalCartCount: req.totalCartCount });
             }
         }
     } catch (error) {
@@ -1692,31 +1791,28 @@ const shopsorting = async (req, res) => {
         const category = req.params.category;
         const sortingOption = req.query.sorting;
 
+        console.log("lllll");
         console.log(category);
         console.log(sortingOption);
 
-        // Find products based on the category
-        const product = await Products.findOne({ 'products.category': category });
-        if (!product) {
-            return res.render('user/error404', { error: "Product Not Available Now !!" });
-        }
+        // Define filter based on category
+        const filter = { 'category': category };
 
-        // Get unique categories for navigation
-        const data = await Products.findOne();
-        const uniqueCategories = [...new Set(data.products.map(product => product.category))];
-
-        // Filter products based on the category
-        let categorProducts = product.products.filter(produ => produ.category === category);
-
-        // Sort products based on the sorting option
+        // Define sort criteria based on sorting option
+        const sortCriteria = {};
         if (sortingOption === 'lowToHigh') {
-            categorProducts.sort((a, b) => a.productPrice - b.productPrice);
+            sortCriteria.productPrice = 1; // Ascending order
         } else if (sortingOption === 'highToLow') {
-            categorProducts.sort((a, b) => b.productPrice - a.productPrice);
+            sortCriteria.productPrice = -1; // Descending order
         }
 
-       
-        // Get user information if available
+        
+        const categorProducts = await Products.find(filter).sort(sortCriteria);
+
+        if (!categorProducts || categorProducts.length === 0) {
+            return res.render('user/shop', {errorMessage:"Product Not Found",categor: categorProducts, uniqueCategories, cartcount: req.cartcount, user:req.user, totalCartCount: req.totalCartCount });
+
+        }
         let user = undefined;
         if (req.cookies.user_jwt) {
             jwt.verify(req.cookies.user_jwt, process.env.JWT_SECRET, async (err, decodedToken) => {
@@ -1724,15 +1820,16 @@ const shopsorting = async (req, res) => {
                     req.user = decodedToken;
                     user = await User.findOne({ _id: req.user.id });
                 }
-                res.json({ categor: categorProducts, product, user })            });
+                res.json({ categor: categorProducts, user });
+            });
         } else {
-            res.json({ categor: categorProducts, product, user })        }
+            res.json({ categor: categorProducts, user });
+        }
     } catch (error) {
         console.error("Error:", error);
         res.render('user/error404', { errormessage: "Product Not Available" });
     } 
 };
-
 
 
 async function sendOTP(req, res) {
@@ -1883,8 +1980,8 @@ module.exports={
     editprofile,
     deleteProfileImage,
     shoppage,
+    newproducts,
     getproductdetails ,
-    contactpage,
     addToCart,
     cartpage,
     deletecartproduct,
@@ -1904,6 +2001,7 @@ module.exports={
     editAddressFormcheckout,
     placeholder,
     saveorder,
+    coupenmanage,
     ordermanage,
     getShopProducts,
     shopsorting,

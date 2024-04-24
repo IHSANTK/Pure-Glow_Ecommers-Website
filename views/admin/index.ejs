@@ -13,6 +13,9 @@
     <link rel="stylesheet" href="assets/plugin/datatables/responsive.dataTables.min.css">
     <link rel="stylesheet" href="assets/plugin/datatables/dataTables.bootstrap5.min.css">
 
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
     <!-- project css file  -->
     <link rel="stylesheet" href="assets/css/ebazar.style.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -77,16 +80,17 @@
                     </li>
                     <!-- <li><a class="m-link active" href="/orderslist"><i class="icofont-home fs-5"></i> <span>Orders</span></a></li> -->
 
-                    <!-- <li class="collapsed">
+                    <li class="collapsed">
                         <a class="m-link" data-bs-toggle="collapse" data-bs-target="#menu-sale" href="#">
-                        <i class="icofont-sale-discount fs-5"></i> <span>Sales Promotion</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a> -->
+                        <i class="icofont-sale-discount fs-5"></i> <span>Sales Promotion</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
                         <!-- Menu: Sub menu ul -->
-                        <!-- <ul class="sub-menu collapse" id="menu-sale">
-                            <li><a class="ms-link" href="coupons-list.html">Coupons List</a></li>
+                        <ul class="sub-menu collapse" id="menu-sale">
+                            
+                            <li><a class="ms-link" href="/coupon-manage">Coupons List</a></li>
                             <li><a class="ms-link" href="coupon-add.html">Coupons Add</a></li>
                             <li><a class="ms-link" href="coupon-edit.html">Coupons Edit</a></li>
                         </ul>
-                    </li> -->
+                    </li>
                     <!-- <li class="collapsed">
                         <a class="m-link" data-bs-toggle="collapse" data-bs-target="#menu-inventory" href="#"> -->
                         <!-- <i class="icofont-chart-histogram fs-5"></i> <span>Inventory</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a> -->
@@ -1062,18 +1066,25 @@
                                                             <form action="/orederstatus" method="post">
                                                                 <span class="badge bg-success"><%= product.orderStatus %></span>
                                                                 <% if (product.orderStatus === "cancelled") { %>
+                                                                  
                                                                     <span class="badge bg-success"><%= product.cancelReason %></span>
+                                                                   
                                                                 <% } else { %>
+                                                                    
+                                                                    <% if (product.orderStatus !== "delivered") { %>
                                                                     <select class="status-select" name="newStatus">
                                                                       
                                                                         <option value="shipped">Shipped</option>
                                                                         <option value="delivered">Delivered</option>
-                                                                        <option value="cancel">Cancel</option>
+                                                                        <option value="cancelled">cancelled</option>
                                                                     </select>
                                                                     <input type="hidden" name="orderId" value="<%= order._id %>">
                                                                     <input type="hidden" name="productId" value="<%= product._id %>">
                                                                     <button type="submit" style="background-color: rgb(199, 218, 218); border-radius: 10px; border: none;">Update</button>
-                                                                <% } %>
+                                                                   
+                                                                        
+                                                                        <% } %>  
+                                                                    <% } %>
                                                             </form>
                                                         </td>
                                                         <td>
@@ -1085,7 +1096,7 @@
                                                                 <%= order.shippingAddress.state %>
                                                                 <%= order.shippingAddress.pincode %>
                                                             </p>
-                                                            <h6><i class="bi bi-telephone" style="margin-right: 10px;"></i><%= order.shippingAddress.phone %></h6>
+                                                            <h6><i class="fas fa-phone-alt" style="margin-right: 10px;"></i><%= order.shippingAddress.phone %></h6>
                                                         </td>
                                                     </tr>
                                                 <% }); %>

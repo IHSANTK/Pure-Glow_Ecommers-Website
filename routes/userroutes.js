@@ -27,15 +27,14 @@ router.get('/signup',preventBack, userController.signuppage);
 
 router.get('/logout',preventBack, userController.logout);
 
-router.get('/contact',preventBack,userController.contactpage);
-
 // router.get('/change-password/:id',preventBack,userController.changepassword)
 // router.get('/edit-profile/:id',preventBack,userController.editprofileget)
 router.post('/edit-profile/:id',upload.array('profileImage', 1),userController.editprofile)
 router.delete('/delete-profile-image/:userId', userController.deleteProfileImage);
 
 router.post('/edit-password/:id',userController.editpassword)
-router.get('/shop',userController.shoppage)
+router.get('/shop',userController.shoppage);
+router.get('/newproductsshop',userController.newproducts)
 
 
 router.get('/getshopproduct/:category', preventBack, userController.getproductdetails);
@@ -88,7 +87,9 @@ router.get('/getsearchproduct', preventBack, userController.getShopProducts);
 
 router.get('/shopsort/:category',preventBack,userController.shopsorting)
 
-router.post('/saveorder',userController.saveorder)
+router.post('/saveorder',userController.saveorder);
+
+router.post('/coupenmanage',userController.coupenmanage)
 
 
 
