@@ -235,7 +235,7 @@
                         </div>
                       
                         <div class="row g-4 mt-2">
-                            <% if (errorMessage !== "Product Not Found") { %>
+                            <% if (errorMessage !== "Products Not Found !") { %>
                             <div class="col-lg-3 ">
                                
                                 <div class="row g-4">
@@ -263,23 +263,18 @@
                                 </div>
                             </div>
                             <% }else{%>
-                                <div class="col-lg-3 ">
+                                
                                
-                                    <div class="row g-4">
-                                        <div class="col-lg-12 col-6">
-                                            <div class="mb-3">
-                                                
-                                                
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-12 col-6 d-flex  justify-content-center">
+                                   
+                                        
+                                        
                                             <div class="mb-3 " >
                                                 <span style="font-size:xx-large"><%=errorMessage%></span>
                                                 
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                        
+                                    
+                               
                             <% } %>
                             
                             <div class="col-lg-9">
@@ -308,9 +303,11 @@
                                                               <% } %>
                                                         </button>
                                                     </div>
-                                                    <div class="disabled-overlay position-absolute top-50 ms-5 mt-4 " > <!-- Centering the message -->
+                                                    <div class="disabled-overlay position-absolute top-50 ms-5 mt-4  " > <!-- Centering the message -->
                                                         <% if (product.disable) { %>
                                                             <h5 class="disabled-message text-danger ms-3"> Not available now</h5>
+                                                        <%  }else if(product.stockcount===0) { %>
+                                                            <h5 class="disabled-message text-danger ms-4 mt-4"> Out Of Stock</h5>
                                                         <% } %>
                                                     </div>
                                                     <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">
@@ -660,7 +657,7 @@ axios.get(`/shopsort/${encodeURIComponent(category)}`, {
 
 
         <!-- Footer Start -->
-        <% if (errorMessage !== "Product Not Found") { %>
+        <% if (errorMessage !== "Products Not Found !") { %>
         <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
             <div class="container py-5">
                 <div class="pb-4 mb-4" style="border-bottom: 1px solid rgba(226, 175, 24, 0.5) ;">

@@ -410,14 +410,15 @@ const productedit = async (req, res) => {
 const updateProduct = async (req, res) => {
     try {
         const productId = req.params.id;
-        const { ProductName, Price, description, category } = req.body;
+        const { ProductName, Price, description, category,stockcount } = req.body;
         const imageData = req.files || [];
 
         let updateFields = {
             'productName': ProductName,
             'productPrice': Price,
             'description': description,
-            'category': category
+            'category': category,
+            'stockcount':stockcount
         };
 
         // If new images are uploaded, upload them to Cloudinary and update image URLs

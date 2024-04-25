@@ -415,12 +415,10 @@ function editaddress(addressId) {
                                 <div class="col-12">
                                     <% if (cartTotal) { %>
                                         <p class="text-start text-dark">Total:₹<strong style="margin-left: 10px;" id="totalamout"><%= cartTotal %></strong></p>
-                                    <% } else if (products.length > 0) { %>
-                                        <p class="text-start text-dark">Total:₹<strong style="margin-left: 30px;" id="amount"><%= products[0].productPrice %></strong></p>
-                                    <% } else { %>
-                                        <p class="text-start text-dark">Total:<strong style="margin-left: 30px;">₹</strong></p>
                                     <% } %>
+                                    
                                 </div>
+                                <span id="couponmeseage" style="color: black; font-weight: 600;"></span>
                             <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
                                
                             </div>
@@ -460,28 +458,34 @@ function editaddress(addressId) {
                 } else {
                     document.getElementById('couponError').innerText = '';
             
-                    let checkouttotalamout = '<%= cartTotal %>';
-                    let amount = '<%= products[0].productPrice %>';
-                    let totalamout;
-            
-                    if (checkouttotalamout) {
-                        totalamout = checkouttotalamout;
-                    } else {
-                        totalamout = amount;
-                    }
+                    let totalamout = '<%= cartTotal %>';
+                 
+                   
             
                     axios.post('/coupenmanage', {
                         selectedCoupon,
                         totalamout
                     })
                     .then(function(response) {
-                        if (checkouttotalamout) {
+                       if (response.data.adjustedTotalAmount) {
                             document.getElementById('totalamout').innerText = response.data.adjustedTotalAmount;
-                        } else {
-                            document.getElementById('amount').innerText = response.data.adjustedTotalAmount;
-                        }
+                       }
+                            
+
+                            if(response.data.message==="Coupon applied successfully"){
+                                document.getElementById('couponmeseage').innerText = response.data.message
+                                document.getElementById('couponmeseage').style.color = "green"
+
+                            }else{
+                                document.getElementById('couponmeseage').innerText = response.data.message
+                                document.getElementById('couponmeseage').style.color = "red"
+                            }
+                        
                         document.getElementById('applyCouponBtn').classList.add('d-none');
                         document.getElementById('removeCouponBtn').classList.remove('d-none');
+
+                       
+                        
                     })
                     .catch(function(error) {
                         console.error(error);
@@ -491,12 +495,10 @@ function editaddress(addressId) {
             });
             
             document.getElementById('removeCouponBtn').addEventListener('click', function() {
-                let totalamout = '<%= cartTotal || products[0].productPrice %>';
-                if (document.getElementById('totalamout')) {
+                let totalamout = '<%= cartTotal %>';
+               
                     document.getElementById('totalamout').innerText = totalamout;
-                } else {
-                    document.getElementById('amount').innerText = totalamout;
-                }
+                
                 document.getElementById('removeCouponBtn').classList.add('d-none');
                 document.getElementById('applyCouponBtn').classList.remove('d-none');
                 document.getElementById('couponCodeInput').value = ""; 
@@ -547,18 +549,10 @@ function editaddress(addressId) {
 
         console.log(selectedCoupon);
 
-        let checkouttotalamout ='<%= cartTotal %>';
-        let amount='<%= products[0].productPrice %>'
-
-        let totalamout;
-
-        if(checkouttotalamout){
+        let totalamout ='<%= cartTotal %>';
+      
 
             totalamout = document.getElementById('totalamout').innerText.trim();
-        }else{
-            totalamout= document.getElementById('amount').innerText.trim();
-        }
-             
 
         console.log(selectedPaymentMethod);
 

@@ -30,6 +30,7 @@
     "passport-google-oauth2": "^0.2.0",
     "passport-jwt": "^4.0.1",
     "path": "^0.12.7",
+    "puppeteer": "^22.7.0",
     "razorpay": "^2.9.2"
   }
 }

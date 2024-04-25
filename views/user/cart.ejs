@@ -138,7 +138,9 @@
                             <th scope="col">Products</th>
                             <th scope="col">Name</th>
                             <th scope="col">Price</th>
+                            <th scope="col"></th>
                             <th scope="col">Quantity</th>
+                           
                             <!-- <th scope="col">Total</th> -->
                             <th scope="col">Handle</th>
                             <% } %>
@@ -154,7 +156,9 @@
                                     <tr>
                                         <th scope="row">
                                             <div class="d-flex align-items-center">
+                                            <a href="/productveiw/<%= product.productId %>">
                                                 <img src="<%= product.image[0] %>" class="img-fluid me-5 rounded-circle" style="width: 80px; height: 80px;" alt="">
+                                            </a>
                                             </div>
                                         </th>
                                         <td>
@@ -163,7 +167,13 @@
                                         <td>
                                             <p class="mb-0 mt-4"><%= product.productPrice %></p>
                                         </td>
-                                    
+                                        <td>
+                                            <% if (product.disable) { %>
+                                                <p class="disabled-message text-danger ms-3 mt-4"> Not available now</p>
+                                            <%  }else if(product.stockcount===0) { %>
+                                                <p class="disabled-message text-danger ms-5 mt-4"> Out Of Stock</p>
+                                            <% } %>
+                                        </td>
                                         <td>
                                             <div class="input-group">
                                                 <!-- Minus button -->
@@ -343,6 +353,7 @@
                                 <h5 class="mb-0 ps-4 me-4">Total</h5>
                                 <p class="mb-0 pe-4 total ">₹<%=totalPrice %></p>
                             </div>
+                            
                             <a href="/checkoutfromcart"><button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">Proceed Checkout</button></a>
                         </div>
                     </div>

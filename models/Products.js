@@ -18,8 +18,8 @@ const productSchema = new mongoose.Schema({
     
   },
   stockcount:{
-    type:String,
-    required: true
+    type:Number,
+    
   },
   subcategory: String, // Optional field
   createdAt: {

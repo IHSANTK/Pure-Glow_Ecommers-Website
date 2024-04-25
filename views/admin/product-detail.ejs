@@ -357,6 +357,9 @@
                                                         <h6 class="price-title fw-bold">Price</h6>
                                                         <p class="sale-price">₹<%= product.productPrice %></p>
                                                     </div>
+                                                    <% if (product.stockcount) { %>
+                                                    <p>StockCount:<strong class="ms-2"><%= product.stockcount %></strong></p>
+                                                    <% } %>
                                                     <p><%= product.description %></p>
                                                     <div class="product-btn mb-5">
                                                         <div class="d-flex flex-wrap">

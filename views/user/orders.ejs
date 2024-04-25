@@ -55,6 +55,9 @@
 
         .product-image {
             margin-right: 20px;
+          
+            
+            
         }
 
         .address-info {
@@ -189,8 +192,12 @@
                                 </div>
                                 <div class="order-details">
                                     <h2><%= product.name %></h2>
-                                    <p>Quantity: <%= product.qty %></p>
-                                    <p>Price: <%= product.price * product.qty %></p>
+                                    <% if (order.products.length !== 1) { %>
+                                        <% if (product.qty!==1) { %>
+                                        <p>Quantity: <%= product.qty %></p>
+                                        <% } %>
+                                    <% } %>
+                                    <p>Price: <%= product.price %></p>
                                     <p>Order Date: <%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
                                     <% const orderDate = new Date(order.orderDate);
                                     const expectedDeliveryDate = new Date(orderDate);
@@ -198,10 +205,10 @@
                                     <p>Expected Delivery Date: <%= expectedDeliveryDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
                                     <p>Payment Method: <%= order.paymentMethod %></p>
                                     <% if (product.orderStatus === 'cancelled') { %>
-                                        <span style="">Order Status:<span style="color: red;"> <%= product.orderStatus %></span></span>
+                                        <span >Order Status:<span style="color: red;"> <%= product.orderStatus %></span></span>
                                         <p class="mt-3">Cancel Reason: <%= product.cancelReason %></p>
                                     <% } else if (product.orderStatus === 'delivered') { %>
-                                        <span style="">Order Status:<span style="color: rgb(11, 167, 63);"><strong> <%= product.orderStatus %></strong></span></span>
+                                        <span >Order Status:<span style="color: rgb(11, 167, 63);"><strong> <%= product.orderStatus %></strong></span></span>
                                     <% } else { %>
                                         <p>Order Status: <%= product.orderStatus %></p>
                                     <% } %>
@@ -217,7 +224,7 @@
                                     <%= order.shippingAddress.pincode %></p>
                                 <h6><i class="fas fa-phone-alt"></i> <%= order.shippingAddress.phone %></h6>
                                 <% if (product.orderStatus !== 'delivered') { %>
-                                <form id="cancelForm" class="cancel-form" action="/cancellreson/<%=product._id%>" method="post">
+                                <form id="cancelForm" class="cancel-form" action="/cancellreson/<%=product.productId%>" method="post">
                                     <div class="form-group">
                                         <label for="cancelReasonSelect">Cancel Product</label>
                                         <select class="form-control" id="cancelReasonSelect" name="cancelReason" required>
@@ -232,12 +239,17 @@
                                     <div id="errorMessage" style="display: none; color: red;">Please select a reason before submitting.</div>
                                     <button type="submit" class="btn btn-danger">Cancel</button>
                                 </form>
+                                <form action="/downloadinvoice/<%= order.orderID %>/<%= product.productId %>" method="post">
+                                    <button type="submit" class="btn border mt-2"> Download Invoice</button>
+                                </form>
                                 <% } %>
+                               
                             </div>
                         </div>
                         <button class="btn view-details-btn mt-2" style="color: blue;" onclick="toggleDetails(this)">View Details</button>
                     </div>
                 <% }); %>
+                
             <% }); %>
         <% } else { %>
             

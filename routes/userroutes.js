@@ -89,9 +89,9 @@ router.get('/shopsort/:category',preventBack,userController.shopsorting)
 
 router.post('/saveorder',userController.saveorder);
 
-router.post('/coupenmanage',userController.coupenmanage)
+router.post('/coupenmanage',userController.coupenmanage);
 
-
+router.post('/downloadinvoice/:orderId/:productId', userController.downloadinvoice);
 
 
 router.get('/auth/google', userController.googleAuth);

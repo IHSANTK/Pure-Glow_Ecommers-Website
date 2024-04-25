@@ -130,7 +130,9 @@
                                 <div>
                                     <% if (product.disable) { %>
                                         <div class="disabled-message text-danger mb-3"><strong>Product not available now</strong></div>
-                                    <% } %>
+                                    <% }else if(product.stockcount===0) { %>
+                                        <div class="disabled-message text-danger mb-3"><strong>Out of Stock</strong></div>
+                                     <%}%>   
                                     <h4 class="fw-bold mb-3 mt-3"><%= product.productName %></h4>
                                     <!-- Container for inline images -->
             
@@ -154,11 +156,13 @@
                                     </button>
                                 
                                     <% if (!product.disable) { %>
-                                        <form action="/checkout/<%=product._id %>" method="post">
-                                            <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary ms-3 mb-3 custom-btn" <% if (product.disable) { %> disabled <% } %>>
+                                        <% if (product.stockcount !== 0) { %>
+                                        <form action="/checkout/<%= product._id %>" method="post">
+                                            <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary ms-3 mb-3 custom-btn">
                                                 Buy Now
                                             </button>
                                         </form>
+                                        <% } %>
                                     <% } %>
                                 </div>
                                 
