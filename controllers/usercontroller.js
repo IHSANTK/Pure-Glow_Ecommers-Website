@@ -22,32 +22,25 @@ const Homepage = async (req, res) => {
       });
     }
 
-    // Extract category names from each document
     const categories = products.map((product) => product.category);
 
-    // Create a Set to ensure uniqueness and spread it into an array
     const uniqueCategories = [...new Set(categories)];
 
-    // console.log("Unique categories:", uniqueCategories);
 
-    // Fetch latest product from each category
+    
     const latestProducts = [];
 
-    // Iterate over each unique category
     uniqueCategories.forEach((category) => {
-      // Filter products by category
       const categoryProducts = products.filter(
         (product) => product.category === category
       );
 
-      // Sort products in descending order based on createdAt
       categoryProducts.sort((a, b) => b.createdAt - a.createdAt);
 
-      // Select the latest product for the category and add it to latestProducts array
       latestProducts.push(categoryProducts[0]);
     });
 
-    // console.log("Latest products by category:", latestProducts);
+  
     let userWishlist = [];
     let totalCartCount = "";
 
@@ -55,35 +48,34 @@ const Homepage = async (req, res) => {
 
     if (token) {
       try {
-        // Verify the JWT token to get user ID
+       
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         if (decoded && decoded.id) {
-          // Fetch user details from the database using the user ID from the JWT payload
+          
           const user = await User.findById(decoded.id);
           if (user) {
             const wishlistData = user.wishlist.map((item) => ({
               productId: item._id,
             }));
-            // Extract the wishlist data from the user document
+           
             userWishlist = await Promise.all(
               wishlistData.map(async (item) => {
-                // Find the product by its ID
+             
                 const product = await Products.findById(item.productId);
 
                 if (!product) {
-                  // If product not found, handle the error
+                  
                   throw new Error(
                     `Product with ID ${item.productId} not found`
                   );
                 }
 
-                // Return product details including the image array
+ 
                 return {
                   productId: product._id,
                   productName: product.productName,
                   productPrice: product.productPrice,
-
-                  image: product.image, // Assuming image is an array field in your product schema
+                  image: product.image,
                 };
               })
             );
@@ -92,10 +84,10 @@ const Homepage = async (req, res) => {
         }
       } catch (error) {
         if (error instanceof jwt.TokenExpiredError) {
-          // Handle token expiration only if redirection hasn't already occurred
+        
           if (!res.locals.tokenExpiredHandled) {
             console.error("Token has expired:", error);
-            res.locals.tokenExpiredHandled = true; // Set flag to indicate that redirection has occurred
+            res.locals.tokenExpiredHandled = true; 
             return res.render("user/index", {
               uniqueCategories,
               categor: latestProducts,
@@ -104,14 +96,13 @@ const Homepage = async (req, res) => {
             });
           }
         } else {
-          // Handle other JWT verification errors
+     
           console.error("JWT verification error:", error);
           return res.status(500).json({ error: "Internal server error" });
         }
       }
     }
 
-    // console.log("ooooofdf",userWishlist);
 
     res.render("user/index", {
       uniqueCategories,
@@ -567,13 +558,13 @@ const addToCart = async (req, res) => {
 
   try {
     if (!token) {
-      return res.status(401).json({ message: "Please log in" });
+      return res.json({ message: "Please log in",cartcount:"0" });
     }
 
     // Verify the JWT token to get user ID
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded || !decoded.id) {
-      return res.status(401).json({ message: "Please log in" });
+      return res.redirect({ message: "Please log in",cartcount:"0" });
     }
 
     const userId = decoded.id;
@@ -605,11 +596,6 @@ const addToCart = async (req, res) => {
       console.log("product data", product);
       user.cart.products.push({
         productId: product._id,
-        // productName: productData.productName,
-        // productPrice: productData.productPrice,
-        // image: productData.image,
-        // quantity: 1,
-        // disable:productData.disable
       });
     }
 
@@ -619,11 +605,14 @@ const addToCart = async (req, res) => {
     }, 0);
 
     user.cart.total = totalPrice;
+    let cartcount = user.cart.products.length
+
+    console.log(cartcount);
 
     // Save the updated user cart
     await user.save();
 
-    res.json({ message: "Product added to cart" });
+    res.json({ message: "Product added to cart",cartcount });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error ");
@@ -795,8 +784,8 @@ const quantityplus = async (req, res) => {
     const productId = req.params.productId;
     const token = req.cookies.user_jwt;
 
-    console.log(productId);
-    console.log("hioooooooooo");
+   
+    console.log("hiooo",productId); 
 
     if (!token) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -808,14 +797,28 @@ const quantityplus = async (req, res) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    // Find the user by ID and update the quantity of the specified product
+    const usercart = await User.findOne(
+        { _id: decoded.id, "cart.products.productId": productId },
+        { _id: 1, "cart.products.$": 1 }
+    );
+    console.log("User:", usercart.cart.products[0].quantity);
+    
+    if (!usercart) {
+        return res.status(404).json({ error: "User not found or product not in the cart" });
+    }
+    const product = await Products.findById(productId);
+    console.log(product.stockcount)
+
+     
+
+    
+if(product.stockcount!==0 && usercart.cart.products[0].quantity<product.stockcount){
     const user = await User.findOneAndUpdate(
       { _id: decoded.id, "cart.products.productId": productId }, // Filter object
       { $inc: { "cart.products.$.quantity": 1 } }, // Increase quantity by 1
       { new: true }
     );
 
-    console.log(user);
 
     if (!user) {
       return res.status(404).json({ error: "User or product not found" });
@@ -825,12 +828,16 @@ const quantityplus = async (req, res) => {
     const totalPrice = user.cart.products.reduce((total, product) => {
       return total + product.productPrice * product.quantity;
     }, 0);
-
     user.cart.total = totalPrice;
-
     await user.save();
 
-    return res.json({ user });
+    return res.json({ user }); 
+}else{
+    return res.json({ message:"No more stock" });
+}
+   
+
+   
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -1090,7 +1097,7 @@ const checkoutfromcart = async (req, res) => {
       stockcount: { $ne: "0" },
     });
 
-    console.log(productsInCart);
+    
 
     let cartTotalNonDisabled;
 
@@ -1551,13 +1558,14 @@ const placeholder = async (req, res) => {
           qty: quantity[index], // Use quantity from the quantities array
           price: product.productPrice,
           image: product.image,
-          orderStatus: "Pending",
-          cancelReason: null,
+          
         })),
         totalAmount: sanitizedTotalAmount,
         orderDate: new Date(),
         shippingAddress: exactAddress,
         paymentMethod: selectedPaymentMethod,
+        orderStatus: "Pending",
+        cancelReason: null,
       });
 
       // Save the updated user document
@@ -1611,13 +1619,14 @@ const saveorder = async (req, res) => {
       qty: quantity[index], // Use quantity from the quantities array
       price: product.productPrice,
       image: product.image,
-      orderStatus: "Pending",
-      cancelReason: null,
+      
     })),
     totalAmount: sanitizedTotalAmount,
     orderDate: new Date(),
     shippingAddress: exactAddress,
     paymentMethod: selectedPaymentMethod,
+    orderStatus: "Pending",
+    cancelReason: null,
   });
 
   // Save the updated user document
@@ -1694,7 +1703,7 @@ const coupenmanage = async (req, res) => {
     
     if (
         matchedCoupon.endDate &&
-        currentDate > new Date(matchedCoupon.endDate)
+        currentDate >= new Date(matchedCoupon.endDate)
     ) {
         return res.json({ success: false, message: "Coupon has expired" });
     }
@@ -1719,7 +1728,9 @@ const coupenmanage = async (req, res) => {
   }
 };
 const ordermanage = async (req, res) => {
-  const token = req.cookies.user_jwt;
+    const token = req.cookies.user_jwt;
+    try{
+  
 
   if (!token) {
     return res.redirect("/login");
@@ -1747,12 +1758,14 @@ const ordermanage = async (req, res) => {
   const userOrders = sortedUserOrders.map((order) => {
     return {
       products: order.products,
-      totalAmount: order.totalAmount,
+      totalAmount: order.totalAmount, 
       orderDate: order.orderDate,
       expectedDeliveryDate: order.expectedDeliveryDate,
       shippingAddress: order.shippingAddress,
       paymentMethod: order.paymentMethod,
-      orderID:order._id
+      orderStatus:order.orderStatus,
+      cancelReason:order.cancelReason,
+      orderID:order._id 
     };
   });
 
@@ -1766,65 +1779,63 @@ const ordermanage = async (req, res) => {
     userOrders,
     totalCartCount,
   });
-};
-
-const cancellreson = async (req, res) => {
-  try {
-    const productId = req.params.id;
-    console.log(productId);
-    const token = req.cookies.user_jwt;
-
-    if (!token) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-
-    // Verify the JWT token to get user ID
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded || !decoded.id) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-
-    const user = await User.findById(decoded.id);
-
-    let foundProduct = null;
-    const { cancelReason } = req.body;
-
-    // Iterate over each order and its products to find the product with the matching productId
-    user.orders.forEach((order) => {
-      order.products.filter((product) => {
-        if (product.productId.toString() === productId) {
-          foundProduct = product;
-          product.orderStatus = "cancelled";
-          product.cancelReason = cancelReason;
-          return; // Exit the loop once the product is found
-        }
-      }); 
-    });
-
-    if (!foundProduct) {
-      return res.status(404).json({ error: "Product not found" });
-    }
-
-    // Access selected cancellation reason from request body
-
-    const product = await Products.findById(productId);
-
-    console.log(product);
-    product.stockcount += 1;
-    await product.save();
-
-    await user.save();
-    // const userEmail = user.orders.find(order => order.products.some(product => product._id.toString() === productId)).shippingAddress.email;
-
-    // Send cancellation email
-    // await sendCancellationEmail(userEmail, foundProduct.name, cancelReason);
-
-    res.redirect("/orders");
-  } catch (error) {
+}catch (error){
     console.error("Error:", error);
     res.status(500).send("Internal Server Error");
   }
-};
+}
+
+
+const cancellreson = async (req, res) => {
+    try {
+      const orderId = req.params.id;
+      const token = req.cookies.user_jwt;
+
+      console.log(orderId);
+      console.log(req.body.cancelReason);
+  
+      if (!token) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+  
+      // Verify the JWT token to get user ID
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (!decoded || !decoded.id) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+  
+      // Find the user by ID and update the order with the specified orderId
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: decoded.id, "orders._id": orderId },
+        { $set: { "orders.$.orderStatus": "cancelled", "orders.$.cancelReason": req.body.cancelReason } },
+        { new: true }
+      ); 
+   
+      if (!updatedUser) {
+        return res.status(404).json({ error: "User or order not found" });
+      }
+  
+      // Update product stock count in Products collection
+      const order = updatedUser.orders.find(order => order._id.toString() === orderId);
+ 
+      // Get all product IDs from the order
+      const productIds = order.products.map(product => product.productId);
+
+      // Increment stock count for each product
+      for (const productId of productIds) {
+        const product = await Products.findById(productId);
+        if (product) {
+            product.stockcount += 1;
+            await product.save(); 
+        }
+    } 
+  
+      res.redirect("/orders");
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  };
 
 const getShopProducts = async (req, res) => {
   try {
@@ -1972,37 +1983,36 @@ const shopsorting = async (req, res) => {
 const downloadinvoice = async (req, res) => {
     try {
         const orderId = req.params.orderId;
-        const productId = req.params.productId;
         console.log(orderId);
-        console.log(productId);
-
         const token = req.cookies.user_jwt;
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await User.findById(decoded.id); 
+        if (!token) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        // Verify the JWT token to get user ID
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded || !decoded.id) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        // Find the user by ID
+        const user = await User.findById(decoded.id);
 
         // Find the order matching the orderId
         const matchingOrder = user.orders.find(order => order._id.toString() === orderId);
-
-        console.log(matchingOrder);
 
         // Handle if the order is not found
         if (!matchingOrder) {
             return res.status(404).json({ error: 'Order not found' });
         }
 
-        // Find the product matching the productId within the order's products array
-        const matchingProduct = matchingOrder.products.find(product => product.productId.toString() === productId);
+        // Get all products from inside the order's products array
+        const products = matchingOrder.products;
 
-        console.log(matchingProduct);
+        let totalAmount = products.reduce((total, product) => total + product.price, 0);
+        console.log(totalAmount);
 
-        // Handle if the product is not found
-        if (!matchingProduct) {
-            return res.status(404).json({ error: 'Product not found in the order' });
-        }
-
-        // Do something with the matching product
-        const date = new Date()
         const options = {
             weekday: 'short',
             year: 'numeric',
@@ -2013,10 +2023,8 @@ const downloadinvoice = async (req, res) => {
         };
 
         const formattedOrderDate = matchingOrder.orderDate.toLocaleString('en-US', options);
-        const formattedInvoiceDate = date.toLocaleString('en-US', options);
-        const price = Math.floor(matchingOrder.totalAmount);
-
-        const invoiceHtml = `
+        // Generate HTML dynamically
+        let invoiceHtml = `
         <html>
         <head>
             <style>
@@ -2065,8 +2073,8 @@ const downloadinvoice = async (req, res) => {
                 <h1>Invoice</h1>
                 <h1 id="logo">Pure Glow</h1>
                 <p>Order ID: ${matchingOrder._id}</p>
-                <p>Order Date: ${formattedOrderDate}</p>
-                <p>Invoice Date: ${formattedInvoiceDate}</p>
+                <p>Order Date: ${matchingOrder.orderDate}</p>
+                <p>Invoice Date: ${formattedOrderDate}</p>
                 <p>Payment mode: ${matchingOrder.paymentMethod}</p>
                 <hr>
                 <h4>Sold by</h4>
@@ -2076,7 +2084,7 @@ const downloadinvoice = async (req, res) => {
                 <p>${matchingOrder.shippingAddress.name}<br>
                    ${matchingOrder.shippingAddress.address}<br>
                    ${matchingOrder.shippingAddress.city}
-                   ${matchingOrder.shippingAddress.district}><br>
+                   ${matchingOrder.shippingAddress.district}<br>
                    ${matchingOrder.shippingAddress.state}
                    ${matchingOrder.shippingAddress.pincode}</p>
                 <hr>
@@ -2090,46 +2098,48 @@ const downloadinvoice = async (req, res) => {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>${matchingProduct.name}</td>
-                            <td>${matchingProduct.qty}</td>
-                            <td>${matchingProduct.price}</td>
-                        </tr>
-                        <!-- Add more rows for additional products if needed -->
+                        ${products.map(product => `
+                            <tr>
+                                <td>${product.name}</td>
+                                <td>${product.qty}</td>
+                                <td>₹${product.price}</td>
+                            </tr>
+                        `).join('')}
                     </tbody>
                 </table>
                 <hr>
-                <p class="total">Total Amount: ${price}</p>
+              
+                <p class="total">Discount: ₹${totalAmount-matchingOrder.totalAmount}</p>
+               
+                <p class="total">Total Amount: ₹${matchingOrder.totalAmount}</p>
             </div>
         </body>
         </html>
         `;
-    
-    // Launch Puppeteer browser
-    const browser = await puppeteer.launch();
-    
-    // Create a new page
-    const page = await browser.newPage();
-    
-    // Set HTML content for the page
-    await page.setContent(invoiceHtml);
-    
-    // Generate PDF
-    const pdfBuffer = await page.pdf({
-        format: 'A4', // or 'Letter' or any other format
-        printBackground: true // Include background graphics
-    });
-    
-    // Close the browser
-    await browser.close();
-    
-    // Set response headers for PDF download
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="invoice.pdf"`);
-    
-    // Send PDF buffer as response
-    res.send(pdfBuffer);
 
+        const browser = await puppeteer.launch();
+
+        // Create a new page
+        const page = await browser.newPage();
+
+        // Set HTML content for the page
+        await page.setContent(invoiceHtml);
+
+        // Generate PDF
+        const pdfBuffer = await page.pdf({
+            format: 'A4', // or 'Letter' or any other format
+            printBackground: true // Include background graphics
+        });
+
+        // Close the browser
+        await browser.close();
+
+        // Set response headers for PDF download
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="invoice.pdf"`);
+
+        // Send PDF buffer as response
+        res.send(pdfBuffer);
 
     } catch (error) {
         console.error('Error:', error);

@@ -96,11 +96,15 @@
                             <a href="/whishlist" class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" ><i class="fas fa-heart heart-icon ok"></i></a>
                             <a href="/cart" class="position-relative me-4 my-auto">
                                 <i class="fa fa-shopping-bag fa-2x"></i>
-                                <% if (totalCartCount) { %>
-                                    <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">
+                               
+                                    <span id="cartcount" class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">
+                                        <% if (totalCartCount) { %>
                                         <%= totalCartCount %>
+                                        <%}else{%>
+                                            0
+                                          <% } %>
                                     </span>
-                                <% } %>
+                               
                             </a>
                             <div class="dropdown">
                                 <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"  aria-expanded="false">
@@ -148,7 +152,6 @@
                 
                 var searchInputValue = document.getElementById('searchInput').value.trim();
         
-                // Check if the input is empty
                 if (searchInputValue === '') {
             
                     return false;
@@ -387,8 +390,11 @@
                         axios.post(`/cart/${productId}`)
                             .then(function (response) {
                                 console.log(response.data.message);
+                                if (response.data.cartcount) {
+                                    document.getElementById("cartcount").innerText = ""
+                                   document.getElementById("cartcount").innerHTML = response.data.cartcount
+                                }
                                 if (response.data.message) {
-                                    // Show cart status message from response
                                     showWishlistStatusMessage(response.data.message);
                                 }
                             })

@@ -138,7 +138,7 @@
                             <th scope="col">Products</th>
                             <th scope="col">Name</th>
                             <th scope="col">Price</th>
-                            <th scope="col"></th>
+                            
                             <th scope="col">Quantity</th>
                            
                             <!-- <th scope="col">Total</th> -->
@@ -163,17 +163,17 @@
                                         </th>
                                         <td>
                                             <p class="mb-0 mt-4"><%= product.productName %></p>
+                                            <% if (product.disable) { %>
+                                                <small class="disabled-message text-danger mt-2 "> Not available now</small>
+                                            <%  }else if(product.stockcount===0) { %>
+                                                <small class="disabled-message text-danger mt-3"> Out Of Stock</small>
+                                            <% } %>
+                                         
                                         </td>
                                         <td>
                                             <p class="mb-0 mt-4"><%= product.productPrice %></p>
                                         </td>
-                                        <td>
-                                            <% if (product.disable) { %>
-                                                <p class="disabled-message text-danger ms-3 mt-4"> Not available now</p>
-                                            <%  }else if(product.stockcount===0) { %>
-                                                <p class="disabled-message text-danger ms-5 mt-4"> Out Of Stock</p>
-                                            <% } %>
-                                        </td>
+                                      
                                         <td>
                                             <div class="input-group">
                                                 <!-- Minus button -->
@@ -193,6 +193,8 @@
                                                     <i class="fa fa-plus"></i>
                                                 </button>
                                             </div>
+                                            <small id="message"  class="disabled-message text-danger mt-4"></small>
+
                                         </td>
                                         <td>
                                             <!-- Delete button form -->
@@ -242,8 +244,11 @@
                                 axios.post(`/quantityplus/${productId}`)
                                     .then(function (response) {
                                         console.log(response.data);
-                                        // Handle success response, if needed
-                                        location.reload(); // Reload the page after updating quantity
+                                        if(response.data.message){
+                                             document.getElementById('message').innerHTML = response.data.message;
+                                            }else{
+                                            location.reload(); 
+                                            }
                                     })
                                     .catch(function (error) {
                                         console.error('Error increasing quantity:', error);

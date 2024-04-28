@@ -336,68 +336,105 @@
                                                 <th>Customer Name</th>
                                                 <th>Payment Info</th>
                                                 <th>Price</th>
-                                                <th>orderdate</th>
+                                                <th>Order Date</th>
                                                 <th>Status</th>
-                                                <th>Address</th>
+                                                <th>Status Update</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <% orders.forEach(order => { %>
-                                                <% order.products.forEach(product => { %>
-                                                    <tr>
-                                                        <td><a href="order-details.html"><strong>#<%= product._id %></strong></a></td>
-                                                        <td>
-                                                            <img src="<%= product.image[0] %>" class="avatar lg rounded me-2" alt="profile-image">
-                                                            <span><%= product.name %></span>
-                                                        </td>
-                                                        <td><%= order.shippingAddress.name %></td>
-                                                        <td><%= order.paymentMethod %></td>
-                                                        <td>₹<%= product.price %></td>
-                                                        <td><%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></td>
-                                                        <td>
+                                                <tr>
+                                                    <td><a href="order-details.html"><strong>#<%= order._id %></strong></a></td>
+                                                    <td>
+                                                        <button class="btn btn-link toggle-products" style="color: rgb(0, 0, 0); font-weight: 700;">Show Products</button>
+                                                        <div class="product-details" style="display: none;">
+                                                            <% order.products.forEach(product => { %>
+                                                                <img src="<%= product.image[0] %>" class="avatar lg rounded me-2" alt="profile-image">
+                                                                <span style="font-weight: 600;"><%= product.name %></span><br>
+                                                                <span style="font-weight: 600;"> ₹<%= product.price %> </span><br>
+                                                                <span style="font-weight: 600;"> Qty: <%= product.qty %> </span><br>
+                                                                
+                                                            <% }); %>
+                                                        </div>
+                                                    </td>
+                                                    <td><%= order.shippingAddress.name %></td>
+                                                    <td><%= order.paymentMethod %></td>
+
+                                                    <td>
+                                                        ₹<%= order.totalAmount %>
+                                                    </td>
+
+                                                    <td><%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></td>
+                                                    <td>
+                                                        <% if (order.orderStatus === "cancelled") { %>
+                                                            <span class="badge bg-danger">Cancelled</span>
+                                                            <span class="badge bg-danger"><%= order.cancelReason %></span>
+                                                        <% } else { %>
+                                                            <% if (order.orderStatus === "delivered") { %>
+                                                                <span class="badge bg-success">Delivered</span>
+                                                            <% } else if(order.orderStatus === "Pending") { %>
+                                                                <span class="badge bg-warning">Pending</span>
+                                                            <% }else{ %>
+                                                                <span class="badge" style="background-color: rgb(56, 161, 46);">Shipped</span>
+                                                                <% } %>
+                                                          <% } %>
+                                                    </td>
+                                                    
+                                                        
+                                                    <td>
+                                                        <form action="/orederstatus" method="post">
                                                             
-                                                            <form action="/orederstatus" method="post">
-                                                                <span class="badge bg-success"><%= product.orderStatus %></span>
-                                                                <% if (product.orderStatus === "cancelled") { %>
-                                                                    <span class="badge bg-success"><%= product.cancelReason %></span>
-                                                                <% } else { %>
-                                                                    <% if (product.orderStatus !== "delivered") { %>
-                                                                    <select class="status-select" name="newStatus">
-                                                                       
-                                                                        <option value="shipped">Shipped</option>
-                                                                        <option value="delivered">Delivered</option>
-                                                                        <option value="cancelled">cancelled</option>
-                                                                    </select>
-                                                                    <input type="hidden" name="orderId" value="<%= order._id %>">
-                                                                    <input type="hidden" name="productId" value="<%= product._id %>">
-                                                                    <button type="submit" style="background-color: rgb(199, 218, 218); border-radius: 10px; border: none;">Update</button>
-                                                                    <% } %>  
-                                                                    <% } %>
-                                                            </form>
-                                                        </td>
-                                                        <td>
-                                                            <h5><%= order.shippingAddress.name %></h5>
-                                                            <p>
-                                                                <%= order.shippingAddress.address %> 
-                                                                <%= order.shippingAddress.city %>
-                                                                <%= order.shippingAddress.district %><br>
-                                                                <%= order.shippingAddress.state %>
-                                                                <%= order.shippingAddress.pincode %>
-                                                            </p>
-                                                            <h6><i class="fas fa-phone-alt" style="margin-right: 10px;"></i></i><%= order.shippingAddress.phone %></h6>
-                                                        </td>
-                                                    </tr>
-                                                <% }); %>
+                                                            <% if (order.orderStatus === "cancelled") { %>
+                                                                <span class="badge bg-danger"><%= order.cancelReason %></span>
+                                                            <% } else { %>
+                                                                <% if (order.orderStatus !== "delivered") { %>
+                                                                <select class="status-select" name="newStatus">
+                                                                   
+                                                                    <option value="shipped">Shipped</option>
+                                                                    <option value="delivered">Delivered</option>
+                                                                    <option value="cancelled">cancelled</option>
+                                                                </select>
+                                                                <input type="hidden" name="orderId" value="<%= order._id %>">
+                                                               
+                                                                <button type="submit" style="background-color: rgb(199, 218, 218); border-radius: 10px; border: none;">Update</button>
+                                                                <% } %>  
+                                                                <% } %> 
+                                                                
+                                                        </form>
+                                                    <br>
+                                                        <h5><%= order.shippingAddress.name %></h5>
+                                                        <p>
+                                                            <%= order.shippingAddress.address %> 
+                                                            <%= order.shippingAddress.city %>
+                                                            <%= order.shippingAddress.district %><br>
+                                                            <%= order.shippingAddress.state %>
+                                                            <%= order.shippingAddress.pincode %>
+                                                        </p>
+                                                        <h6><i class="fas fa-phone-alt" style="margin-right: 10px;"></i><%= order.shippingAddress.phone %></h6>
+                                                    </td>
+                                                </tr>
                                             <% }); %>
                                         </tbody>
                                     </table>
                                 </div>
-                                
                             </div>
+
                         </div>
                     </div> <!-- Row end  -->
                 </div>
             </div>
+
+            <script>
+                document.querySelectorAll('.toggle-products').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const productDetails = button.nextElementSibling;
+                        const buttonText = button.textContent;
+                        productDetails.style.display = productDetails.style.display === 'none' ? 'block' : 'none';
+                        button.textContent = buttonText === 'Show Products' ? 'Hide ' : 'Show Products';
+                    });
+                });
+            </script>
+
             <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {

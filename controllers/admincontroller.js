@@ -530,17 +530,19 @@ const orderslist = async (req, res) => {
             },
             {
                 $project: {
-                    _id: "$orders._id", // Exclude the default MongoDB ID field
-                    userId: "$_id", // Include the userId for reference
+                    _id: "$orders._id",
+                    userId: "$_id",
                     paymentMethod: "$orders.paymentMethod",
+                    orderStatus:"$orders.orderStatus",
+                    totalAmount: "$orders.totalAmount",
                     orderDate: "$orders.orderDate",
                     shippingAddress: "$orders.shippingAddress",
-                    products: "$orders.products"
+                    products: "$orders.products",
                 }
             }
         ]);
 
-        // console.log(usersWithOrders);
+       
 
         res.render('admin/order-list', { orders: usersWithOrders }); // Pass orders as a variable to the template
     } catch (error) {
@@ -548,16 +550,16 @@ const orderslist = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 }
-
+ 
 const orederstatus = async (req, res) => {
     try {
-        console.log("hi");
+        console.log("hi"); 
 
         // Extract order ID, product ID, and new status from request parameters and body
         const { orderId, productId, newStatus } = req.body;
 
-        console.log(newStatus);
-        console.log("orderid", orderId, "productid", productId, newStatus);
+        console.log(newStatus); 
+        console.log("orderid", orderId);
 
         // Find the user based on the order ID
         const user = await User.findOne({ 'orders._id': orderId });
@@ -572,21 +574,15 @@ const orederstatus = async (req, res) => {
         if (!order) {
             return res.status(404).json({ error: 'Order not found' });
         }
- 
-        // Find the product within the order based on product ID
-        const product = order.products.find(product => product._id.toString() === productId);
 
-        if (!product) {
-            return res.status(404).json({ error: 'Product not found in order' });
-        } 
+        console.log(order);
 
-        // Update the order status for the specific product
-        product.orderStatus = newStatus;
+        order.orderStatus = newStatus;
 
         // Save the updated user document
         await user.save();
 
-        // Redirect to the orders list page
+        // Redirect to the orders list page 
         res.redirect('/orederslist');
 
     } catch (error) {
@@ -594,6 +590,9 @@ const orederstatus = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+
+
 
 const couponmanage = async (req, res) => {
     try {
@@ -608,7 +607,7 @@ const couponmanage = async (req, res) => {
         // Render the coupon list page and pass the coupons array
         res.render('admin/coupons-list', { coupons });
     } catch (error) {
-        console.error(error);
+        console.error(error); 
         res.status(500).send('Error retrieving coupon data.');
     }
 };

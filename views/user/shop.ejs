@@ -130,46 +130,51 @@
     return true; 
 }
             </script>
-            <div class="container px-0 ">
-                <nav class="navbar navbar-ligh bg-white navbar-expand-xl  ps-4 pe-4">
-                    <a href="index.html" class="navbar-brand"><h1 class="text-primary display-6">Pure Glow</h1></a>
-                    <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                        <span class="fa fa-bars text-primary"></span>
-                    </button>
+           <div class="container px-0">
+            <nav class="navbar navbar-ligh bg-white navbar-expand-xl ps-4 pe-4">
+                <a href="index.html" class="navbar-brand"><h1 class="text-primary display-6">Pure Glow</h1></a>
+                <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                    <span class="fa fa-bars text-primary"></span>
+                </button>
+                
+                <form id="searchForm" action="/getsearchproduct" method="get" class="search-form " onsubmit="return validateSearch()">
+                   
+                        <input id="searchInput" class="form-control border-2 border-secondary " style="width: 60%; " name="search" type="text" placeholder="Search">
+                        <button type="submit" id="button" class="btn btn-primary border-2 border-secondary  text-white"><i class="bi bi-search"></i></button>
                     
-                    <form id="searchForm" action="/getsearchproduct" method="get" class="search-form" onsubmit="return validateSearch()">
-                        <input id="searchInput" class="form-control border-2 border-secondary w-75 h-50 py-3 px-4" name="search" type="text" placeholder="Search">
-                        <button type="submit" id="button" class="btn btn-primary border-2 border-secondary py-3 px-4 text-white" style="height: 55px;"><i class="bi bi-search"></i></button>
-                    </form>
-                    
-                    <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
-                        <div class="navbar-nav mx-auto">
-                            <a href="/" class="nav-item nav-link">Home</a>
-                            <!-- <a href="shop.html" class="nav-item nav-link active">Shop</a> -->
-                            <!-- <a href="shop-detail.html" class="nav-item nav-link">Shop Detail</a> -->
-                            <div class="nav-item dropdown">
-                                <a href="#" class="nav-link ">shop</a>
-                                
-                            </div>
-                            <!-- <a href="/contact" class="nav-item nav-link">Contact</a> -->
+                </form>
+                
+                <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
+                    <div class="navbar-nav mx-auto">
+                        <a href="/" class="nav-item nav-link">Home</a>
+                        <!-- <a href="shop.html" class="nav-item nav-link active">Shop</a> -->
+                        <!-- <a href="shop-detail.html" class="nav-item nav-link">Shop Detail</a> -->
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link ">shop</a>
                         </div>
-                        <div class="d-flex m-3 me-0">
-                            <a href="/whishlist" class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" ><i class="fas fa-heart heart-icon ok"></i></a>
-                            <a href="/cart" class="position-relative me-4 my-auto">
-                                <i class="fa fa-shopping-bag fa-2x"></i>
-                              
-                               
-                                    <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">
-                                        <%= totalCartCount %>
-                                    </span>
-                                                            </a>
-                            <a href="/profile" class="my-auto">
-                                <i class="fas fa-user fa-2x"></i>
-                            </a>
-                        </div>
+                        <!-- <a href="/contact" class="nav-item nav-link">Contact</a> -->
                     </div>
-                </nav>
-            </div>
+                    <div class="d-flex m-3 me-0">
+                        <a href="/whishlist" class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4">
+                            <i class="fas fa-heart heart-icon ok"></i>
+                        </a>
+                        <a href="/cart" class="position-relative me-4 my-auto">
+                            <i class="fa fa-shopping-bag fa-2x"></i>
+                            <span id="cartcount" class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">
+                                <% if (totalCartCount) { %>
+                                    <%= totalCartCount %>
+                                <% } else { %>
+                                    0
+                                <% } %>
+                            </span>
+                        </a>
+                        <a href="/profile" class="my-auto">
+                            <i class="fas fa-user fa-2x"></i>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </div>
         </div>
         <!-- Navbar End -->
 
@@ -492,12 +497,15 @@ axios.get(`/shopsort/${encodeURIComponent(category)}`, {
                     console.log(productId);
                                 axios.post(`/cart/${productId}`)
                                    .then(function (response) {
-                                        console.log(response.data.message);
-                       
-                                           // Show wishlist status message from response
+                                        console.log(response.data.cartcount);
+                                        if (response.data.cartcount) {
+                                     document.getElementById("cartcount").innerText = response.data.cartcount
+                                    }
+                                           
                                           showWishlistStatusMessage(response.data.message);
-                                         // Optionally, update UI based on response
-                       })
+                                      
+                                         
+                                            })
                                     .catch(function (error) {
                                   console.error('Error:', error);
                        });

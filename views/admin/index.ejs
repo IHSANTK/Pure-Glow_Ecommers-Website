@@ -1052,7 +1052,7 @@
                                             <% latestOrders.forEach(order => { %>
                                                 <% order.products.forEach(product => { %>
                                                     <tr>
-                                                        <td><a href="order-details.html"><strong>#<%= product._id %></strong></a></td>
+                                                        <td><a href="order-details.html"><strong>#<%= order._id %></strong></a></td>
                                                         <td>
                                                             <img src="<%= product.image[0] %>" class="avatar lg rounded me-2" alt="profile-image">
                                                             <span><%= product.name %></span>

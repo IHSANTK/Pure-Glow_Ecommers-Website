@@ -33,54 +33,25 @@
     <!-- Template Stylesheet -->
     <link href="/css/style.css" rel="stylesheet">
     <style>
-        /* Your custom styles here */
-        .order-container {
-            display: flex;
-            justify-content: center;
-            
-            flex-direction: column;
-           
-       
+        .product-details{
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
         }
-
-        .order-details {
-            margin-left: 20px;
-        }
-
-        .product-info {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .product-image {
-            margin-right: 20px;
-          
-            
-            
-        }
-
-        .address-info {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-
-        .cancel-form {
-            margin-top: 20px;
-        }
-
-        .product-description {
-            margin-left: 20px; /* Adjust this value as needed */
-        }
+         .view-details-btn{
+            margin-left: 5%;
+             background-color: 
+             rgb(145, 204, 133);
+              border: none;
+               color: rgb(0, 0, 0);
+               font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+              
+         } 
     </style>
     
 </head>
 
-<body style="background-color: aliceblue;">
+<body style="background-color: rgb(243, 243, 243)">
     <div class="container-fluid fixed-top ">
-        <div class="container topbar bg-primary d-none d-lg-block">
+        
              <!-- <div class="d-flex justify-content-between">
                  <div class="top-info ps-2">
                     <small class="me-3"><i class="fas fa-map-marker-alt me-2 text-secondary"></i> <a href="#" class="text-white">123 Street, New York</a></small>
@@ -92,7 +63,7 @@
                     <a href="#" class="text-white"><small class="text-white ms-2">Sales and Refunds</small></a>
                 </div>
             </div> -->
-         </div>
+         
         <div class="container px-0 ">
             <nav class="navbar navbar-ligh bg-white navbar-expand-xl  ps-4 pe-4">
                 <a href="index.html" class="navbar-brand"><h1 class="text-primary display-6">Pure Glow</h1></a>
@@ -150,112 +121,122 @@
     </div>
     <!-- Modal Search End -->
    
-<h2 style="margin-left: 10%; margin-top: 12%;">My Orders</h2>
-<div class="container"> <!-- Set container-lg for lg and xl screens -->
-    <div class="row">
-        <div class="col-12 col-xl-6 col-lg-6">
-    <div class="order-container">
-        <% if (userOrders.length > 0) { %>
-            <% userOrders.forEach(order => { %>
-                <% order.products.forEach(product => { %>
-                    <div class="order" style="background-color: rgb(224, 236, 177); padding: 10px; border-radius: 10px; margin-bottom: 15px;">
-                        <div class="product-info ps-5">
-                            <div class="product-details  " >
-                                <div class="order-header">
-                                    <p><%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
-                                </div>
-                                <div class="product-info">
-                                    <div class="product-image">
-                                        <a href="/productveiw/<%= product.productId %>">
-                                            <img src="<%= product.image[0] %>" alt="Product Image" style="max-width: 100px;">
-                                        </a>
+<h2 style="margin-left: 10%; margin-top: 10%;">My Orders</h2>
+<div class="container ">
+  <div class="col-12 col-xl-9 d-flex flex-column justify-content-center" id="order-container">
+    <% if (userOrders.length > 0) { %>
+      <% userOrders.forEach((order, index) => { %>
+        <div class="order" style="background-color: rgb(255, 255, 255); padding: 10px; margin-bottom: 15px; border: .5px solid rgb(190, 190, 190);">
+          <div class="product-info d-flex justify-content-center" style="width: 100%; align-items: center;">
+            <div class="product-details p-3 mt-3 bg-light" style="width: 90%;">
+              <div class="order-header">
+                <p><%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
+              </div>
+              <div class="product-infoo">
+                <div class="product-image d-flex">
+                  <a href="/productveiw/<%= order.products[0].productId %>">
+                    <img src="<%= order.products[0].image[0] %>" alt="Product Image" style="max-width: 100px;">
+                  </a>
+                  <h4 class="ms-5 mt-4"><%= order.products[0].name %></h4>
+                  <div class="product-description mt-4 me-5" style="margin-left: 7%;">
+                    <% if (order.orderStatus === 'delivered') { %>
+                      <p style="color: rgb(0, 182, 0);">Delivered</p>
+                    <% } else if (order.orderStatus === 'cancelled') { %>
+                      <p style="color: red;">Cancelled</p>
+                    <% } else if (order.orderStatus === 'shipped') { %>
+                      <p style="color: rgb(10, 158, 42);">Shipped</p>
+                    <% } else { %>
+                      <p style="color: orange;">Pending</p>
+                    <% } %>
+                    </div>
+                </div>
+                <% if (order.products.length > 1) { %>
+                  <a class="view-details mt-2 ms-1" style="color: rgb(104, 104, 104); font-weight: 300; text-decoration: none;" onclick="toggleDetails(false)">+<%= order.products.length - 1 %> more</a>
+                <% } %>
+              </div>
+            </div>
+          </div>
+          <button class="view-details-btn mt-2" style="" onclick="toggleDetails(this)">View Details</button>
+
+                            <div class="additional-info col-12" style="display: none;">
+                                <!-- Display additional order details -->
+                                <% order.products.forEach(product => { %>
+                                    <div class="product-info p-2 mt-2 d-flex " style="background-color: rgb(133, 157, 168); width: 100%;">
+                                        <div class="product-image">
+                                            <a href="/productveiw/<%= product.productId %>">
+                                                <img src="<%= product.image[0] %>" alt="Product Image" style="max-width: 100px;">
+                                            </a>
+                                        </div>
+                                        <div class="product-description">
+                                            <h4 class="ps-5"><%= product.name %></h4>
+                                            <p class="ps-5 mt-3">Price: ₹<%= product.price %></p>
+                                        </div>
                                     </div>
-                                    <div class="product-description">
-                                        <h2><%= product.name %></h2>
-                                        <% if (product.orderStatus === 'cancelled') { %>
-                                            <span style=""><span style="color: red;"> <%= product.orderStatus %></span></span>
-                                        <% } else if (product.orderStatus === 'delivered') { %>
-                                            <span style=""><strong><span style="color: rgb(11, 167, 63);"> <%= product.orderStatus %></span></strong></span>
-                                        <% } else { %>
-                                            <p> <%= product.orderStatus %></p>
-                                        <% } %>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="additional-info" style="display: none;">
-                            <div class="product-info">
-                                <div class="product-image">
-                                    <a href="/productveiw/<%= product.productId %>">
-                                        <img src="<%= product.image[0] %>" alt="Product Image" style="max-width: 100px;">
-                                    </a>
-                                </div>
+                                <% }); %>
                                 <div class="order-details">
-                                    <h2><%= product.name %></h2>
-                                    <% if (order.products.length !== 1) { %>
-                                        <% if (product.qty!==1) { %>
-                                        <p>Quantity: <%= product.qty %></p>
-                                        <% } %>
-                                    <% } %>
-                                    <p>Price: <%= product.price %></p>
                                     <p>Order Date: <%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
                                     <% const orderDate = new Date(order.orderDate);
                                     const expectedDeliveryDate = new Date(orderDate);
                                     expectedDeliveryDate.setDate(orderDate.getDate() + 4); %>
                                     <p>Expected Delivery Date: <%= expectedDeliveryDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
                                     <p>Payment Method: <%= order.paymentMethod %></p>
-                                    <% if (product.orderStatus === 'cancelled') { %>
-                                        <span >Order Status:<span style="color: red;"> <%= product.orderStatus %></span></span>
-                                        <p class="mt-3">Cancel Reason: <%= product.cancelReason %></p>
-                                    <% } else if (product.orderStatus === 'delivered') { %>
-                                        <span >Order Status:<span style="color: rgb(11, 167, 63);"><strong> <%= product.orderStatus %></strong></span></span>
-                                    <% } else { %>
-                                        <p>Order Status: <%= product.orderStatus %></p>
+                                    <!-- Show order status with color -->
+                                    <% if (order.orderStatus === 'delivered') { %>
+                                        <p style="color: rgb(0, 182, 0);">Delivered</p>
+                                    <% } else if (order.orderStatus === 'cancelled') { %>
+                                        <p style="color: red;">Cancelled</p>
+                                        <p>Cancel Reason: <%= order.cancelReason %></p>
+                                    <% } else if(order.orderStatus === 'Shipped') { %>
+                                        <p style="color: orange;">Shipped</p>
+                                    <% } else{%>
+                                        <p style="color: rgb(3, 110, 52);">Pending</p>
                                     <% } %>
                                 </div>
-                            </div>
-                            <div class="address-info">
-                                <h4>Shipping Address</h4><br>
-                                <h5> <%= order.shippingAddress.name %></h5>
-                                <p><i class="fas fa-map-marker-alt"></i><br><%= order.shippingAddress.address %>,
-                                    <%= order.shippingAddress.city %>,
-                                    <%= order.shippingAddress.district %> <br>
-                                    <%= order.shippingAddress.state %>
-                                    <%= order.shippingAddress.pincode %></p>
-                                <h6><i class="fas fa-phone-alt"></i> <%= order.shippingAddress.phone %></h6>
-                                <% if (product.orderStatus !== 'delivered') { %>
-                                <form id="cancelForm" class="cancel-form" action="/cancellreson/<%=product.productId%>" method="post">
-                                    <div class="form-group">
-                                        <label for="cancelReasonSelect">Cancel Product</label>
-                                        <select class="form-control" id="cancelReasonSelect" name="cancelReason" required>
-                                            <option selected disabled>Select a reason</option>
-                                            <option value="size Not Match">Different variant</option>
-                                            <option value="Change My Mind">Change My Mind</option>
-                                            <option value="Product Damages">Product Damage</option>
-                                            <!-- Add more reasons as needed -->
-                                        </select>
-                                    </div>
-                                    <!-- Error message container -->
-                                    <div id="errorMessage" style="display: none; color: red;">Please select a reason before submitting.</div>
-                                    <button type="submit" class="btn btn-danger">Cancel</button>
-                                </form>
-                                <form action="/downloadinvoice/<%= order.orderID %>/<%= product.productId %>" method="post">
-                                    <button type="submit" class="btn border mt-2"> Download Invoice</button>
-                                </form>
+                                <div class="address-info p-4" style="background-color: #f8f9fa ;">
+                                    
+                                    <h4>Shipping Address</h4><br>
+                                    <h5><%= order.shippingAddress.name %></h5>
+                                    <p><i class="fas fa-map-marker-alt"></i><br><%= order.shippingAddress.address %>,
+                                        <%= order.shippingAddress.city %>,
+                                        <%= order.shippingAddress.district %> <br>
+                                        <%= order.shippingAddress.state %>
+                                        <%= order.shippingAddress.pincode %></p>
+                                    <h6><i class="fas fa-phone-alt"></i> <%= order.shippingAddress.phone %></h6>
+                                </div>
+                                <% if (order.orderStatus !== 'delivered' && order.orderStatus !== 'cancelled') { %>
+                                    <!-- Display cancellation form and download invoice button -->
+                                    <form id="cancelForm" class="cancel-form" action="/cancellreson/<%= order.orderID %>" method="post">
+                                        <div class="form-group">
+                                            <label for="cancelReasonSelect">Cancel Product</label>
+                                            <select class="form-control" id="cancelReasonSelect" name="cancelReason" required>
+                                                <option selected disabled>Select a reason</option>
+                                                <option value="size Not Match">Different variant</option>
+                                                <option value="Change My Mind">Change My Mind</option>
+                                                <option value="Product Damages">Product Damage</option>
+                                                <!-- Add more reasons as needed -->
+                                            </select>
+                                        </div>
+                                        <!-- Error message container -->
+                                        <div id="errorMessage" style="display: none; color: red;">Please select a reason before submitting.</div>
+                                        <button type="submit" class="btn btn-danger">Cancel</button>
+                                    </form>
+                                    
                                 <% } %>
+                                <% if (order.orderStatus !== 'cancelled') { %>
+                                <form action="/downloadinvoice/<%= order.orderID %>" method="post">
+                                    <button type="submit" class="btn bg-success text-light mt-2">Download Invoice</button>
+                                </form>
+                                    <!-- Display all product details -->
+                               <% } %>     
                                
                             </div>
+                            
                         </div>
-                        <button class="btn view-details-btn mt-2" style="color: blue;" onclick="toggleDetails(this)">View Details</button>
-                    </div>
-                <% }); %>
-                
-            <% }); %>
-        <% } else { %>
-            
-            <a class="btn border-secondary rounded-pill py-3 px-5 mt-3" href="/shop">Shop Now</a>
-        <% } %>
-    </div>
+                    <% }); %>
+                <% } else { %>
+                    <a class="btn border-secondary rounded-pill py-3 px-5 mt-3" href="/shop">Shop Now</a>
+                <% } %>
+            </div>
 </div>
 </div>
 </div>
