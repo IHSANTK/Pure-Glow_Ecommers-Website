@@ -502,9 +502,7 @@ const getproductdetails = async (req, res) => {
     const category = req.params.category;
     const sortingOption = req.query.sorting;
 
-    console.log("yes");
-
-    // Define the filter based on category
+  
     const filter = { category: category };
 
     const sortCriteria = {};
@@ -522,7 +520,6 @@ const getproductdetails = async (req, res) => {
       });
     }
 
-    // Get user information if available
     let user = undefined;
     if (req.cookies.user_jwt) {
       jwt.verify(
@@ -571,28 +568,37 @@ const addToCart = async (req, res) => {
 
     // Find the product by ID
     const product = await Products.findOne({ _id: productId });
+
+    console.log("gfdhgfgfdg",product);
     if (!product) {
       return res.status(404).send("Product not found");
     }
 
     // Find the user by ID
     const user = await User.findById(userId);
+
+   
     if (!user) {
       return res.status(404).send("User not found");
     }
+    
 
     const existingProduct = user.cart.products.find(
       (item) => item.productId == productId
     );
 
-    console.log("hi");
+    
     if (existingProduct) {
+
+     if(product.stockcount !==0 && existingProduct.quantity<product.stockcount){
       console.log("exting", existingProduct);
       existingProduct.quantity += 1;
-    } else {
-      // If the product doesn't exist, add it to the cart
-      // const productData = product.find(prod => prod._id == productId);
+     }else{
+       return res.json({ message: "No Availble Stock" });
+     }
 
+    } else {
+    
       console.log("product data", product);
       user.cart.products.push({
         productId: product._id,
@@ -605,11 +611,10 @@ const addToCart = async (req, res) => {
     }, 0);
 
     user.cart.total = totalPrice;
+   
+
     let cartcount = user.cart.products.length
 
-    console.log(cartcount);
-
-    // Save the updated user cart
     await user.save();
 
     res.json({ message: "Product added to cart",cartcount });
@@ -1411,8 +1416,7 @@ const editAddressFormcheckout = async (req, res) => {
 };
 
 const placeholder = async (req, res) => {
-  const { selectedAddressId, selectedPaymentMethod, productIds, totalamout } =
-    req.body;
+  const { selectedAddressId, selectedPaymentMethod, productIds, totalamout } =req.body;
 
   try {
     const token = req.cookies.user_jwt;
@@ -1439,11 +1443,9 @@ const placeholder = async (req, res) => {
     if (!exactAddress) {
       return res.status(404).json({ error: "Address not found" });
     }
-
-    // Find only the products whose IDs match the provided productIds within the 'products' array field
     const products = await Products.find();
 
-    // console.log(products);
+
 
     if (!products || products.length === 0) {
       return res.status(404).json({ error: "Products not found" });
@@ -1452,8 +1454,6 @@ const placeholder = async (req, res) => {
     let exactProducts = [];
     let cartProduct = null;
 
-    // let totalAmount ='' ;
-    // let totalPrice =[];
     let quantity = [];
 
     if (productIds.length === 1) {
@@ -1461,7 +1461,6 @@ const placeholder = async (req, res) => {
         (p) => p.productId.toString() === productIds[0]
       );
 
-      //    console.log("cartProduct",cartProduct);
     } else {
       cartProduct = user.cart.products.filter((product) =>
         productIds.includes(product.productId.toString())
@@ -1476,9 +1475,11 @@ const placeholder = async (req, res) => {
           // product.stockcount-1
 
           exactProducts.push(product);
+
           if (product.stockcount > 0) {
             product.stockcount -= 1;
             await product.save();
+
           } else {
             // If the stockcount is already 0, do something (like logging or throwing an error)
           }
@@ -1493,16 +1494,19 @@ const placeholder = async (req, res) => {
 
         if (cartProduct) {
           const product = await Products.findById(productId);
-          // console.log("aaaaaaaaaaaaaaaaa");
+          
           if (product && !product.disable) {
             exactProducts.push(product);
 
             const cartQuantity = cartProduct.quantity;
 
+
             quantity.push(cartQuantity);
+
             if (product.stockcount > 0) {
-              product.stockcount -= 1;
+              product.stockcount -= cartQuantity;
               await product.save();
+
             } else {
               // If the stockcount is already 0, do something (like logging or throwing an error)
             }
@@ -1527,7 +1531,7 @@ const placeholder = async (req, res) => {
     if (selectedPaymentMethod === "Prepaid") {
       try {
         // Generate Razorpay order (assuming this function returns the order details)
-        console.log("ooooooooooooooooooooooooooook");
+        console.log("ooooook");
         const razorpayResponse = await helpers.generateRazorpay(
           user._id,
           sanitizedTotalAmount
@@ -1790,9 +1794,6 @@ const cancellreson = async (req, res) => {
     try {
       const orderId = req.params.id;
       const token = req.cookies.user_jwt;
-
-      console.log(orderId);
-      console.log(req.body.cancelReason);
   
       if (!token) {
         return res.status(401).json({ error: "Unauthorized" });
@@ -1807,28 +1808,36 @@ const cancellreson = async (req, res) => {
       // Find the user by ID and update the order with the specified orderId
       const updatedUser = await User.findOneAndUpdate(
         { _id: decoded.id, "orders._id": orderId },
-        { $set: { "orders.$.orderStatus": "cancelled", "orders.$.cancelReason": req.body.cancelReason } },
+        {
+          $set: {
+            "orders.$.orderStatus": "cancelled",
+            "orders.$.cancelReason": req.body.cancelReason,
+          },
+        },
         { new: true }
-      ); 
-   
+      );
+  
       if (!updatedUser) {
         return res.status(404).json({ error: "User or order not found" });
       }
   
-      // Update product stock count in Products collection
-      const order = updatedUser.orders.find(order => order._id.toString() === orderId);
- 
-      // Get all product IDs from the order
-      const productIds = order.products.map(product => product.productId);
-
-      // Increment stock count for each product
-      for (const productId of productIds) {
+      const order = updatedUser.orders.find(
+        (order) => order._id.toString() === orderId
+      );
+  
+      for (const produc of order.products) {
+        const productId = produc.productId;
+        const quantity = produc.qty;
+  
         const product = await Products.findById(productId);
-        if (product) {
-            product.stockcount += 1;
-            await product.save(); 
+  
+        if (!product) { 
+          continue; 
         }
-    } 
+  
+        product.stockcount += quantity;
+        await product.save();
+      }
   
       res.redirect("/orders");
     } catch (error) {
@@ -1840,13 +1849,13 @@ const cancellreson = async (req, res) => {
 const getShopProducts = async (req, res) => {
   try {
     const { search } = req.query;
-    const sortingOption = req.query.sorting;
 
     let categorProducts = [];
     let uniqueCategories = [];
 
     if (search && search.trim().length >= 3) {
-      const searchTerm = new RegExp(search, "i"); // Case-insensitive search term
+      const searchTerm = new RegExp(search, "i"); 
+      console.log(searchTerm);
 
       const data = await Products.find({
         $or: [{ category: searchTerm }, { productName: searchTerm }],
@@ -1874,6 +1883,7 @@ const getShopProducts = async (req, res) => {
         async (err, decodedToken) => {
           if (!err) {
             req.user = decodedToken;
+
             user = await User.findOne({ _id: req.user.id });
           }
           if (categorProducts.length > 0) {
@@ -1897,25 +1907,6 @@ const getShopProducts = async (req, res) => {
           }
         }
       );
-    } else {
-      if (categorProducts.length > 0) {
-        return res.render("user/shop", {
-          categor: categorProducts,
-          uniqueCategories,
-          totalCartCount: req.totalCartCount,
-          cartcount: req.cartcount,
-          user,
-        });
-      } else {
-        return res.render("user/shop", {
-          errorMessage: "Products Not Found!",
-          categor: categorProducts,
-          uniqueCategories,
-          cartcount: req.cartcount,
-          user,
-          totalCartCount: req.totalCartCount,
-        });
-      }
     }
   } catch (error) {
     console.error(error);
@@ -1928,19 +1919,14 @@ const shopsorting = async (req, res) => {
     const category = req.params.category;
     const sortingOption = req.query.sorting;
 
-    console.log("lllll");
-    console.log(category);
-    console.log(sortingOption);
-
-    // Define filter based on category
+  
     const filter = { category: category };
 
-    // Define sort criteria based on sorting option
     const sortCriteria = {};
     if (sortingOption === "lowToHigh") {
-      sortCriteria.productPrice = 1; // Ascending order
+      sortCriteria.productPrice = 1; 
     } else if (sortingOption === "highToLow") {
-      sortCriteria.productPrice = -1; // Descending order
+      sortCriteria.productPrice = -1; 
     }
 
     const categorProducts = await Products.find(filter).sort(sortCriteria);
@@ -1989,40 +1975,41 @@ const downloadinvoice = async (req, res) => {
         if (!token) {
             return res.status(401).json({ error: "Unauthorized" });
         }
-
-        // Verify the JWT token to get user ID
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         if (!decoded || !decoded.id) {
             return res.status(401).json({ error: "Unauthorized" });
         }
 
-        // Find the user by ID
         const user = await User.findById(decoded.id);
 
-        // Find the order matching the orderId
+
         const matchingOrder = user.orders.find(order => order._id.toString() === orderId);
 
-        // Handle if the order is not found
         if (!matchingOrder) {
             return res.status(404).json({ error: 'Order not found' });
         }
 
-        // Get all products from inside the order's products array
         const products = matchingOrder.products;
 
-        let totalAmount = products.reduce((total, product) => total + product.price, 0);
-        console.log(totalAmount);
+        console.log("Products:", products); 
+        
+        const totalAmount = products.reduce((total, product) => total + (product.price * product.qty), 0);
+        
+        console.log("Total Amount:", totalAmount);
 
         const options = {
             weekday: 'short',
             year: 'numeric',
             month: 'short',
             day: '2-digit',
-            hour: 'numeric',
-            minute: 'numeric'
+            hour: 'numeric', 
+            minute: 'numeric',
+            second: 'numeric'
         };
-
+        
         const formattedOrderDate = matchingOrder.orderDate.toLocaleString('en-US', options);
+        const invoicedtae =  new Date().toLocaleString('en-US', options);
+
         // Generate HTML dynamically
         let invoiceHtml = `
         <html>
@@ -2073,8 +2060,8 @@ const downloadinvoice = async (req, res) => {
                 <h1>Invoice</h1>
                 <h1 id="logo">Pure Glow</h1>
                 <p>Order ID: ${matchingOrder._id}</p>
-                <p>Order Date: ${matchingOrder.orderDate}</p>
-                <p>Invoice Date: ${formattedOrderDate}</p>
+                <p>Order Date: ${formattedOrderDate}</p>
+                <p>Invoice Date: ${invoicedtae}</p>
                 <p>Payment mode: ${matchingOrder.paymentMethod}</p>
                 <hr>
                 <h4>Sold by</h4>
@@ -2108,7 +2095,7 @@ const downloadinvoice = async (req, res) => {
                     </tbody>
                 </table>
                 <hr>
-              
+                <p class="total">Total: ₹${totalAmount}</p>
                 <p class="total">Discount: ₹${totalAmount-matchingOrder.totalAmount}</p>
                
                 <p class="total">Total Amount: ₹${matchingOrder.totalAmount}</p>

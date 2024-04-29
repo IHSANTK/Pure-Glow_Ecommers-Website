@@ -34,12 +34,12 @@ const admindashbord = async (req, res) => {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             if (decoded && decoded.id) {
                 // Count users where orders field is not null
-                let countUsersWithOrders = await User.countDocuments({ orders: { $ne: null } });
+                let countUsersWithOrders = await User.countDocuments();
 
                 // Aggregate to count the total number of orders across all users
                 let totalOrdersCount = await User.aggregate([
                     { 
-                        $match: { orders: { $exists: true, $ne: null } } // Match documents where orders field exists and is not null
+                        $match: { orders: { $exists: true, $ne: null } } 
                     },
                     {
                         $group: {
@@ -52,54 +52,55 @@ const admindashbord = async (req, res) => {
                     const latestOrders = await User.aggregate([
                         {
                             $match: {
-                                orders: { $exists: true, $ne: null } // Filter users with non-empty orders
+                                orders: { $exists: true, $ne: null }
                             }
                         }, 
                         {
-                            $unwind: "$orders" // Deconstruct the orders array
+                            $unwind: "$orders" 
                         },
                         {
                             $project: {
-                                _id: "$orders._id", // Exclude the default MongoDB ID field
-                                userId: "$_id", // Include the userId for reference
+                                _id: "$orders._id",
+                                userId: "$_id",
                                 paymentMethod: "$orders.paymentMethod",
                                 orderDate: "$orders.orderDate",
                                 shippingAddress: "$orders.shippingAddress",
-                                products: "$orders.products"
-                            }
+                                products: "$orders.products",
+                                totalAmount:"$orders.totalAmount",
+                                orderStatus:"$orders.orderStatus"
+
+                             }
                         },
                         {
-                            $sort: { orderDate: -1 } // Sort by orderDate in descending order (latest first)
+                            $sort: { orderDate: -1 } 
                         },
                         {
-                            $limit: 10 // Limit to only the latest 10 orders
+                            $limit: 10 
                         }
                     ]);
 
                     const latestOrdersforcategory = await User.aggregate([
                         {
                             $match: {
-                                orders: { $exists: true, $ne: null } // Filter users with non-empty orders
+                                orders: { $exists: true, $ne: null } 
                             }
                         },
                         {
-                            $unwind: "$orders" // Deconstruct the orders array
+                            $unwind: "$orders" 
                         },
                         {
-                            $unwind: "$orders.products" // Deconstruct the products array within each order
+                            $unwind: "$orders.products" 
                         },
                         {
                             $group: {
-                                _id: "$orders.products.category", // Group by category
-                                count: { $sum: 1 } // Count products for each category
+                                _id: "$orders.products.category", 
+                                count: { $sum: 1 } 
                             }
                         }
                     ]);
                     
-                    // Initialize an object to hold category-based order counts
                     let orderCounts = {};
                     
-                    // Iterate through the latestOrdersforcategory array and assign counts to respective properties in the orderCounts object
                     latestOrdersforcategory.forEach(category => {
                         orderCounts[category._id] = category.count;
                     });

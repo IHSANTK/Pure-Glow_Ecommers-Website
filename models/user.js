@@ -20,8 +20,7 @@ const productSchema = new mongoose.Schema({
     qty: { type: Number, default: 1 },
     price: { type: Number,  },
     image: [String],
-    orderStatus: { type: String, default: "Pending" },
-    cancelReason: String,
+    
 }); 
 
 const orderSchema = new mongoose.Schema({
@@ -31,6 +30,8 @@ const orderSchema = new mongoose.Schema({
     expectedDeliveryDate: String,
     shippingAddress: addressSchema,
     paymentMethod: { type: String, required: true },
+    orderStatus: { type: String, default: "Pending" },
+    cancelReason: String,
 });
 
 const userSchema = new mongoose.Schema({

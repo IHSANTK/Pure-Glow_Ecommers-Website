@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Pure Glow</title>
+    <title>My Orders</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -39,12 +39,13 @@
          .view-details-btn{
             margin-left: 5%;
              background-color: 
-             rgb(145, 204, 133);
+             rgb(173, 236, 161);
               border: none;
                color: rgb(0, 0, 0);
                font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
               
          } 
+
     </style>
     
 </head>
@@ -128,7 +129,7 @@
       <% userOrders.forEach((order, index) => { %>
         <div class="order" style="background-color: rgb(255, 255, 255); padding: 10px; margin-bottom: 15px; border: .5px solid rgb(190, 190, 190);">
           <div class="product-info d-flex justify-content-center" style="width: 100%; align-items: center;">
-            <div class="product-details p-3 mt-3 bg-light" style="width: 90%;">
+            <div class="product-details p-3 mt-3 bg-light" st style="width: 90%;">
               <div class="order-header">
                 <p><%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
               </div>
@@ -140,13 +141,13 @@
                   <h4 class="ms-5 mt-4"><%= order.products[0].name %></h4>
                   <div class="product-description mt-4 me-5" style="margin-left: 7%;">
                     <% if (order.orderStatus === 'delivered') { %>
-                      <p style="color: rgb(0, 182, 0);">Delivered</p>
+                      <p style="color: rgb(0, 182, 0);font-weight: 700;">Delivered</p>
                     <% } else if (order.orderStatus === 'cancelled') { %>
-                      <p style="color: red;">Cancelled</p>
+                      <p style="color: red;font-weight: 700;">Cancelled</p>
                     <% } else if (order.orderStatus === 'shipped') { %>
-                      <p style="color: rgb(10, 158, 42);">Shipped</p>
+                      <p style="color: rgb(10, 158, 42);font-weight: 700;">Shipped</p>
                     <% } else { %>
-                      <p style="color: orange;">Pending</p>
+                      <p style="color: orange;font-weight: 700;">Pending</p>
                     <% } %>
                     </div>
                 </div>
@@ -161,7 +162,7 @@
                             <div class="additional-info col-12" style="display: none;">
                                 <!-- Display additional order details -->
                                 <% order.products.forEach(product => { %>
-                                    <div class="product-info p-2 mt-2 d-flex " style="background-color: rgb(133, 157, 168); width: 100%;">
+                                    <div class="product-info p-2 mt-2 d-flex " style="background-color: rgb(240, 240, 240); width: 100%; box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);">
                                         <div class="product-image">
                                             <a href="/productveiw/<%= product.productId %>">
                                                 <img src="<%= product.image[0] %>" alt="Product Image" style="max-width: 100px;">
@@ -170,29 +171,46 @@
                                         <div class="product-description">
                                             <h4 class="ps-5"><%= product.name %></h4>
                                             <p class="ps-5 mt-3">Price: ₹<%= product.price %></p>
+                                            
+                                            <p class="ps-5 mt-3">Qty: <%= product.qty %></p>
+                                            
                                         </div>
                                     </div>
                                 <% }); %>
+
+                                <p class="mt-3  text-dark" ><span style=" color: black; font-weight: 700;">Amount Payable: ₹</span><%= order.totalAmount%></p>
                                 <div class="order-details">
-                                    <p>Order Date: <%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
-                                    <% const orderDate = new Date(order.orderDate);
-                                    const expectedDeliveryDate = new Date(orderDate);
-                                    expectedDeliveryDate.setDate(orderDate.getDate() + 4); %>
-                                    <p>Expected Delivery Date: <%= expectedDeliveryDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
-                                    <p>Payment Method: <%= order.paymentMethod %></p>
+                                <div class="d-flex" style="justify-content: space-evenly;">
+                                    <div>
+                                        <p class="ms-2 text-dark mt-2" style="font-weight: 600;">Order Date</p>
+                                        <p class="ms-2"><%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
+                                    </div>
+                                    <div>
+                                        <p class="ms-2 text-dark mt-2" style="font-weight: 600;">Expected Delivery Date</p>
+                                        <% const orderDate = new Date(order.orderDate);
+                                           const expectedDeliveryDate = new Date(orderDate);
+                                           expectedDeliveryDate.setDate(orderDate.getDate() + 4); %>
+                                        <p class="ms-2"><%= expectedDeliveryDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
+                                    </div>
+                                    <div>
+                                        <p class="ms-2 text-dark mt-2" style="font-weight: 600;">Payment Method</p>
+                                        <p class="ms-2"><%= order.paymentMethod %></p>
+                                    </div>
+                                </div>
                                     <!-- Show order status with color -->
                                     <% if (order.orderStatus === 'delivered') { %>
-                                        <p style="color: rgb(0, 182, 0);">Delivered</p>
+                                        <p style="color: rgb(0, 182, 0);font-weight: 700; ">Delivered</p>
                                     <% } else if (order.orderStatus === 'cancelled') { %>
-                                        <p style="color: red;">Cancelled</p>
-                                        <p>Cancel Reason: <%= order.cancelReason %></p>
-                                    <% } else if(order.orderStatus === 'Shipped') { %>
-                                        <p style="color: orange;">Shipped</p>
+                                        <p style="color: red; font-weight: 700;">Cancelled</p>
+                                        <p><span class="text-dark" style="font-weight: 600;">Cancel Reason:</span> <%= order.cancelReason %></p>
+                                    <% } else if(order.orderStatus === 'shipped') { %>
+                                        <p style="color:rgb(3, 110, 52);font-weight: 700;">Shipped</p>
                                     <% } else{%>
-                                        <p style="color: rgb(3, 110, 52);">Pending</p>
+                                        <p style="color:orange;font-weight: 700;">Pending</p>
                                     <% } %>
+                                    
                                 </div>
-                                <div class="address-info p-4" style="background-color: #f8f9fa ;">
+                                <div class="address-info p-4" style="background-color: #ececec ;">
                                     
                                     <h4>Shipping Address</h4><br>
                                     <h5><%= order.shippingAddress.name %></h5>
@@ -207,7 +225,7 @@
                                     <!-- Display cancellation form and download invoice button -->
                                     <form id="cancelForm" class="cancel-form" action="/cancellreson/<%= order.orderID %>" method="post">
                                         <div class="form-group">
-                                            <label for="cancelReasonSelect">Cancel Product</label>
+                                            <label for="cancelReasonSelect" class="text-dark" style="font-weight: 600;">Cancel Product</label>
                                             <select class="form-control" id="cancelReasonSelect" name="cancelReason" required>
                                                 <option selected disabled>Select a reason</option>
                                                 <option value="size Not Match">Different variant</option>
@@ -218,13 +236,12 @@
                                         </div>
                                         <!-- Error message container -->
                                         <div id="errorMessage" style="display: none; color: red;">Please select a reason before submitting.</div>
-                                        <button type="submit" class="btn btn-danger">Cancel</button>
+                                        <button type="submit" class="btn btn-white" onclick="return validateForm()">Cancel</button>
                                     </form>
-                                    
                                 <% } %>
                                 <% if (order.orderStatus !== 'cancelled') { %>
                                 <form action="/downloadinvoice/<%= order.orderID %>" method="post">
-                                    <button type="submit" class="btn bg-success text-light mt-2">Download Invoice</button>
+                                    <button type="submit" class="btn bg-success text-light mt-2">Get Invoice</button>
                                 </form>
                                     <!-- Display all product details -->
                                <% } %>     
@@ -234,13 +251,23 @@
                         </div>
                     <% }); %>
                 <% } else { %>
-                    <a class="btn border-secondary rounded-pill py-3 px-5 mt-3" href="/shop">Shop Now</a>
+                    <a  class="btn border-secondary rounded-pill py-3 px-5  mt-3 w-25" href="/shop">Shop Now</a>
                 <% } %>
             </div>
 </div>
 </div>
 </div>
-
+<script>
+    function validateForm() {
+        console.log("hloooo");
+        var reason = document.getElementById("cancelReasonSelect").value;
+        if (reason === "" || reason === null) {
+            document.getElementById("errorMessage").style.display = "block";
+            return false; // Prevent form submission
+        }
+        return true; 
+    }
+</script>
 <script>
     function toggleDetails(button) {
         const additionalInfo = button.parentElement.querySelector('.additional-info');
@@ -260,19 +287,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        function submitCancellationReason(form) {
-        var reasonSelect = form.querySelector('#cancelReasonSelect');
-        var selectedReason = reasonSelect.value;
-        
-        if (selectedReason === "") {
-            alert("Please select a reason.");
-            return false; // Prevent form submission if no reason selected
-        }
-        
-        return true; // Allow form submission if reason selected
-    }
-    </script>
+   
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>

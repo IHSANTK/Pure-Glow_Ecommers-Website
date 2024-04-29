@@ -82,13 +82,13 @@
 
                     <li class="collapsed">
                         <a class="m-link" data-bs-toggle="collapse" data-bs-target="#menu-sale" href="#">
-                        <i class="icofont-sale-discount fs-5"></i> <span>Sales Promotion</span> <span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
+                        <i class="icofont-sale-discount fs-5"></i> <span></span>Coupons<span class="arrow icofont-rounded-down ms-auto text-end fs-5"></span></a>
                         <!-- Menu: Sub menu ul -->
                         <ul class="sub-menu collapse" id="menu-sale">
                             
                             <li><a class="ms-link" href="/coupon-manage">Coupons List</a></li>
-                            <li><a class="ms-link" href="coupon-add.html">Coupons Add</a></li>
-                            <li><a class="ms-link" href="coupon-edit.html">Coupons Edit</a></li>
+                            <!-- <li><a class="ms-link" href="coupon-add.html">Coupons Add</a></li>
+                            <li><a class="ms-link" href="coupon-edit.html">Coupons Edit</a></li> -->
                         </ul>
                     </li>
                     <!-- <li class="collapsed">
@@ -288,7 +288,7 @@
                                             <div><hr class="dropdown-divider border-dark"></div>
                                         </div>
                                         <div class="list-group m-2 ">
-                                            <a href="/admin-profile" class="list-group-item list-group-item-action border-0 "><i class="icofont-ui-user fs-5 me-3"></i>Profile Page</a>
+                                            <!-- <a href="/admin-profile" class="list-group-item list-group-item-action border-0 "><i class="icofont-ui-user fs-5 me-3"></i>Profile Page</a> -->
                                             <!-- <a href="order-invoices.html" class="list-group-item list-group-item-action border-0 "><i class="icofont-file-text fs-5 me-3"></i>Order Invoices</a> -->
                                             <a href="/admin-logout" class="list-group-item list-group-item-action border-0 "><i class="icofont-logout fs-5 me-3"></i>Signout</a>
                                         </div>
@@ -307,10 +307,10 @@
         
                         <!-- main menu Search-->
                         <div class="order-0 col-lg-4 col-md-4 col-sm-12 col-12 mb-3 mb-md-0 ">
-                            <div class="input-group flex-nowrap input-group-lg">
+                            <!-- <div class="input-group flex-nowrap input-group-lg">
                                 <input type="search" class="form-control" placeholder="Search" aria-label="search" aria-describedby="addon-wrapping">
                                 <button type="button" class="input-group-text" id="addon-wrapping"><i class="fa fa-search"></i></button>
-                            </div>
+                            </div> -->
                         </div>
         
                     </div>
@@ -1031,9 +1031,6 @@
                     <div class="row g-3 mb-3"> 
                         <div class="col-md-12">
                             <div class="card"> 
-                                <div class="card-header py-3 d-flex justify-content-between align-items-center bg-transparent border-bottom-0">
-                                    <h6 class="m-0 fw-bold">Latest Orders</h6>
-                                </div>
                                 <div class="card-body"> 
                                     <table id="myDataTable" class="table table-hover align-middle mb-0" style="width: 100%;">  
                                         <thead>
@@ -1043,73 +1040,88 @@
                                                 <th>Customer Name</th>
                                                 <th>Payment Info</th>
                                                 <th>Price</th>
-                                                <th>orderdate</th>
+                                                <th>Order Date</th>
                                                 <th>Status</th>
-                                                <th>Address</th>
+                                                
+                                                <th></th>
+                                                
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <% latestOrders.forEach(order => { %>
-                                                <% order.products.forEach(product => { %>
-                                                    <tr>
-                                                        <td><a href="order-details.html"><strong>#<%= order._id %></strong></a></td>
-                                                        <td>
-                                                            <img src="<%= product.image[0] %>" class="avatar lg rounded me-2" alt="profile-image">
-                                                            <span><%= product.name %></span>
-                                                        </td>
-                                                        <td><%= order.shippingAddress.name %></td>
-                                                        <td><%= order.paymentMethod %></td>
-                                                        <td>₹<%= product.price %></td>
-                                                        <td><%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></td>
-                                                        <td>
-                                                            
-                                                            <form action="/orederstatus" method="post">
-                                                                <span class="badge bg-success"><%= product.orderStatus %></span>
-                                                                <% if (product.orderStatus === "cancelled") { %>
-                                                                  
-                                                                    <span class="badge bg-success"><%= product.cancelReason %></span>
-                                                                   
-                                                                <% } else { %>
-                                                                    
-                                                                    <% if (product.orderStatus !== "delivered") { %>
-                                                                    <select class="status-select" name="newStatus">
-                                                                      
-                                                                        <option value="shipped">Shipped</option>
-                                                                        <option value="delivered">Delivered</option>
-                                                                        <option value="cancelled">cancelled</option>
-                                                                    </select>
-                                                                    <input type="hidden" name="orderId" value="<%= order._id %>">
-                                                                    <input type="hidden" name="productId" value="<%= product._id %>">
-                                                                    <button type="submit" style="background-color: rgb(199, 218, 218); border-radius: 10px; border: none;">Update</button>
-                                                                   
-                                                                        
-                                                                        <% } %>  
-                                                                    <% } %>
-                                                            </form>
-                                                        </td>
-                                                        <td>
-                                                            <h5><%= order.shippingAddress.name %></h5>
-                                                            <p>
-                                                                <%= order.shippingAddress.address %> 
-                                                                <%= order.shippingAddress.city %>
-                                                                <%= order.shippingAddress.district %><br>
-                                                                <%= order.shippingAddress.state %>
-                                                                <%= order.shippingAddress.pincode %>
-                                                            </p>
-                                                            <h6><i class="fas fa-phone-alt" style="margin-right: 10px;"></i><%= order.shippingAddress.phone %></h6>
-                                                        </td>
-                                                    </tr>
-                                                <% }); %>
+                                            <%  latestOrders.forEach(order => { %>
+                                                <tr>
+                                                    <td><a href="order-details.html"><strong>#<%= order._id %></strong></a></td>
+                                                    <td>
+                                                        <button class="btn btn-link toggle-products" style="color: rgb(0, 0, 0); font-weight: 700;">Show Products</button>
+                                                        <div class="product-details" style="display: none;">
+                                                            <% order.products.forEach(product => { %>
+                                                                <img src="<%= product.image[0] %>" class="avatar lg rounded me-2" alt="profile-image">
+                                                                <span style="font-weight: 600;"><%= product.name %></span><br>
+                                                                <span style="font-weight: 600;"> ₹<%= product.price %> </span><br>
+                                                                <span style="font-weight: 600;"> Qty: <%= product.qty %> </span><br><br>
+                                                                
+                                                            <% }); %>
+                                                        </div>
+                                                    </td>
+                                                    <td><%= order.shippingAddress.name %></td>
+                                                    <td><%= order.paymentMethod %></td>
+
+                                                    <td>
+                                                        ₹<%= order.totalAmount %>
+                                                    </td>
+
+                                                    <td><%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></td>
+                                                    <td>
+                                                        <% if (order.orderStatus === "cancelled") { %>
+                                                            <span class="badge bg-danger">Cancelled</span>
+                                                            <span class="badge bg-danger"><%= order.cancelReason %></span>
+                                                        <% } else { %>
+                                                            <% if (order.orderStatus === "delivered") { %>
+                                                                <span class="badge bg-success">Delivered</span>
+                                                            <% } else if(order.orderStatus === "Pending") { %>
+                                                                <span class="badge bg-warning">Pending</span>
+                                                            <% }else{ %>
+                                                                <span class="badge" style="background-color: rgb(56, 161, 46);">Shipped</span>
+                                                                <% } %>
+                                                          <% } %>
+                                                    </td>
+                                                    
+                                                        
+                                                    <td>
+                                                    
+                                                    <br>
+                                                        <h5><%= order.shippingAddress.name %></h5>
+                                                        <p>
+                                                            <%= order.shippingAddress.address %> 
+                                                            <%= order.shippingAddress.city %>
+                                                            <%= order.shippingAddress.district %><br>
+                                                            <%= order.shippingAddress.state %>
+                                                            <%= order.shippingAddress.pincode %>
+                                                        </p>
+                                                        <h6><i class="fas fa-phone-alt" style="margin-right: 10px;"></i><%= order.shippingAddress.phone %></h6>
+                                                    </td>
+                                                </tr>
                                             <% }); %>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
+
                         </div>
-                    </div><!-- Row end  -->
+                    </div>
                     
                 </div>
             </div>
+            <script>
+                document.querySelectorAll('.toggle-products').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const productDetails = button.nextElementSibling;
+                        const buttonText = button.textContent;
+                        productDetails.style.display = productDetails.style.display === 'none' ? 'block' : 'none';
+                        button.textContent = buttonText === 'Show Products' ? 'Hide ' : 'Show Products';
+                    });
+                });
+            </script>
             <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
