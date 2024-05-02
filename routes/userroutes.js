@@ -15,7 +15,10 @@ router.get('/profile',preventBack, authenticateJWT, userController.userprofilepa
 
 router.get('/login',preventBack, userController.loginpage);
 router.get('/block',preventBack,userController.blockpage)
- 
+
+router.post('/sendotp',preventBack, userController.sendtotplogin);
+ router.post('/loginwithotp',preventBack, userController.loginwithotp);
+
 router.post('/login',preventBack, userController.dataslogin);
 
 router.post('/login-otp', preventBack, userController.sendOTP); // Add route for sending OTP
@@ -77,7 +80,7 @@ router.post('/placeorder',userController.placeholder);
  
 router.get('/orders',userController.ordermanage);
 
-router.post('/cancellreson/:id',userController.cancellreson);
+router.post('/cancellreson/:productid/:orderid',userController.cancellreson);
 
 router.post('/editAddressForm/:id', userController.editaddress);
 
@@ -91,7 +94,7 @@ router.post('/saveorder',userController.saveorder);
 
 router.post('/coupenmanage',userController.coupenmanage);
 
-router.post('/downloadinvoice/:orderId', userController.downloadinvoice);
+router.post('/downloadinvoice/:orderId/:productId', userController.downloadinvoice);
 
 
 router.get('/auth/google', userController.googleAuth);

@@ -193,7 +193,7 @@
                                                     <i class="fa fa-plus"></i>
                                                 </button>
                                             </div>
-                                            <small id="message"  class="disabled-message text-danger mt-4"></small>
+                                            
 
                                         </td>
                                         <td>
@@ -208,6 +208,7 @@
                                 </tbody>
                             <% }); %>
                         <% } %>
+                        
                         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
                         <script>
                             function deleteFromcart(productId) {
@@ -245,7 +246,8 @@
                                     .then(function (response) {
                                         console.log(response.data);
                                         if(response.data.message){
-                                             document.getElementById('message').innerHTML = response.data.message;
+                                            //  document.getElementById('message').innerHTML = response.data.message;
+                                            showStockStatusMessage(response.data.message);
                                             }else{
                                             location.reload(); 
                                             }
@@ -255,7 +257,24 @@
                                         // Handle error, if needed
                                     });
                             }
+                            function showStockStatusMessage(message) {
+                          const wishlistModalBody = document.getElementById('StockstatusModalBody');
+                           wishlistModalBody.innerHTML = `<p>${message}</p>`;
+                           $('#StockstatusModal').modal('show');
+                            setTimeout(function() {
+                               $('#StockstatusModal').modal('hide');
+                            }, 2000); 
+                          }  
                         </script>
+                            <div class="modal fade" id="StockstatusModal" tabindex="-1" aria-labelledby="wishlistModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content" style="background-color: rgb(192, 179, 179); width: 60%; margin-left: 21%;height: 55px; ">
+                                        <div class="modal-body" id="StockstatusModalBody" style="margin: auto; color: rgb(224, 37, 37);">
+                                            <!-- Wishlist status message will be displayed here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <!-- <tr>
                                 <th scope="row">
                                     <div class="d-flex align-items-center">
@@ -335,13 +354,15 @@
                     <input type="text" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
                     <button class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="button">Apply Coupon</button>
                 </div> -->
+                <!-- <small id="message"  class="disabled-message text-danger mt-4" style="margin: auto;font-weight: 600;"></small> -->
+
                 <% if (usercartdata.length !== 0) { %>
                 <div class="row g-4 justify-content-end">
                     <div class="col-8"></div>
                     <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
                         <div class="bg-light rounded">
                             <div class="p-4">
-                                <h1 class="display-6 mb-4">Cart <span class="fw-normal">Total</span></h1>
+                                <!-- <h1 class="display-6 mb-4">Cart <span class="fw-normal">Total</span></h1> -->
                                 <div class="d-flex justify-content-between mb-4">
                                     <h5 class="mb-0 me-4">Subtotal:</h5>
                                     <p class="mb-0 total">₹<%=totalPrice %></p>
@@ -447,13 +468,13 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        <span class="text-light"><a href="#"><i class="fas fa-copyright text-light me-2"></i>Your Site Name</a>, All right reserved.</span>
+                        <span class="text-light"><a href="#"><i class="fas fa-copyright text-light me-2"></i>Pure Glow</a>, All right reserved.</span>
                     </div>
                     <div class="col-md-6 my-auto text-center text-md-end text-white">
                         <!--/*** This template is free as long as you keep the below author’s credit link/attribution link/backlink. ***/-->
                         <!--/*** If you'd like to use the template without the below author’s credit link/attribution link/backlink, ***/-->
                         <!--/*** you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". ***/-->
-                        Designed By <a class="border-bottom" href="https://htmlcodex.com">Ihsan tk</a> Distributed By <a class="border-bottom" href="https://themewagon.com">ThemeWagon</a>
+                        Designed By <a class="border-bottom" href="https://htmlcodex.com">Ihsan tk</a> 
                     </div>
                 </div>
             </div>

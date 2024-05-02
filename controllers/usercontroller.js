@@ -13,108 +13,104 @@ const nodemailer = require("nodemailer");
 const puppeteer = require('puppeteer');
 
 const Homepage = async (req, res) => {
-  try {
-    const products = await Products.find();
-
-    if (!products || !products.length === 0) {
-      return res.render("user/error404", {
-        errormessage: "Data not found or empty",
-      });
-    }
-
-    const categories = products.map((product) => product.category);
-
-    const uniqueCategories = [...new Set(categories)];
-
-
-    
-    const latestProducts = [];
-
-    uniqueCategories.forEach((category) => {
-      const categoryProducts = products.filter(
-        (product) => product.category === category
-      );
-
-      categoryProducts.sort((a, b) => b.createdAt - a.createdAt);
-
-      latestProducts.push(categoryProducts[0]);
-    });
-
+    try {
+      const products = await Products.find();
   
-    let userWishlist = [];
-    let totalCartCount = "";
-
-    const token = req.cookies.user_jwt;
-
-    if (token) {
-      try {
-       
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        if (decoded && decoded.id) {
-          
-          const user = await User.findById(decoded.id);
-          if (user) {
-            const wishlistData = user.wishlist.map((item) => ({
-              productId: item._id,
-            }));
-           
-            userWishlist = await Promise.all(
-              wishlistData.map(async (item) => {
-             
-                const product = await Products.findById(item.productId);
-
-                if (!product) {
-                  
-                  throw new Error(
-                    `Product with ID ${item.productId} not found`
-                  );
-                }
-
- 
-                return {
-                  productId: product._id,
-                  productName: product.productName,
-                  productPrice: product.productPrice,
-                  image: product.image,
-                };
-              })
-            );
-            totalCartCount = user.cart.products.length;
+      if (!products || !products.length === 0) {
+        return res.render("user/error404", {
+          errormessage: "Data not found or empty",
+        });
+      }
+  
+      // Fetch unique categories
+      const uniqueCategories = await Products.distinct("category");
+  
+      // Fetch latest products for each category
+      const latestProducts = [];
+      uniqueCategories.forEach((category) => {
+        const categoryProducts = products.filter(
+          (product) => product.category === category
+        );
+        categoryProducts.sort((a, b) => b.createdAt - a.createdAt);
+        latestProducts.push(categoryProducts[0]);
+      });
+  
+      // Initialize variables
+      let userWishlist = [];
+      let totalCartCount = "";
+      let username = ""; // Variable to store the username
+  
+      const token = req.cookies.user_jwt;
+  
+      if (token) {
+        try {
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          if (decoded && decoded.id) {
+            const user = await User.findById(decoded.id);
+            if (user) {
+              // Fetch user's wishlist
+              const wishlistData = user.wishlist.map((item) => ({
+                productId: item._id,
+              }));
+              userWishlist = await Promise.all(
+                wishlistData.map(async (item) => {
+                  const product = await Products.findById(item.productId);
+                  if (!product) {
+                    return null;
+                  }
+                  return {
+                    productId: product._id,
+                    productName: product.productName,
+                    productPrice: product.productPrice,
+                    image: product.image,
+                  };
+                })
+              );
+              // Count total items in the user's cart
+              totalCartCount = user.cart.products.length;
+              username = user.name;
+             console.log(username);
+            }
           }
-        }
-      } catch (error) {
-        if (error instanceof jwt.TokenExpiredError) {
-        
-          if (!res.locals.tokenExpiredHandled) {
-            console.error("Token has expired:", error);
-            res.locals.tokenExpiredHandled = true; 
-            return res.render("user/index", {
-              uniqueCategories,
-              categor: latestProducts,
-              wishlist: userWishlist,
-              totalCartCount: totalCartCount,
-            });
+        } catch (error) {
+          if (error instanceof jwt.TokenExpiredError) {
+            if (!res.locals.tokenExpiredHandled) {
+              console.error("Token has expired:", error);
+              res.locals.tokenExpiredHandled = true;
+              // Filter out null values from wishlist data
+              const filteredWishlistData = userWishlist.filter(
+                (item) => item !== null
+              );
+              return res.render("user/index", {
+                uniqueCategories,
+                categor: latestProducts,
+                wishlist: filteredWishlistData,
+                totalCartCount,
+                username, // Pass the username to the index page
+              });
+            }
+          } else {
+            console.error("JWT verification error:", error);
+            return res.status(500).json({ error: "Internal server error" });
           }
-        } else {
-     
-          console.error("JWT verification error:", error);
-          return res.status(500).json({ error: "Internal server error" });
         }
       }
+  
+      // Filter out null values from wishlist data
+      const filteredWishlistData = userWishlist.filter((item) => item !== null);
+  
+      res.render("user/index", {
+        uniqueCategories,
+        categor: latestProducts,
+        wishlist: filteredWishlistData,
+        totalCartCount,
+        username, // Pass the username to the index page
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
-
-
-    res.render("user/index", {
-      uniqueCategories,
-      categor: latestProducts,
-      wishlist: userWishlist,
-      totalCartCount: totalCartCount,
-    });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
+  };
 
 const userprofilepage = async (req, res) => {
   let message = req.query.passwordUpdate;
@@ -516,7 +512,7 @@ const getproductdetails = async (req, res) => {
 
     if (!products || products.length === 0) {
       return res.render("user/error404", {
-        error: "Product Not Available Now !!",
+        errorMessage: "Product Not Available Now !!",
       });
     }
 
@@ -829,7 +825,7 @@ if(product.stockcount!==0 && usercart.cart.products[0].quantity<product.stockcou
       return res.status(404).json({ error: "User or product not found" });
     }
 
-    // Recalculate total price
+    
     const totalPrice = user.cart.products.reduce((total, product) => {
       return total + product.productPrice * product.quantity;
     }, 0);
@@ -881,70 +877,67 @@ const latestproduct = async (req, res) => {
   }
 };
 const whishlistget = async (req, res) => {
-  const token = req.cookies.user_jwt;
-
-  try {
-    if (!token) {
-      return res.redirect("/login");
+    const token = req.cookies.user_jwt;
+  
+    try {
+      if (!token) {
+        return res.redirect("/login");
+      }
+      // Verify the JWT token to get user ID
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (!decoded || !decoded.id) {
+        return res.redirect("/login");
+      }
+  
+      // Find the logged-in user by ID
+      const user = await User.findById(decoded.id);
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+  
+      const userwishlistData = user.wishlist.map((item) => ({
+        productId: item._id,
+      }));
+      // Extract the wishlist data from the user document
+      const wishlistData = await Promise.all(
+        userwishlistData.map(async (item) => {
+          const product = await Products.findById(item.productId);
+          if (!product) {
+            return null;
+          }
+          return {
+            productId: product._id,
+            productName: product.productName,
+            productPrice: product.productPrice,
+            image: product.image,
+          };
+        })
+      );
+  
+      // Filter out null values from wishlistData
+      const filteredWishlistData = wishlistData.filter(item => item !== null);
+  
+      // Count the number of products in the user's cart
+      if (user) {
+        totalCartCount = user.cart.products.length;
+      } else {
+        totalCartCount = "";
+      }
+  
+      res.render("user/whishlist", {
+        wishlist: filteredWishlistData,
+        cartcount:totalCartCount,
+      });
+  
+    } catch (error) {
+      console.error(error);
+      if (error instanceof jwt.TokenExpiredError) {
+        return res.redirect("/login");
+      } else {
+        res.status(500).send("Internal Server Error");
+      }
     }
-    // Verify the JWT token to get user ID
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded || !decoded.id) {
-      return res.redirect("/login");
-    }
-
-    // Find the logged-in user by ID
-    const user = await User.findById(decoded.id);
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-
-    const userwishlistData = user.wishlist.map((item) => ({
-      productId: item._id,
-    }));
-    // Extract the wishlist data from the user document
-    const wishlistData = await Promise.all(
-      userwishlistData.map(async (item) => {
-        // Find the product by its ID
-        const product = await Products.findById(item.productId);
-
-        if (!product) {
-          // If product not found, handle the error
-          throw new Error(`Product with ID ${item.productId} not found`);
-        }
-
-        // Return product details including the image array
-        return {
-          productId: product._id,
-          productName: product.productName,
-          productPrice: product.productPrice,
-
-          image: product.image, // Assuming image is an array field in your product schema
-        };
-      })
-    );
-    if (user) {
-      totalCartCount = user.cart.products.length;
-    } else {
-      totalCartCount = "";
-    }
-    // Render the wishlist page with the wishlist data
-    res.render("user/whishlist", {
-      wishlist: wishlistData,
-      cartcount: totalCartCount,
-    });
-  } catch (error) {
-    // Handle error, including token expiration
-    console.error(error);
-    if (error instanceof jwt.TokenExpiredError) {
-      // Redirect to login page if token has expired
-      return res.redirect("/login");
-    } else {
-      // Handle other errors
-      res.status(500).send("Internal Server Error");
-    }
-  }
-};
+  };
 
 const wishlist = async (req, res) => {
   const token = req.cookies.user_jwt;
@@ -956,19 +949,18 @@ const wishlist = async (req, res) => {
       return res.json({ message: "Please Login" });
     }
 
-    // Verify the JWT token to get user ID
+  
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded || !decoded.id) {
       return res.json({ message: "Please Login" });
     }
 
-    // Check if the user exists
+
     const user = await User.findById(decoded.id);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Check if the product already exists in the wishlist
     const existingProductIndex = user.wishlist.findIndex(
       (item) => item._id.toString() === productId
     );
@@ -976,16 +968,13 @@ const wishlist = async (req, res) => {
     console.log(existingProductIndex);
 
     if (existingProductIndex !== -1) {
-      // If the product exists, remove it from the wishlist
       user.wishlist.splice(existingProductIndex, 1);
       await user.save();
       let color = false;
       res.json({ message: "Product removed from wishlist", color });
     } else {
-      // If the product doesn't exist, add its ID to the wishlist
       user.wishlist.push(productId);
 
-      // Save the user data
       await user.save();
 
       let color = true;
@@ -1418,6 +1407,8 @@ const editAddressFormcheckout = async (req, res) => {
 const placeholder = async (req, res) => {
   const { selectedAddressId, selectedPaymentMethod, productIds, totalamout } =req.body;
 
+  console.log(totalamout);
+
   try {
     const token = req.cookies.user_jwt;
 
@@ -1526,6 +1517,8 @@ const placeholder = async (req, res) => {
 
     console.log(exactProducts);
 
+    console.log(sanitizedTotalAmount);
+
     // console.log(exactProducts);
 
     if (selectedPaymentMethod === "Prepaid") {
@@ -1562,15 +1555,16 @@ const placeholder = async (req, res) => {
           qty: quantity[index], // Use quantity from the quantities array
           price: product.productPrice,
           image: product.image,
+          orderStatus: "Pending",
+          cancelReason: null,
           
         })),
         totalAmount: sanitizedTotalAmount,
         orderDate: new Date(),
         shippingAddress: exactAddress,
         paymentMethod: selectedPaymentMethod,
-        orderStatus: "Pending",
-        cancelReason: null,
-      });
+       
+      }); 
 
       // Save the updated user document
       await user.save();
@@ -1623,14 +1617,15 @@ const saveorder = async (req, res) => {
       qty: quantity[index], // Use quantity from the quantities array
       price: product.productPrice,
       image: product.image,
+      orderStatus: "Pending",
+      cancelReason: null,
       
     })),
     totalAmount: sanitizedTotalAmount,
     orderDate: new Date(),
     shippingAddress: exactAddress,
     paymentMethod: selectedPaymentMethod,
-    orderStatus: "Pending",
-    cancelReason: null,
+   
   });
 
   // Save the updated user document
@@ -1759,6 +1754,7 @@ const ordermanage = async (req, res) => {
     (a, b) => b.orderDate - a.orderDate
   );
 
+  console.log(sortedUserOrders);
   const userOrders = sortedUserOrders.map((order) => {
     return {
       products: order.products,
@@ -1769,11 +1765,11 @@ const ordermanage = async (req, res) => {
       paymentMethod: order.paymentMethod,
       orderStatus:order.orderStatus,
       cancelReason:order.cancelReason,
-      orderID:order._id 
-    };
-  });
+      orderID:order._id     
+    }; 
+  }); 
 
-  console.log(userOrders);
+  
   // Count total items in the cart
   const totalCartCount = user.cart.products.length;
 
@@ -1792,127 +1788,104 @@ const ordermanage = async (req, res) => {
 
 const cancellreson = async (req, res) => {
     try {
-      const orderId = req.params.id;
-      const token = req.cookies.user_jwt;
-  
-      if (!token) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-  
-      // Verify the JWT token to get user ID
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      if (!decoded || !decoded.id) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-  
-      // Find the user by ID and update the order with the specified orderId
-      const updatedUser = await User.findOneAndUpdate(
-        { _id: decoded.id, "orders._id": orderId },
-        {
-          $set: {
-            "orders.$.orderStatus": "cancelled",
-            "orders.$.cancelReason": req.body.cancelReason,
-          },
-        },
-        { new: true }
-      );
-  
-      if (!updatedUser) {
-        return res.status(404).json({ error: "User or order not found" });
-      }
-  
-      const order = updatedUser.orders.find(
-        (order) => order._id.toString() === orderId
-      );
-  
-      for (const produc of order.products) {
-        const productId = produc.productId;
-        const quantity = produc.qty;
-  
-        const product = await Products.findById(productId);
-  
-        if (!product) { 
-          continue; 
+        const productId = req.params.productid;
+        const orderId = req.params.orderid;
+
+        console.log(productId);
+        console.log(orderId);
+        
+        const token = req.cookies.user_jwt;
+
+        if (!token) {
+            return res.status(401).json({ error: "Unauthorized" });
         }
-  
-        product.stockcount += quantity;
+
+        // Verify the JWT token to get user ID
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded || !decoded.id) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        // Find the user by ID and update the order with the specified orderId
+        const updatedUser = await User.findOneAndUpdate(
+            { _id: decoded.id, "orders._id": orderId },
+            {
+                $set: {
+                    "orders.$.products.$[product].orderStatus": "cancelled",
+                    "orders.$.products.$[product].cancelReason": req.body.cancelReason,
+                },
+            },
+            { new: true, arrayFilters: [{ "product.productId": productId }] }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ error: "User or order not found" });
+        }
+
+        // Find the product by ID and update its stock count
+        const product = await Products.findById(productId);
+
+        console.log(product);
+
+        product.stockcount += updatedUser.orders.find(order => order._id.toString() === orderId).products.find(product => product.productId.toString() === productId).qty;
+
+        // Save the updated product
         await product.save();
-      }
-  
-      res.redirect("/orders");
+
+       
+        res.redirect("/orders");
     } catch (error) {
-      console.error("Error:", error);
-      res.status(500).send("Internal Server Error");
+        console.error("Error:", error);
+        res.status(500).send("Internal Server Error");
     }
-  };
+};
+
+
 
 const getShopProducts = async (req, res) => {
-  try {
-    const { search } = req.query;
-
-    let categorProducts = [];
-    let uniqueCategories = [];
-
-    if (search && search.trim().length >= 3) {
-      const searchTerm = new RegExp(search, "i"); 
-      console.log(searchTerm);
-
-      const data = await Products.find({
-        $or: [{ category: searchTerm }, { productName: searchTerm }],
-      });
-
-      uniqueCategories = await Products.distinct("category");
-
-      categorProducts = data;
-    } else {
+    try {
+      const { search } = req.query;
+  
+      let categorProducts = [];
+      let uniqueCategories = [];
+  
+      if (search && search.trim().length >= 3) {
+        const searchTerm = new RegExp(search, "i"); 
+        console.log(searchTerm);
+  
+        const data = await Products.find({
+          $or: [{ category: searchTerm }, { productName: searchTerm }],
+        });
+  
+        uniqueCategories = await Products.distinct("category");
+  
+        categorProducts = data;
+      }
+  
+      let user = undefined;
+      if (req.cookies.user_jwt) {
+        try {
+          const decodedToken = jwt.verify(req.cookies.user_jwt, process.env.JWT_SECRET);
+          req.user = decodedToken;
+          user = await User.findOne({ _id: req.user.id });
+        } catch (err) {
+          console.error("JWT verification error:", err);
+        }
+      }
+  
       return res.render("user/shop", {
-        errorMessage: "Products Not Found !",
+        errorMessage: categorProducts.length === 0 ? "Products Not Found !" : undefined,
         categor: categorProducts,
         uniqueCategories,
         cartcount: req.cartcount,
-        user: req.user,
+        user,
         totalCartCount: req.totalCartCount,
       });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: "Internal Server Error" });
     }
-
-    let user = undefined;
-    if (req.cookies.user_jwt) {
-      jwt.verify(
-        req.cookies.user_jwt,
-        process.env.JWT_SECRET,
-        async (err, decodedToken) => {
-          if (!err) {
-            req.user = decodedToken;
-
-            user = await User.findOne({ _id: req.user.id });
-          }
-          if (categorProducts.length > 0) {
-            return res.render("user/shop", {
-              categor: categorProducts,
-              uniqueCategories,
-              cartcount: req.cartcount,
-              user,
-              totalCartCount: req.totalCartCount,
-              errorMessage: req.errorMessage,
-            });
-          } else {
-            return res.render("user/shop", {
-              errorMessage: "Products Not Found !",
-              categor: categorProducts,
-              uniqueCategories,
-              cartcount: req.cartcount,
-              user,
-              totalCartCount: req.totalCartCount,
-            });
-          }
-        }
-      );
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
-  }
-};
+  };
 
 const shopsorting = async (req, res) => {
   try {
@@ -1969,7 +1942,11 @@ const shopsorting = async (req, res) => {
 const downloadinvoice = async (req, res) => {
     try {
         const orderId = req.params.orderId;
+        const productId = req.params.productId;
+
         console.log(orderId);
+        console.log(productId);
+
         const token = req.cookies.user_jwt;
 
         if (!token) {
@@ -1982,20 +1959,25 @@ const downloadinvoice = async (req, res) => {
 
         const user = await User.findById(decoded.id);
 
+   const matchingOrder = user.orders.find(order => order._id.toString() === orderId);
 
-        const matchingOrder = user.orders.find(order => order._id.toString() === orderId);
+if (!matchingOrder) {
+    return res.status(404).json({ error: 'Order not found' });
+}
 
-        if (!matchingOrder) {
-            return res.status(404).json({ error: 'Order not found' });
-        }
 
-        const products = matchingOrder.products;
+const product = matchingOrder.products.find(product => product.productId.toString() === productId)
 
-        console.log("Products:", products); 
-        
-        const totalAmount = products.reduce((total, product) => total + (product.price * product.qty), 0);
-        
-        console.log("Total Amount:", totalAmount);
+
+console.log(matchingOrder);
+console.log(product);
+
+
+const totalAmount = product.price * product.qty;
+
+      
+
+console.log("Total Amount:", totalAmount);
 
         const options = {
             weekday: 'short',
@@ -2085,20 +2067,20 @@ const downloadinvoice = async (req, res) => {
                         </tr>
                     </thead>
                     <tbody>
-                        ${products.map(product => `
+                      
                             <tr>
                                 <td>${product.name}</td>
                                 <td>${product.qty}</td>
                                 <td>₹${product.price}</td>
                             </tr>
-                        `).join('')}
+                      
                     </tbody>
                 </table>
                 <hr>
                 <p class="total">Total: ₹${totalAmount}</p>
-                <p class="total">Discount: ₹${totalAmount-matchingOrder.totalAmount}</p>
+                
                
-                <p class="total">Total Amount: ₹${matchingOrder.totalAmount}</p>
+             
             </div>
         </body>
         </html>
@@ -2134,6 +2116,65 @@ const downloadinvoice = async (req, res) => {
     }
 };
 
+async function sendtotplogin(req, res) {
+    const { email } = req.body;
+  console.log("gggggggggggggg",email);
+    try {
+      const existingUser = await User.findOne({ email });
+  
+      console.log(existingUser);
+      if(!existingUser){
+        return res.status(400).json({ message: "User not exists " });
+      }
+  
+      
+        const otp = otpService.generateOTP();
+      otpService.otpMap.set(email, otp.toString());
+      await otpService.sendOTP(email, otp);
+  
+      res.sendStatus(200);
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      res.status(500).json({ message: error.message });
+    }
+  }
+const loginwithotp = async(req,res)=>{
+
+
+    const { email, otp } = req.body; 
+    console.log(email, otp);
+  
+    try {
+      const existingUser = await User.findOne({ email });
+  
+      console.log(existingUser);
+  
+      if(!existingUser){
+        return res.status(400).json({ message: "User not exists " });
+      }
+
+      const isOTPValid = otpService.verifyOTP(email, otp);
+  
+      if (!isOTPValid) {
+        return res
+          .status(400)
+          .json({ message: "Invalid OTP. Please sign up again." });
+      }
+
+      const token = jwt.sign({ id: existingUser._id }, process.env.JWT_SECRET, {
+        expiresIn: "24h",
+      });
+  
+      res.cookie("user_jwt", token, { httpOnly: true });
+
+      res.redirect("/");
+    } catch (error) {
+      console.error("Error signing up:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+
 
 
 
@@ -2142,13 +2183,11 @@ async function sendOTP(req, res) {
   const { email } = req.body;
 
   try {
-    // Check if the email already exists in the User collection
     const existingUser = await User.findOne({ email });
 
     console.log(existingUser);
 
     if (existingUser) {
-      // If the email exists, return a response indicating that the user already exists
       return res.status(400).json({ message: "User already exists " });
     }
 
@@ -2170,7 +2209,6 @@ const signupwithotp = async (req, res) => {
   console.log(email, otp, formData);
 
   try {
-    // Check if the user already exists
     const existingUser = await User.findOne({ email });
 
     console.log(existingUser);
@@ -2205,15 +2243,12 @@ const signupwithotp = async (req, res) => {
     // Save the new user to the database
     await newUser.save();
 
-    // Generate JWT token
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: "24h",
     });
 
-    // Set JWT token in the cookie
     res.cookie("user_jwt", token, { httpOnly: true });
 
-    // Redirect the user to the homepage or any desired page after successful signup
     res.redirect("/");
   } catch (error) {
     console.error("Error signing up:", error);
@@ -2311,6 +2346,8 @@ module.exports = {
   shopsorting,
   downloadinvoice,
   cancellreson,
+  sendtotplogin,
+  loginwithotp,
   signupwithotp,
   sendOTP,
   succesGoogleLogin,

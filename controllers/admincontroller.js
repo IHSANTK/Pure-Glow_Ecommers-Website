@@ -6,7 +6,8 @@ const Admin = require('../models/admin');
 const multer =  require('multer')
 const cloudinary = require('../config/cloudinary')
 const upload = require('../config/multer.js');
-require('dotenv').config()
+require('dotenv').config();
+const puppeteer = require('puppeteer');
 
 
 
@@ -49,35 +50,34 @@ const admindashbord = async (req, res) => {
                     }
                 ]);
             
-                    const latestOrders = await User.aggregate([
-                        {
-                            $match: {
-                                orders: { $exists: true, $ne: null }
-                            }
-                        }, 
-                        {
-                            $unwind: "$orders" 
-                        },
-                        {
-                            $project: {
-                                _id: "$orders._id",
-                                userId: "$_id",
-                                paymentMethod: "$orders.paymentMethod",
-                                orderDate: "$orders.orderDate",
-                                shippingAddress: "$orders.shippingAddress",
-                                products: "$orders.products",
-                                totalAmount:"$orders.totalAmount",
-                                orderStatus:"$orders.orderStatus"
-
-                             }
-                        },
-                        {
-                            $sort: { orderDate: -1 } 
-                        },
-                        {
-                            $limit: 10 
+                const latestOrders = await User.aggregate([
+                    {
+                        $match: {
+                            orders: { $exists: true, $ne: null }
                         }
-                    ]);
+                    }, 
+                    {
+                        $unwind: "$orders" 
+                    },
+                    {
+                        $project: {
+                            _id: "$orders._id",
+                            userId: "$_id",
+                            paymentMethod: "$orders.paymentMethod",
+                            orderDate: "$orders.orderDate",
+                            shippingAddress: "$orders.shippingAddress",
+                            products: "$orders.products",
+                            totalAmount: "$orders.totalAmount",
+                            orderStatus: "$orders.orderStatus"
+                        }
+                    },
+                    {
+                        $sort: { orderDate: -1 } // Sort by orderDate in ascending order
+                    },
+                    {
+                        $limit: 10 
+                    }
+                ]);
 
                     const latestOrdersforcategory = await User.aggregate([
                         {
@@ -105,18 +105,52 @@ const admindashbord = async (req, res) => {
                         orderCounts[category._id] = category.count;
                     });
                     
-                  
-            console.log(orderCounts);
-          
+                   
 
-                let product = await Products.findOne();
+                    const monthlyOrderCounts = await User.aggregate([
+                        {
+                            $match: {
+                                orders: { $exists: true, $ne: null } 
+                            }
+                        },
+                        {
+                            $unwind: "$orders"
+                        },
+                        {
+                            $group: {
+                                _id: {
+                                    year: { $year: "$orders.orderDate" },
+                                    month: { $month: "$orders.orderDate" }
+                                },
+                                count: { $sum: 1 }
+                            }
+                        }
+                    ]);
+    
+                    let monthlyOrderCountsData = {};
+                monthlyOrderCounts.forEach(count => {
+                    const year = count._id.year;
+                    const month = count._id.month;
+                    if (!monthlyOrderCountsData[year]) {
+                        monthlyOrderCountsData[year] = {};
+                    }
+                    // Convert month number to month name
+                    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                    const monthName = monthNames[month - 1]; // Month numbers are 1-based
+                    monthlyOrderCountsData[year][monthName] = count.count;
+                });
 
+    
+                 
+           
+console.log(latestOrders); 
 
                 const count = await Products.countDocuments();
 
                 return res.render('admin/index', { 
                     countUsersWithOrders,
                     orderCounts , // Serialize the object
+                    monthlyOrderCountsData,
                     latestOrders, 
                     totalOrdersCount: totalOrdersCount.length > 0 ? totalOrdersCount[0].totalOrders : 0,
                     productcount: count 
@@ -554,31 +588,31 @@ const orderslist = async (req, res) => {
  
 const orederstatus = async (req, res) => {
     try {
-        console.log("hi"); 
-
-        // Extract order ID, product ID, and new status from request parameters and body
         const { orderId, productId, newStatus } = req.body;
 
-        console.log(newStatus); 
-        console.log("orderid", orderId);
+        console.log(orderId, productId, newStatus);
 
-        // Find the user based on the order ID
         const user = await User.findOne({ 'orders._id': orderId });
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // Find the order within the user's orders array based on order ID
         const order = user.orders.find(order => order._id.toString() === orderId);
 
         if (!order) {
             return res.status(404).json({ error: 'Order not found' });
         }
 
-        console.log(order);
+        
+        const product = order.products.find(product => product.productId.toString() === productId);
 
-        order.orderStatus = newStatus;
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found in the order' });
+        }
+
+        // Update the orderStatus field of the product
+        product.orderStatus = newStatus;
 
         // Save the updated user document
         await user.save();
@@ -733,6 +767,238 @@ const deletecoupon = async (req, res) => {
         res.status(500).send('Error deleting coupon.');
     }
 };
+const downloadOrdrReport = async (req, res) => {
+    const { startdate, enddate } = req.body;
+
+    try {
+        // Convert startdate and enddate strings to Date objects
+        const startDateObj = new Date(startdate);
+        const endDateObj = new Date(enddate);
+
+        // Adjust endDateObj to include the whole day
+        endDateObj.setHours(23, 59, 59, 999);
+
+        // Query to find orders between startdate and enddate
+        let orders = await User.aggregate([
+            {
+                $match: { 
+                    orders: { 
+                        $exists: true, 
+                        $ne: [] // Ensure orders array is not empty
+                    }
+                }
+            },
+            {
+                $unwind: "$orders"
+            },
+            {
+                $match: {
+                    "orders.orderDate": {
+                        $gte: startDateObj, // Greater than or equal to startDate
+                        $lte: endDateObj    // Less than or equal to endDate
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: "$orders._id",
+                    orderDate: "$orders.orderDate",
+                    products: "$orders.products",
+                    shippingAddress: "$orders.shippingAddress",
+                    paymentMethod: "$orders.paymentMethod"
+                }
+            }
+        ]);
+
+        console.log(orders);
+        const options = {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+            hour: 'numeric', 
+            minute: 'numeric',
+            second: 'numeric'
+        };
+        
+        const invoicedtae =  new Date().toLocaleString('en-US', options);
+
+        // Generate HTML dynamically
+        let invoiceHtml = `
+        <html>
+        <head>
+            <style>
+                /* Add your CSS styles here */
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                }
+                .container {
+                    width: 800px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    border: 1px solid #ccc;
+                    border-radius: 10px;
+                    background-color: #f9f9f9;
+                }
+                .header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .header h1 {
+                    color: #333;
+                    margin: 0;
+                }
+                .logo {
+                    color: green;
+                    margin-bottom: 20px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 20px;
+                }
+                th, td {
+                    padding: 8px;
+                    border: 1px solid #ddd;
+                }
+                th {
+                    background-color: #f2f2f2;
+                }
+                .total {
+                    font-weight: bold;
+                }
+                .order-details {
+                    display: flex;
+                    justify-content: space-between;
+                }
+                .address-details {
+                    margin-top: 10px;
+                }
+                .payment-details {
+                    margin-top: 20px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1 class="logo">Order Ditiels</h1>
+                    <p>Invoice Date: ${invoicedtae}</p>
+                </div>
+                <hr>
+        `;
+        
+        // Loop through each order
+        orders.forEach(order => {
+            order.products.forEach(product => {
+            const formattedOrderDate = order.orderDate.toLocaleString('en-US', options);
+            
+            // Add order details to HTML
+            invoiceHtml += `
+                <div class="order">
+                    <div class="order-details">
+                        <div>
+                            <p>Order ID: ${order._id}</p>
+                            <p>Order Date: ${formattedOrderDate}</p>
+                            <p>Payment mode: ${order.paymentMethod}</p>
+                            <p>Order Status: ${product.orderStatus}</p>
+                        </div>
+                        
+                    </div>
+                    
+                    <h4>Shipping Address</h4>
+                    <div class="address-details">
+                        <p>${order.shippingAddress.name}</p>
+                        <p>${order.shippingAddress.address}</p>
+                        <p>${order.shippingAddress.city} ${order.shippingAddress.district}</p>
+                        <p>${order.shippingAddress.state} ${order.shippingAddress.pincode}</p>
+                    </div>
+                    
+                    <h4>Item Details</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            // Loop through each product in the order
+           
+                // Add product details to HTML
+                invoiceHtml += `
+                    <tr>
+                        <td>${product.name}</td>
+                        <td>${product.qty}</td>
+                        <td>${product.price}</td>
+                        <td>₹${product.price*product.qty}</td>
+                    </tr>
+                `;
+           
+        
+            // Close the table and add total amount for the order
+            invoiceHtml += `
+                        </tbody>
+                    </table>
+                </div>
+                <hr>
+            `;
+        });
+        });
+        
+        // Close the HTML
+        invoiceHtml += `
+                </div>
+            </body>
+        </html>
+        `;
+
+        const browser = await puppeteer.launch();
+
+        // Create a new page
+        const page = await browser.newPage();
+
+        // Set HTML content for the page
+        await page.setContent(invoiceHtml);
+
+        // Generate PDF
+        const pdfBuffer = await page.pdf({
+            format: 'A4', // or 'Letter' or any other format
+            printBackground: true // Include background graphics
+        });
+
+        // Close the browser
+        await browser.close();
+
+        // Set response headers for PDF download
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="invoice.pdf"`);
+
+        // Send PDF buffer as response
+        res.send(pdfBuffer);
+    } catch (error) {
+        // Handle errors
+        console.error("Error fetching orders:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+// Function to calculate total amount for an order
+function calculateTotal(products) {
+    let total = 0;
+    products.forEach(product => {
+        total += product.qty * product.price;
+    });
+    return total;
+}
+
 
 
 
@@ -771,6 +1037,7 @@ module.exports={
     editcoupon,
     updateeditcoupon,
     deletecoupon,
+    downloadOrdrReport,
     adminlogout,
     
 }

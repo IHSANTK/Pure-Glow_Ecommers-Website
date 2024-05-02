@@ -38,7 +38,11 @@ router.post('/add-coupon',adminMiddleware, authenticateJWT,admincontroller.addco
 router.get('/edit-coupon/:id',adminMiddleware, authenticateJWT,admincontroller.editcoupon)
 router.post('/update-coupon/:id',adminMiddleware, authenticateJWT,admincontroller.updateeditcoupon)
 
-router.get('/deletecoupon/:id',adminMiddleware, authenticateJWT,admincontroller.deletecoupon)
+router.get('/deletecoupon/:id',adminMiddleware, authenticateJWT,admincontroller.deletecoupon);
+
+
+
+router.post('/download-order-report',adminMiddleware, authenticateJWT,admincontroller.downloadOrdrReport)
 
 
 
