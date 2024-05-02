@@ -81,17 +81,39 @@
 
 .search-form {
     position: absolute;
-   left: 250px;
+    margin-left: 30%;
+    width: 50%;
+ 
 }
 
 /* Adjust margin or padding as needed */
 #searchInput {
-    margin-right: 45px; /* Add spacing between input and button */
+ /* Add spacing between input and button */
 } 
 #button{
-    position: absolute;
+   position: absolute;
    top: 0;
-   right: 70px;
+right: 33%;
+}
+#navlogodiv{
+    width: 80%;
+}
+@media (max-width: 440px) {
+    .search-form {
+    position: absolute;
+    margin-left: 45%;
+    width: 65%;
+ 
+}
+#navlogodiv{
+    width: 100%;
+}
+#button{
+   position: absolute;
+   top: 0;
+right: 30%;
+}
+
 }
     </style>
 
@@ -132,25 +154,31 @@
             </script>
            <div class="container px-0">
             <nav class="navbar navbar-ligh bg-white navbar-expand-xl ps-4 pe-4">
+                <div class="d-flex" style="" id="navlogodiv">
                 <a href="index.html" class="navbar-brand"><h1 class="text-primary display-6">Pure Glow</h1></a>
-                <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                    <span class="fa fa-bars text-primary"></span>
-                </button>
                 
-                <form id="searchForm" action="/getsearchproduct" method="get" class="search-form " onsubmit="return validateSearch()">
+                <form id="searchForm" action="/getsearchproduct" method="get" class="search-form mt-2 " onsubmit="return validateSearch()">
                    
-                        <input id="searchInput" class="form-control border-2 border-secondary " style="width: 60%; " name="search" type="text" placeholder="Search">
-                        <button  type="submit" id="button" class="btn btn-primary border-2 border-secondary  text-white me-4"><i class="bi bi-search"></i></button>
+                    <input id="searchInput" class="form-control border-2 border-secondary " style="width: 60%; " name="search" type="text" placeholder="Search">
+                    <button  type="submit" id="button" class="btn btn-primary border-2 border-secondary  text-white me-4"><i class="bi bi-search"></i></button>
+                
+            </form>
+            </div>
+
+                    <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                        <span class="fa fa-bars text-primary"></span>
+                    </button>
                     
-                </form>
+        
+              
                 
                 <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
                     <div class="navbar-nav mx-auto">
-                        <a href="/" class="nav-item nav-link">Home</a>
+                        <a href="" class="nav-item nav-link"></a>
                         <!-- <a href="shop.html" class="nav-item nav-link active">Shop</a> -->
                         <!-- <a href="shop-detail.html" class="nav-item nav-link">Shop Detail</a> -->
                         <div class="nav-item dropdown">
-                            <a href="#" class="nav-link ">shop</a>
+                            <a href="/" class="nav-link ">Home</a>
                         </div>
                         <!-- <a href="/contact" class="nav-item nav-link">Contact</a> -->
                     </div>

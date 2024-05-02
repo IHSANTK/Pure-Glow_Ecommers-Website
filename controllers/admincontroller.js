@@ -810,7 +810,7 @@ const downloadOrdrReport = async (req, res) => {
             }
         ]);
 
-        console.log(orders);
+        // console.log(orders);
         const options = {
             weekday: 'short',
             year: 'numeric',
@@ -990,14 +990,7 @@ const downloadOrdrReport = async (req, res) => {
     }
 }
 
-// Function to calculate total amount for an order
-function calculateTotal(products) {
-    let total = 0;
-    products.forEach(product => {
-        total += product.qty * product.price;
-    });
-    return total;
-}
+
 
 
 
