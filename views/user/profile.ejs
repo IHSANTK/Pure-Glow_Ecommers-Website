@@ -96,6 +96,43 @@
       font-size: medium;
       font-weight: 700;
     }
+    #profileimage{
+      width: 80px;
+       height: 80px; 
+       border-radius: 50%;
+    }
+    #deletebutton{
+      margin-left:60%;
+      position: absolute;
+       top: 5px;
+    }
+    #editbutton{
+      margin-left: 70%;
+      position: absolute;
+      top: 5px;
+    }
+    @media (max-width: 576px) {
+#profileimage{
+  width: 50px;
+       height: 50px; 
+       border-radius: 50%;
+    }
+    .profile-container{
+      width: 130px;
+    }
+    #deletebutton{
+      margin-left:60%;
+      position: absolute;
+       top: 5px;
+    }
+    #editbutton{
+      margin-left: 60%;
+      margin-top: 35px;
+      position: absolute;
+      top: 5px;
+    }
+}
+    
   </style>
 </head>
 <body>
@@ -126,7 +163,7 @@
       <div class="col-8 right-content">
         <div class="profile-top col-7 col-lg-6" style="background-color: rgb(238, 255, 254); padding: 10%; margin-left: 15%; border-radius: 10px;">
             <% if (profileImage) { %>
-                <img src="<%= profileImage %>" alt="Profile Image" style="width: 80px; height: 80px; border-radius: 50%;">
+                <img src="<%= profileImage %>" alt="Profile Image" id="profileimage" style="">
             <% } else { %>
                 <span class="profile-avatar" style="width: 100px; height: 100px; border-radius: 50%;"><i class="fas fa-user"></i></span>
             <% } %>
@@ -141,7 +178,7 @@
             <div class="form-group">
                 <% if (profileImage) { %>
                     <label for="profileImage">
-                        <img src="<%= profileImage %>" alt="Profile Image" style="cursor: pointer; width: 60px; height: 60px; border-radius: 50%;">
+                        <img src="<%= profileImage %>" id="" alt="Profile Image" style="cursor: pointer; width: 60px; height: 60px; border-radius: 50%;">
                     </label>
                 <% } else { %>
                     <label for="profileImage">
@@ -167,6 +204,11 @@
                 <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" value="<%= phoneNumber %>">
                
             </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" class="form-control" id="email" name="email" value="<%= email %>" required>
+             
+          </div>
             <span id="nameError" style="color: rgb(216, 57, 57);"></span><br><br>
             <button type="submit" class="btn btn-primary">Save Changes</button>
         </form>
@@ -330,11 +372,11 @@
                 <% addrress.slice().reverse().forEach(function(address) { %>
                 <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
                     <div class="address-card" style="background-color: rgb(212, 250, 237); padding: 15px; border-radius: 10px; color: black;">
-                        <button type="button" class="btn btn-sm delete-address " style="margin-left: 60%;position: absolute; top: 5px;" onclick="addressdelete('<%= address._id %>')">
+                        <button type="button" id="deletebutton" class="btn btn-sm delete-address " style="" onclick="addressdelete('<%= address._id %>')">
                             <i class="bi bi-trash3" style="font-size: 20px;"></i>
                         </button>
                         <!-- Edit Address button -->
-                        <button type="button" class="btn btn-sm edit-address" style="margin-left: 70%;position: absolute; top: 5px;" data-toggle="modal" data-target="#editAddressModal<%= address._id %>">
+                        <button type="button" id="editbutton" class="btn btn-sm edit-address" style="" data-toggle="modal" data-target="#editAddressModal<%= address._id %>">
                             <i class="bi bi-pencil-square" style="font-size: 20px;"></i>
                         </button>
                         <h5 class="mt-3"><%= address.name %></h5>

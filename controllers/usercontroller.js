@@ -286,7 +286,7 @@ const editpassword = async (req, res) => {
 
 const editprofile = async (req, res) => {
   const token = req.cookies.user_jwt;
-  const { userName, phoneNumber } = req.body;
+  const { userName, phoneNumber,email } = req.body;
 
   try {
     if (!token) {
@@ -320,6 +320,7 @@ const editprofile = async (req, res) => {
     // Update user data with the new information
     user.name = userName;
     user.phoneNumber = phoneNumber;
+    user.email = email
 
     // Update the image URL only if a new image is provided
     if (imageUrl) {
