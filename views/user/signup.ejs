@@ -141,10 +141,12 @@ document.querySelectorAll('.otp-box').forEach(box => {
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <script>
+    if(validateForm()){
   document.getElementById('signupForm').addEventListener('submit', function(event) {
       event.preventDefault(); // Prevent form submission
 
       // Get form data
+    
       const formData = new FormData(this);
 
       // Convert formData to object
@@ -210,7 +212,9 @@ document.querySelectorAll('.otp-box').forEach(box => {
                 alert('Error verifying OTP: ' + error.message);
             }
         });
+      
 });
+    }
 </script>
 
 
