@@ -614,7 +614,7 @@ const addToCart = async (req, res) => {
 
     await user.save();
 
-    res.json({ message: "Product added to cart",cartcount });
+    res.json({ message: "Added to cart",cartcount });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error ");
@@ -972,14 +972,14 @@ const wishlist = async (req, res) => {
       user.wishlist.splice(existingProductIndex, 1);
       await user.save();
       let color = false;
-      res.json({ message: "Product removed from wishlist", color });
+      res.json({ message: "Removed from wishlist", color });
     } else {
       user.wishlist.push(productId);
 
       await user.save();
 
       let color = true;
-      res.json({ message: "Product added to wishlist", color });
+      res.json({ message: "Added to wishlist", color });
     }
   } catch (error) {
     console.error("Error:", error);
