@@ -141,88 +141,7 @@ document.querySelectorAll('.otp-box').forEach(box => {
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <script>
-    if(validateForm()){
-  document.getElementById('signupForm').addEventListener('submit', function(event) {
-      event.preventDefault(); // Prevent form submission
-
-      // Get form data
-    
-      const formData = new FormData(this);
-
-      // Convert formData to object
-      const formDataObject = {};
-      formData.forEach((value, key) => {
-          formDataObject[key] = value;
-      });
-
-      // Send form data to the backend using Axios for OTP verification
-      axios.post('/login-otp', formDataObject)
-          .then(function(response) {
-              if (response.status === 200) {
-                  alert('OTP sent successfully. Check your email.');
-                  // Open the OTP verification modal
-                  $('#otpEmail').val(formDataObject.email);
-                  $('#otpVerifyModal').modal('show');
-
-                  // Store form data in localStorage to access after OTP verification
-                  localStorage.setItem('formData', JSON.stringify(formDataObject));
-              }
-          })
-          .catch(function(error) {
-              // Handle errors here
-              console.error('Error:', error.response.data);
-              $('#signupMessage').text('Error: ' + error.response.data.message);
-          });
-  });
-
-  // Handle OTP verification
-  document.getElementById('verifyOTPButton').addEventListener('click', function() {
-    // Retrieve OTP digits from individual input boxes
-    const otp1 = document.getElementById('otp1').value;
-    const otp2 = document.getElementById('otp2').value;
-    const otp3 = document.getElementById('otp3').value;
-    const otp4 = document.getElementById('otp4').value;
-    const otp5 = document.getElementById('otp5').value;
-    const otp6 = document.getElementById('otp6').value;
-
-    // Concatenate OTP digits into a single OTP string
-    const otp = otp1 + otp2 + otp3 + otp4 + otp5 + otp6;
-
-    // Retrieve email from hidden input field
-    const email = document.getElementById('otpEmail').value;
-
-    // Retrieve form data from localStorage
-    const formDataObject = JSON.parse(localStorage.getItem('formData'));
-
-    // Send form data along with OTP verification to the backend
-    axios.post('/verify-otp', { email: email, otp: otp, formData: formDataObject })
-        .then(function(response) {
-            if (response.status === 200) {
-                alert('OTP verified successfully. Redirecting...');
-                // Redirect user to the homepage or any other desired page
-                window.location.href = '/';
-            } else {
-                alert('Error verifying OTP: ' + response.data.message);
-            }
-        })
-        .catch(function(error) {
-            if (error.response) {
-                alert('Error verifying OTP: ' + error.response.data.message);
-            } else {
-                alert('Error verifying OTP: ' + error.message);
-            }
-        });
-      
-});
-    }
-</script>
-
-
-  <!-- Bootstrap JS -->
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-  <script>
-    function validateForm() {
+     function validateForm() {
       var name = document.getElementById("name").value;
       var email = document.getElementById("email").value;
       var phoneNumber = document.getElementById("phoneNumber").value;
@@ -299,6 +218,89 @@ document.querySelectorAll('.otp-box').forEach(box => {
   
       return isValid;
     }
+    
+  document.getElementById('signupForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevent form submission
+
+      // Get form data
+      if (validateForm()) {
+      const formData = new FormData(this);
+
+      // Convert formData to object
+      const formDataObject = {};
+      formData.forEach((value, key) => {
+          formDataObject[key] = value;
+      });
+
+      // Send form data to the backend using Axios for OTP verification
+      axios.post('/login-otp', formDataObject)
+          .then(function(response) {
+              if (response.status === 200) {
+                  alert('OTP sent successfully. Check your email.');
+                  // Open the OTP verification modal
+                  $('#otpEmail').val(formDataObject.email);
+                  $('#otpVerifyModal').modal('show');
+
+                  // Store form data in localStorage to access after OTP verification
+                  localStorage.setItem('formData', JSON.stringify(formDataObject));
+              }
+          })
+          .catch(function(error) {
+              // Handle errors here
+              console.error('Error:', error.response.data);
+              $('#signupMessage').text('Error: ' + error.response.data.message);
+          });
+        }
+  });
+
+  // Handle OTP verification
+  document.getElementById('verifyOTPButton').addEventListener('click', function() {
+    // Retrieve OTP digits from individual input boxes
+    const otp1 = document.getElementById('otp1').value;
+    const otp2 = document.getElementById('otp2').value;
+    const otp3 = document.getElementById('otp3').value;
+    const otp4 = document.getElementById('otp4').value;
+    const otp5 = document.getElementById('otp5').value;
+    const otp6 = document.getElementById('otp6').value;
+
+    // Concatenate OTP digits into a single OTP string
+    const otp = otp1 + otp2 + otp3 + otp4 + otp5 + otp6;
+
+    // Retrieve email from hidden input field
+    const email = document.getElementById('otpEmail').value;
+
+    // Retrieve form data from localStorage
+    const formDataObject = JSON.parse(localStorage.getItem('formData'));
+
+    // Send form data along with OTP verification to the backend
+    axios.post('/verify-otp', { email: email, otp: otp, formData: formDataObject })
+        .then(function(response) {
+            if (response.status === 200) {
+                alert('OTP verified successfully. Redirecting...');
+                // Redirect user to the homepage or any other desired page
+                window.location.href = '/';
+            } else {
+                alert('Error verifying OTP: ' + response.data.message);
+            }
+        })
+        .catch(function(error) {
+            if (error.response) {
+                alert('Error verifying OTP: ' + error.response.data.message);
+            } else {
+                alert('Error verifying OTP: ' + error.message);
+            }
+        });
+      
+});
+    
+</script>
+
+
+  <!-- Bootstrap JS -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+
   </script>
 </body>
 </html>
