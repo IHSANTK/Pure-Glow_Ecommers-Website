@@ -12,9 +12,9 @@ const adminRoutes = require('./routes/adminroutes');
 const userRoutes = require('./routes/userroutes');
 require('dotenv').config()
 
-const app = express();
-
-mongoose.connect('mongodb+srv://ihsantk786313:tcuR0l8BW0OEhT91@cluster0.rcehlot.mongodb.net/PureGlow', { useNewUrlParser: true, useUnifiedTopology: true })
+const app = express(); 
+ 
+mongoose.connect(process.env.MONGOOSE_CONNECT, { useNewUrlParser: true, useUnifiedTopology: true })
 .then((data)=>{
     console.log("db connected");
 })
