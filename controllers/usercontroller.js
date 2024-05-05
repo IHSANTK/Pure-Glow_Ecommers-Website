@@ -1250,7 +1250,7 @@ const manageaddress = async (req, res) => {
     // Save the changes
     await user.save();
 
-    res.redirect("/profile?passwordUpdate=address added successfully");
+    res.redirect("/profile?passwordUpdate=address added ");
   } catch (error) {
     console.error("Error adding address:", error);
     res.status(500).send("Internal Server Error");

@@ -568,17 +568,19 @@ const orderslist = async (req, res) => {
                     _id: "$orders._id",
                     userId: "$_id",
                     paymentMethod: "$orders.paymentMethod",
-                    orderStatus:"$orders.orderStatus",
+                    orderStatus: "$orders.orderStatus",
                     totalAmount: "$orders.totalAmount",
                     orderDate: "$orders.orderDate",
                     shippingAddress: "$orders.shippingAddress",
                     products: "$orders.products",
                 }
+            },
+            {
+                $sort: { orderDate: -1 } // Sort by orderDate in descending order
             }
         ]);
 
-       
-
+        console.log(usersWithOrders);
         res.render('admin/order-list', { orders: usersWithOrders }); // Pass orders as a variable to the template
     } catch (error) {
         console.error('Error:', error);
