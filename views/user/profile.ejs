@@ -19,7 +19,7 @@
   <style>
     /* Custom styles */
     body {
-     background-color: #dfffe2;
+     background-color: #d6d6d6;
       background-size: cover;
       background-repeat: no-repeat;
       font-family: Arial, sans-serif;
@@ -151,7 +151,7 @@
     <div class="row" >
       <div class=" col-4 col-lg-3 ">
         <div class="profile-container ">
-          <div class="profile-buttons mt-3 " style="height: calc(50vh - 50px);">
+          <div class="profile-buttons mt-3 " style="height: calc(55vh - 55px);">
             <a href="#" class="profile-btn" data-target="edit-profile"><i class="fas fa-edit"></i> Edit Profile</a>
             <a href="#" class="profile-btn mt-3" data-target="change-password"><i class="fas fa-key"></i> Change Password</a>
   
@@ -165,7 +165,7 @@
 
 
       <div class="col-8 right-content">
-        <div class="profile-top col-7 col-lg-6" style="background-color: rgb(238, 255, 254); padding: 10%; margin-left: 15%;  border-radius: 5px; margin-top: 100px;  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);">
+        <div class="profile-top col-7 col-lg-6" style="background-color: rgb(238, 255, 254); padding: 10%; margin-left: 15%;  border-radius: 5px; margin-top: 50px;  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);">
             <% if (profileImage) { %>
                 <img src="<%= profileImage %>" alt="Profile Image" id="profileimage" style="">
             <% } else { %>
@@ -367,7 +367,7 @@
       
       <div class="container-fluid">
         <div id="manage-address" class="profile-edit">
-            <h3 class="text-center mb-3">Manage Address</h3>
+            <h3 class="text-center mb-3" style="color: rgb(59, 59, 59);">Manage Address</h3>
             <!-- Add Address button -->
             <% if (addrress.length < 3) { %>
                 <button id="addAddressBtn" class="btn btn-primary mb-3" data-toggle="modal" data-target="#addAddressModal">Add Address</button>

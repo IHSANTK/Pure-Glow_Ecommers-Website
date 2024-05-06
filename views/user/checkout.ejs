@@ -401,8 +401,10 @@ function editaddress(addressId) {
                                                         ₹<%= product.productPrice %>
                                                     <% } %>
                                                 </td>
+                                                
                                         
                                             </tr>
+                                            
                                             <% } %>
                                             
                                         <% }); %>
@@ -414,7 +416,13 @@ function editaddress(addressId) {
                             <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
                                 <div class="col-12">
                                     <% if (cartTotal) { %>
-                                        <p class="text-start text-dark">Total:₹<strong style="margin-left: 10px;" id="totalamout"><%= cartTotal %></strong></p>
+                                        <p class="text-start text-dark">Total:₹<strong style="margin-right: 10px;" id=""><%= cartTotal %></strong></p>
+                                    <% } %>
+                                    
+                                </div>
+                                <div class="col-12">
+                                    <% if (cartTotal) { %>
+                                        <p class="text-start text-dark">SubTotal:₹<strong style="" id="totalamout"><%= cartTotal %></strong></p>
                                     <% } %>
                                     
                                 </div>

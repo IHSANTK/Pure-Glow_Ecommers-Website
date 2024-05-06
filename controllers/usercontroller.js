@@ -1567,7 +1567,8 @@ const placeholder = async (req, res) => {
        
       }); 
 
-      // Save the updated user document
+      user.cart.products = []
+   
       await user.save();
 
       // await sendOrderConfirmationEmail(exactAddress.email, {
@@ -1629,15 +1630,8 @@ const saveorder = async (req, res) => {
    
   });
 
-  // Save the updated user document
+  user.cart.products = []
   await user.save();
-
-  // await sendOrderConfirmationEmail(exactAddress.email, {
-  //     orderId:user.orders[user.orders.length - 1]._id, // You can use actual order ID
-  //     totalAmount: sanitizedTotalAmount,
-  //     paymentMethod: selectedPaymentMethod,
-  //     shippingAddress: exactAddress.address, // Modify this according to your address structure
-  // });
 
   res.json(true); // Send a success response
 };
@@ -1747,6 +1741,8 @@ const ordermanage = async (req, res) => {
     return res.redirect("/login"); // Redirect if user not found
   }
 
+ 
+
   // Extracting products from each order
   const userProducts = user.orders.map((order) => order.products).flat();
 
@@ -1770,9 +1766,9 @@ const ordermanage = async (req, res) => {
     }; 
   }); 
 
-  
-  // Count total items in the cart
-  const totalCartCount = user.cart.products.length;
+ 
+ 
+  const totalCartCount =user.cart.products.length;
 
   // Render the order page after all necessary data is processed
   res.render("user/orders", {
