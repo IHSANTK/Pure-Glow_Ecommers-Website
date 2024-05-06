@@ -8,6 +8,10 @@ const cloudinary = require('../config/cloudinary')
 const upload = require('../config/multer.js');
 require('dotenv').config();
 const puppeteer = require('puppeteer');
+const htmlPDF = require('html-pdf');
+const { promisify } = require('util');
+const PDFDocument = require('pdfkit');
+const { PassThrough } = require('stream');
 
 
 
@@ -580,8 +584,17 @@ const orderslist = async (req, res) => {
             }
         ]);
 
-        console.log(usersWithOrders);
-        res.render('admin/order-list', { orders: usersWithOrders }); // Pass orders as a variable to the template
+        const page = parseInt(req.query.page) || 1; // Get page number from query parameter or default to 1
+        const ITEMS_PER_PAGE = 6; // Number of orders to display per page
+        const totalOrders = usersWithOrders.length;
+        const totalPages = Math.ceil(totalOrders / ITEMS_PER_PAGE);
+        const startIndex = (page - 1) * ITEMS_PER_PAGE;
+        const endIndex = page * ITEMS_PER_PAGE;
+        
+        // Slice orders array to get orders for the current page
+        const ordersForPage = usersWithOrders.slice(startIndex, endIndex);
+
+        res.render('admin/order-list', { orders: ordersForPage, currentPage: page, totalPages: totalPages }); // Pass orders, current page, and total pages as variables to the template
     } catch (error) {
         console.error('Error:', error);
         res.status(500).send('Internal Server Error');
@@ -783,9 +796,9 @@ const downloadOrdrReport = async (req, res) => {
         // Query to find orders between startdate and enddate
         let orders = await User.aggregate([
             {
-                $match: { 
-                    orders: { 
-                        $exists: true, 
+                $match: {
+                    orders: {
+                        $exists: true,
                         $ne: [] // Ensure orders array is not empty
                     }
                 }
@@ -812,187 +825,67 @@ const downloadOrdrReport = async (req, res) => {
             }
         ]);
 
-        // console.log(orders);
         const options = {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: '2-digit',
-            hour: 'numeric', 
-            minute: 'numeric',
-            second: 'numeric'
+            format: 'A4',
+            orientation: 'portrait',
+            border: {
+                top: "10px solid #ccc",
+                right: "10px solid #ccc",
+                bottom: "10px solid #ccc",
+                left: "10px solid #ccc"
+            }
         };
-        
-        const invoicedtae =  new Date().toLocaleString('en-US', options);
 
-        // Generate HTML dynamically
-        let invoiceHtml = `
-        <html>
-        <head>
-            <style>
-                /* Add your CSS styles here */
-                body {
-                    font-family: Arial, sans-serif;
-                    margin: 0;
-                    padding: 0;
-                }
-                .container {
-                    width: 800px;
-                    margin: 0 auto;
-                    padding: 20px;
-                    border: 1px solid #ccc;
-                    border-radius: 10px;
-                    background-color: #f9f9f9;
-                }
-                .header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                }
-                .header h1 {
-                    color: #333;
-                    margin: 0;
-                }
-                .logo {
-                    color: green;
-                    margin-bottom: 20px;
-                }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 20px;
-                }
-                th, td {
-                    padding: 8px;
-                    border: 1px solid #ddd;
-                }
-                th {
-                    background-color: #f2f2f2;
-                }
-                .total {
-                    font-weight: bold;
-                }
-                .order-details {
-                    display: flex;
-                    justify-content: space-between;
-                }
-                .address-details {
-                    margin-top: 10px;
-                }
-                .payment-details {
-                    margin-top: 20px;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <h1 class="logo">Order Ditiels</h1>
-                    <p>Invoice Date: ${invoicedtae}</p>
-                </div>
-                <hr>
-        `;
-        
-        // Loop through each order
-        orders.forEach(order => {
-            order.products.forEach(product => {
-            const formattedOrderDate = order.orderDate.toLocaleString('en-US', options);
-            
-            // Add order details to HTML
-            invoiceHtml += `
-                <div class="order">
-                    <div class="order-details">
-                        <div>
-                            <p>Order ID: ${order._id}</p>
-                            <p>Order Date: ${formattedOrderDate}</p>
-                            <p>Payment mode: ${order.paymentMethod}</p>
-                            <p>Order Status: ${product.orderStatus}</p>
-                        </div>
-                        
-                    </div>
-                    
-                    <h4>Shipping Address</h4>
-                    <div class="address-details">
-                        <p>${order.shippingAddress.name}</p>
-                        <p>${order.shippingAddress.address}</p>
-                        <p>${order.shippingAddress.city} ${order.shippingAddress.district}</p>
-                        <p>${order.shippingAddress.state} ${order.shippingAddress.pincode}</p>
-                    </div>
-                    
-                    <h4>Item Details</h4>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Quantity</th>
-                                <th>Price</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            // Loop through each product in the order
-           
-                // Add product details to HTML
-                invoiceHtml += `
-                    <tr>
-                        <td>${product.name}</td>
-                        <td>${product.qty}</td>
-                        <td>${product.price}</td>
-                        <td>₹${product.price*product.qty}</td>
-                    </tr>
-                `;
-           
-        
-            // Close the table and add total amount for the order
-            invoiceHtml += `
-                        </tbody>
-                    </table>
-                </div>
-                <hr>
-            `;
-        });
-        });
-        
-        // Close the HTML
-        invoiceHtml += `
-                </div>
-            </body>
-        </html>
-        `;
+        const invoicedate = new Date().toLocaleString('en-US', options);
 
-        const browser = await puppeteer.launch();
+        // Create a new PDF document
+        const doc = new PDFDocument();
 
-        // Create a new page
-        const page = await browser.newPage();
+        // Create a pass-through stream to pipe the PDF content
+        const stream = new PassThrough();
 
-        // Set HTML content for the page
-        await page.setContent(invoiceHtml);
-
-        // Generate PDF
-        const pdfBuffer = await page.pdf({
-            format: 'A4', // or 'Letter' or any other format
-            printBackground: true // Include background graphics
-        });
-
-        // Close the browser
-        await browser.close();
+        // Pipe the PDF content to the pass-through stream
+        doc.pipe(stream);
 
         // Set response headers for PDF download
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="invoice.pdf"`);
 
-        // Send PDF buffer as response
-        res.send(pdfBuffer);
+        let orderCount = 1;
+
+        // Add content to the PDF document
+        orders.forEach(order => {
+            order.products.forEach(product => {
+                const formattedOrderDate = order.orderDate.toLocaleString('en-US', options);
+
+                doc.fontSize(12)
+                   .text(`Order ${orderCount}`, { underline: true }).moveDown()
+                   .text(`Order ID: ${order._id}`)
+                   .text(`Order Date: ${formattedOrderDate}`)
+                   .text(`Payment mode: ${order.paymentMethod}`)
+                   .text(`Order Status: ${product.orderStatus}`)
+                   .text(`Shipping Address: ${order.shippingAddress.name}, ${order.shippingAddress.address}, ${order.shippingAddress.city}, ${order.shippingAddress.district}, ${order.shippingAddress.state}, ${order.shippingAddress.pincode}`)
+                   .text(`Item Name: ${product.name}`)
+                   .text(`Quantity: ${product.qty}`)
+                   .text(`Price: ${product.price}`)
+                   .text(`Total: ₹${product.price * product.qty}`)
+                   .moveDown();
+
+                orderCount++;
+            });
+        });
+
+        // Finalize the PDF document
+        doc.end();
+
+        // Pipe the pass-through stream to the response
+        stream.pipe(res);
     } catch (error) {
         // Handle errors
         console.error("Error fetching orders:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
-}
-
-
+};
 
 
 

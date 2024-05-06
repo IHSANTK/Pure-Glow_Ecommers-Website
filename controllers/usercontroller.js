@@ -1631,6 +1631,7 @@ const saveorder = async (req, res) => {
   });
 
   user.cart.products = []
+
   await user.save();
 
   res.json(true); // Send a success response
@@ -1768,7 +1769,7 @@ const ordermanage = async (req, res) => {
 
  
  
-  const totalCartCount =user.cart.products.length;
+  const totalCartCount = req.totalCartCount;
 
   // Render the order page after all necessary data is processed
   res.render("user/orders", {

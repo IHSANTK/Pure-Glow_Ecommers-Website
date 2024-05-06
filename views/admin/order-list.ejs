@@ -370,92 +370,107 @@
                           </script>
                           
                     </div> <!-- Row end  -->
-                    <div class="row g-3 mb-3"> 
-                        <div class="col-md-12">
-                            <div class="card"> 
-                                <div class="card-body"> 
-                                    <table id="myDataTable" class="table table-hover align-middle mb-0" style="width: 100%;">  
-                                        <thead>
-                                            <tr>
-                                                <th>Order Id</th>
-                                                <th>Item</th>
-                                                <th>Customer Name</th>
-                                                <th>Payment Info</th>
-                                                <th>Price</th>
-                                                <th>Order Date</th>
-                                                <th>Status</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <% orders.forEach(order => { %>
-                                                <% order.products.forEach(product => { %>
-                                                    <tr>
-                                                        <td><a href="order-details.html"><strong>#<%= order._id %></strong></a>
-                                                        <td><img src="<%= product.image[0] %>" alt="" style="width: 40px; height: 40px;"><br>
-                                                        <%= product.name %></td>
-                                                        <td><%= order.shippingAddress.name %></td>
-                                                        <td><%= order.paymentMethod %></td>
-                                                        <td>₹<%= product.price %></td>
-                                                        <td><%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></td>
-                                                        <td>
-                                                            <% if (product.orderStatus === "cancelled") { %>
-                                                                <span class="badge bg-danger">Cancelled</span>
-                                                                <span class="badge bg-danger"><%= order.cancelReason %></span>
-                                                            <% } else { %>
-                                                                <% if (product.orderStatus === "delivered") { %>
-                                                                    <span class="badge bg-success">Delivered</span>
-                                                                <% } else if (product.orderStatus === "Pending") { %>
-                                                                    <span class="badge bg-warning">Pending</span>
-                                                                <% } else { %>
-                                                                    <span class="badge" style="background-color: rgb(56, 161, 46);">Shipped</span>
-                                                                <% } %>
-                                                            <% } %>
-                                                        </td>
-                                                        <td>
-                                                            <form action="/orederstatus" method="post">
-                                                                
-                                                                <% if (product.orderStatus === "cancelled") { %>
-                                                                    <span class="badge bg-danger"><%= product.cancelReason %></span>
-                                                                <% } else { %>
-                                                                    <% if (product.orderStatus !== "delivered") { %>
-                                                                    <select class="status-select" name="newStatus">
-                                                                       
-                                                                        <option value="shipped">Shipped</option>
-                                                                        <option value="delivered">Delivered</option>
-                                                                        <option value="cancelled">cancelled</option>
-                                                                    </select>
-                                                                    <input type="hidden" name="orderId" value="<%= order._id %>">
-                                                                    <input type="hidden" name="productId" value="<%= product.productId %>">
-                                                                   
-                                                                    <button type="submit" style="background-color: rgb(199, 218, 218); border-radius: 10px; border: none;">Update</button>
-                                                                    <% } %>  
-                                                                    <% } %> 
-                                                                    
-                                                            </form>
-                                                        <br>
-                                                            <h5><%= order.shippingAddress.name %></h5>
-                                                            <p>
-                                                                <%= order.shippingAddress.address %> 
-                                                                <%= order.shippingAddress.city %>
-                                                                <%= order.shippingAddress.district %><br>
-                                                                <%= order.shippingAddress.state %>
-                                                                <%= order.shippingAddress.pincode %>
-                                                            </p>
-                                                            <h6><i class="fas fa-phone-alt" style="margin-right: 10px;"></i><%= order.shippingAddress.phone %></h6>
-                                                        </td>
-                                                    </tr>
-                                                <% }); %>
-                                            <% }); %>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                   
 
-                        </div>
-                    </div> <!-- Row end  -->
                 </div>
             </div>
+            <div class="card"> 
+                <div class="card-body"> 
+                    <table id=""  class="table table-hover align-middle mb-0" style="width: 100%;">  
+                        <thead>
+                            <tr>
+                                <th>Order Id</th>
+                                <th>Item</th>
+                                <th>Customer Name</th>
+                                <th>Payment Info</th>
+                                <th>Price</th>
+                                <th>Order Date</th>
+                                <th>Status</th>
+                                <th>Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% orders.forEach(order => { %>
+                                <% order.products.forEach(product => { %>
+                                    <tr>
+                                        <td><a href="order-details.html"><strong>#<%= order._id %></strong></a></td>
+                                        <td><img src="<%= product.image[0] %>" alt="" style="width: 40px; height: 40px;"><br><%= product.name %></td>
+                                        <td><%= order.shippingAddress.name %></td>
+                                        <td><%= order.paymentMethod %></td>
+                                        <td>₹<%= product.price %><br> <br>qty  <%= product.qty%></td>
+                                        <td><%= new Date(order.orderDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></td>
+                                        <td>
+                                            <% if (product.orderStatus === "cancelled") { %>
+                                                <span class="badge bg-danger">Cancelled</span>
+                                                <span class="badge bg-danger"><%= order.cancelReason %></span>
+                                            <% } else { %>
+                                                <% if (product.orderStatus === "delivered") { %>
+                                                    <span class="badge bg-success">Delivered</span>
+                                                <% } else if (product.orderStatus === "Pending") { %>
+                                                    <span class="badge bg-warning">Pending</span>
+                                                <% } else { %>
+                                                    <span class="badge" style="background-color: rgb(56, 161, 46);">Shipped</span>
+                                                <% } %>
+                                               
+                                                <% if (product.orderStatus !== "cancelled" && product.orderStatus !== "delivered") { %>
+                                                    <p>Update Status</p>
+                                                    <form action="/orederstatus" method="post">
+                                                        <select class="status-select" name="newStatus">
+                                                            <option value="shipped">Shipped</option>
+                                                            <option value="delivered">Delivered</option>
+                                                            <option value="cancelled">cancelled</option>
+                                                        </select>
+                                                        <input type="hidden" name="orderId" value="<%= order._id %>">
+                                                        <input type="hidden" name="productId" value="<%= product.productId %>">
+                                                        <button type="submit" class=" btn-success mt-2">Update</button>
+                                                    </form>
+                                                <% }  %>
+                                                   
+                                        </td>
+                                        <td>            
+                                  <p>
+                                                                    <%= order.shippingAddress.address %> 
+                                                                    <%= order.shippingAddress.city %>
+                                                                    <%= order.shippingAddress.district %><br>
+                                                                    <%= order.shippingAddress.state %>
+                                                                    <%= order.shippingAddress.pincode %>
+                                                                </p>
+                                                                <h6><i class="fas fa-phone-alt" style="margin-right: 10px;"></i><%= order.shippingAddress.phone %></h6>
+                                                            </td>
+                                                            </div>
+                                                          
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <% } %>
+                                        
+                                    </tr>
+                                <% }); %>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>                       
+            
+            
+
+            <ul class="pagination">
+                <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= currentPage - 1 %>" tabindex="-1">Previous</a>
+                    </li>
+                <% } %>
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                    </li>
+                <% } %>
+                <% if (currentPage < totalPages) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+                    </li>
+                <% } %>
+            </ul>
 
             <script>
                 document.querySelectorAll('.toggle-products').forEach(button => {
