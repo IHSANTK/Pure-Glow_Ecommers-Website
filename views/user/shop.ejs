@@ -339,8 +339,8 @@ right: 30%;
                                                         <%= product.category %>
                                                     </div>
                                                     <div class="p-4 border border-secondary border-top-0 rounded-bottom">
-                                                        <h4><%= product.productName %></h4>
-                                                        <p><%= product.description %></p>
+                                                        <h4><%= product.productName %></h4><br>
+                                                        <!-- <p><%= product.description %></p> -->
                                                         <div class="d-flex justify-content-between flex-lg-wrap">
                                                             <p class="text-dark fs-5 fw-bold mb-0">₹<%= product.productPrice %></p>
                                                             <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn" onclick="addtoCart('<%= product._id %>')">
@@ -404,8 +404,8 @@ right: 30%;
                                 ${product.category}
                             </div>
                             <div class="p-4 border border-secondary border-top-0 rounded-bottom">
-                                <h4>${product.productName}</h4>
-                                <p>${product.description}</p>
+                                <h4>${product.productName}</h4><br>
+                              
                                 <div class="d-flex justify-content-between flex-lg-wrap">
                                     <p class="text-dark fs-5 fw-bold mb-0">₹${product.productPrice}</p>
                                     <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn" onclick="addtoCart('${product._id}')">
@@ -459,8 +459,8 @@ axios.get(`/shopsort/${encodeURIComponent(category)}`, {
                         ${product.category}
                     </div>
                     <div class="p-4 border border-secondary border-top-0 rounded-bottom">
-                        <h4>${product.productName}</h4>
-                        <p>${product.description}</p>
+                        <h4>${product.productName}</h4><br>
+                   
                         <div class="d-flex justify-content-between flex-lg-wrap">
                             <p class="text-dark fs-5 fw-bold mb-0">₹${product.productPrice}</p>
                             <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary addToCartBtn" onclick="addtoCart('${product._id}')">
