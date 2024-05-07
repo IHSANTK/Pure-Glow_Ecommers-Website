@@ -19,6 +19,9 @@
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
 
+  <link href="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.css" rel="stylesheet">
+
+
   <!-- Libraries Stylesheet -->
   <link href="lib/lightbox/css/lightbox.min.css" rel="stylesheet">
   <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
@@ -149,7 +152,7 @@
               
                 showWishlistStatusMessage(response.data.message);
 
-                location.reload(); 
+                
                 
             })
             .catch(function (error) {
@@ -158,12 +161,18 @@
     }
 
     function showWishlistStatusMessage(message) {
-        const wishlistModalBody = document.getElementById('wishlistModalBody');
-        wishlistModalBody.innerHTML = `<p>${message}</p>`;
-        $('#wishlistModal').modal('show');
+        Toastify({
+                            text: message,
+                            duration: 3000, // 2000 milliseconds = 2 seconds
+                            gravity: 'top', // Position of the toast message
+                            position: 'right' ,// Alignment of the toast message
+                            backgroundColor:'green'
+                        }).showToast();
+                        location.reload();
        
     }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.js"></script>
 
 <!-- Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

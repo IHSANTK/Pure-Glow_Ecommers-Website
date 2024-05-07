@@ -22,6 +22,9 @@
         <link href="lib/lightbox/css/lightbox.min.css" rel="stylesheet">
         <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
 
+        <link href="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.css" rel="stylesheet">
+
+
 
         <!-- Customized Bootstrap Stylesheet -->
         <link href="/css/bootstrap.min.css" rel="stylesheet">
@@ -504,12 +507,14 @@ axios.get(`/shopsort/${encodeURIComponent(category)}`, {
                     }
 
     function showWishlistStatusMessage(message) {
-        const wishlistModalBody = document.getElementById('wishlistModalBody');
-        wishlistModalBody.innerHTML = `<p>${message}</p>`;
-        $('#wishlistModal').modal('show');
-            setTimeout(function() {
-            $('#wishlistModal').modal('hide');
-      }, 2000); // 2000 milliseconds = 2 seconds
+        Toastify({
+                            text: message,
+                            duration: 2000, // 2000 milliseconds = 2 seconds
+                            gravity: 'top', // Position of the toast message
+                            position: 'right', // Alignment of the toast message
+                            backgroundColor:'green'
+                            
+                        }).showToast();
     }
      
     function addtoCart(productId){
@@ -532,7 +537,8 @@ axios.get(`/shopsort/${encodeURIComponent(category)}`, {
                  }
 </script>
         
-              
+<script src="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.js"></script>
+   
               
                                     <!-- <div class="col-md-6 col-lg-6 col-xl-4">
                                         <div class="rounded position-relative fruite-item">
