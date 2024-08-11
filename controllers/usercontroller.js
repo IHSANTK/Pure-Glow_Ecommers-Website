@@ -241,6 +241,8 @@ let signuppage = (req, res) => {
   }
 };
 
+
+
 const logout = (req, res) => {
   res.clearCookie("user_jwt");
   res.redirect("/");
@@ -2267,8 +2269,8 @@ async function succesGoogleLogin(req, res) {
     let user = await User.findOne({ email: req.user.email });
 
     if (!user) {
-      // If user doesn't exist, create a new user
-      user = new User({
+      
+        user = new User({
         name: req.user.displayName,
         email: req.user.email,
         image: req.user.profile.photos[0].value, // Save profile image URL

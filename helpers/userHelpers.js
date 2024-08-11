@@ -10,7 +10,7 @@ const generateRazorpay = (orderId, total) => {
     console.log("ooooooooo",total);
     return new Promise((resolve, reject) => {
         const options = {
-            amount: total*100, // Razorpay expects amount in paisa (multiply by 100)
+            amount: total*100, 
             currency: "INR",
             receipt: orderId
         };

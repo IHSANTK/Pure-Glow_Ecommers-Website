@@ -153,7 +153,7 @@ console.log(latestOrders);
 
                 return res.render('admin/index', { 
                     countUsersWithOrders,
-                    orderCounts , // Serialize the object
+                    orderCounts , 
                     monthlyOrderCountsData,
                     latestOrders, 
                     totalOrdersCount: totalOrdersCount.length > 0 ? totalOrdersCount[0].totalOrders : 0,
@@ -398,10 +398,12 @@ const productlist = async (req, res) => {
 
         // Upload images to cloudinary and get secure URLs
         for (const file of imageData) {
+            console.log(file);
             const result = await cloudinary.uploader.upload(file.path);
             imageUrls.push(result.secure_url);
         }
 
+        
         // Create a new product object
         const newProduct = new Products({
             productName: ProductName,

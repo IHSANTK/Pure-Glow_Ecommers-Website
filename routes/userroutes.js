@@ -97,9 +97,10 @@ router.post('/coupenmanage',userController.coupenmanage);
 router.post('/downloadinvoice/:orderId/:productId', userController.downloadinvoice);
 
 
-router.get('/auth/google', userController.googleAuth);
+
 
 router.get('/auth/google',passport.authenticate('google',{scope:['email','profile']}))
+
 router.get('/auth/google/callback',
  passport.authenticate('google',{successRedirect:
                                 '/success',
@@ -107,9 +108,9 @@ router.get('/auth/google/callback',
                             }
                         )
 )
-// success
+
 router.get('/success',userController.succesGoogleLogin)
-// failure
+
 router.get('/failure',userController.failureGooglelogin)
 
 module.exports = router;
